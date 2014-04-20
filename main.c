@@ -147,6 +147,20 @@ void vm_cmd_mod(uint8_t *args) {
     vm_reg[rga] %= vm_reg[rgb];
 }
 
+void vm_cmd_shl(uint8_t args[]) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    vm_reg[rga] <<= vm_reg[rgb];
+}
+
+void vm_cmd_shr(uint8_t args[]) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    vm_reg[rga] >>= vm_reg[rgb];
+}
+
 /*
  * Команды условного перехода
  */
@@ -223,7 +237,7 @@ void vm_cmd_jge(uint8_t *args) {
 
 void vm_cmd_in(uint8_t args[]) {
     uint8_t reg, prt;
-    reg = args[0];
+    reg = args[0] & 0xf;
     prt = args[1];
     switch (prt) {
         case 0: {
@@ -239,31 +253,33 @@ void vm_cmd_in(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 18
+#define CMD_COUNT 20
 
 struct {
     void (*func)();
     uint8_t argc;
 } vm_cmd[CMD_COUNT] = {
-    {vm_cmd_nop, 0}, //0 пока ассемблера нет, пользуемся этим
+    {vm_cmd_nop,  0}, //0 пока ассемблера нет, пользуемся этим
     //а вот были бы в C ассоциативные массивы...
-    {vm_cmd_ldw, 3}, //1
-    {vm_cmd_ldb, 2}, //2
-    {vm_cmd_llb, 2}, //3
-    {vm_cmd_lhb, 2}, //4
-    {vm_cmd_add, 1}, //5
-    {vm_cmd_sub, 1}, //6
-    {vm_cmd_mul, 1}, //7
-    {vm_cmd_div, 1}, //8
-    {vm_cmd_mod, 1}, //9
-    {vm_cmd_jeq, 1}, //10
-    {vm_cmd_jne, 1}, //11
-    {vm_cmd_jlt, 1}, //12
-    {vm_cmd_jgt, 1}, //13
-    {vm_cmd_jle, 1}, //14
-    {vm_cmd_jge, 1}, //15
-    {vm_cmd_in , 2},  //16
-    {vm_cmd_lvar, 3} //17
+    {vm_cmd_ldw,  3}, //1
+    {vm_cmd_ldb,  2}, //2
+    {vm_cmd_llb,  2}, //3
+    {vm_cmd_lhb,  2}, //4
+    {vm_cmd_add,  1}, //5
+    {vm_cmd_sub,  1}, //6
+    {vm_cmd_mul,  1}, //7
+    {vm_cmd_div,  1}, //8
+    {vm_cmd_mod,  1}, //9
+    {vm_cmd_jeq,  1}, //10
+    {vm_cmd_jne,  1}, //11
+    {vm_cmd_jlt,  1}, //12
+    {vm_cmd_jgt,  1}, //13
+    {vm_cmd_jle,  1}, //14
+    {vm_cmd_jge,  1}, //15
+    {vm_cmd_in ,  2}, //16
+    {vm_cmd_lvar, 3}, //17
+	{vm_cmd_shl,  1}, //18
+	{vm_cmd_shr,  1}  //19
 };
 
 void vm_exec_comand(uint8_t seg) {
