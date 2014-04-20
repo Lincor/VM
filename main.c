@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "vm.h"
 
 /* TODO:
  * 1) Реализовать весь набор команд
@@ -9,32 +10,6 @@
  * 5) slb/shb и llb/lhb
  * 6) Проверять переполнение при арфиметических операциях
  */
-
-/*
- * Типы данных для ВМ
- */
-#define uint16_t unsigned short
-#define uint8_t unsigned char
-
-/*
- * Настройки ВМ
- */
-#define REG_COUNT   16
-#define MEM_SIZE    65536
-#define PORTS_CNT   64
-// Специальные регистры
-#define REG_PC 0xf
-#define REG_SP 0xe
-#define REG_BP 0xd
-#define REG_AC 0xc
-
-typedef struct {
-	uint16_t base;
-	uint16_t limit;
-	uint8_t type; //0 - код, 1 - данные
-	uint8_t ro; //только чтение
-	uint8_t access; //уровень доступа
-} selector;
 
 uint16_t vm_reg[REG_COUNT];
 selector vm_seg_regs[4]; //4 сегмента это мало
