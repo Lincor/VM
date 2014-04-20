@@ -26,7 +26,6 @@
 #define REG_PC 0xf
 #define REG_SP 0xe
 #define REG_BP 0xd
-#define REG_FL 0xc
 
 uint16_t vm_reg[REG_COUNT];
 uint8_t  vm_mem[MEM_SIZE];
@@ -54,6 +53,26 @@ void vm_cmd_ldb(uint8_t args[]) {
     byt = args[1];
     vm_reg[reg] = byt;
 }
+
+void vm_cmd_llb(uint8_t args[]) {
+    uint8_t reg, byt;
+    reg = args[0] & 0xf;
+    byt = args[1];
+    vm_reg[reg] &= 0xff00;
+    vm_reg[reg] |= byt;
+}
+
+void vm_cmd_lhb(uint8_t args[]) {
+    uint8_t reg, byt;
+    reg = args[0] & 0xf0;
+    byt = args[1];
+    vm_reg[reg] &= 0x00ff;
+    vm_reg[reg] |= byt << 8;
+}
+
+/*
+ * Арифметические операции
+ */
 
 void vm_cmd_add(uint8_t args[]) {
     uint8_t rga, rgb;
@@ -90,6 +109,80 @@ void vm_cmd_mod(uint8_t *args) {
     vm_reg[rga] %= vm_reg[rgb];
 }
 
+/*
+ * Команды условного перехода
+ */
+
+void vm_cmd_jeq(uint8_t *args) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    uint16_t wrd;
+    wrd = (args[1] << 8) | args[2];
+    if (vm_reg[rga] == vm_reg[rgb]) {
+        vm_reg[REG_PC] = wrd;
+    }
+}
+
+void vm_cmd_jne(uint8_t *args) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    uint16_t wrd;
+    wrd = (args[1] << 8) | args[2];
+    if (vm_reg[rga] != vm_reg[rgb]) {
+        vm_reg[REG_PC] = wrd;
+    }
+}
+
+void vm_cmd_jlt(uint8_t *args) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    uint16_t wrd;
+    wrd = (args[1] << 8) | args[2];
+    if (vm_reg[rga] < vm_reg[rgb]) {
+        vm_reg[REG_PC] = wrd;
+    }
+}
+
+void vm_cmd_jgt(uint8_t *args) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    uint16_t wrd;
+    wrd = (args[1] << 8) | args[2];
+    if (vm_reg[rga] > vm_reg[rgb]) {
+        vm_reg[REG_PC] = wrd;
+    }
+}
+
+void vm_cmd_jle(uint8_t *args) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    uint16_t wrd;
+    wrd = (args[1] << 8) | args[2];
+    if (vm_reg[rga] <= vm_reg[rgb]) {
+        vm_reg[REG_PC] = wrd;
+    }
+}
+
+void vm_cmd_jge(uint8_t *args) {
+    uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    uint16_t wrd;
+    wrd = (args[1] << 8) | args[2];
+    if (vm_reg[rga] >= vm_reg[rgb]) {
+        vm_reg[REG_PC] = wrd;
+    }
+}
+
+/*
+ * Работа с портами ввода/вывода
+ */
+
 void vm_cmd_in(uint8_t args[]) {
     uint8_t reg, prt;
     reg = args[0];
@@ -108,7 +201,7 @@ void vm_cmd_in(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 9
+#define CMD_COUNT 17
 
 struct {
     void    (*func)();
@@ -117,12 +210,20 @@ struct {
     {vm_cmd_nop, 0}, //0 пока ассемблера нет, пользуемся этим
     {vm_cmd_ldw, 3}, //1
     {vm_cmd_ldb, 2}, //2
-    {vm_cmd_add, 1}, //3
-    {vm_cmd_sub, 1}, //4
-    {vm_cmd_mul, 1}, //5
-    {vm_cmd_div, 1}, //6
-    {vm_cmd_mod, 1}, //7
-    {vm_cmd_in , 2}  //8
+    {vm_cmd_llb, 2}, //3
+    {vm_cmd_lhb, 2}, //4
+    {vm_cmd_add, 1}, //5
+    {vm_cmd_sub, 1}, //6
+    {vm_cmd_mul, 1}, //7
+    {vm_cmd_div, 1}, //8
+    {vm_cmd_mod, 1}, //9
+    {vm_cmd_jeq, 1}, //10
+    {vm_cmd_jne, 1}, //11
+    {vm_cmd_jlt, 1}, //12
+    {vm_cmd_jgt, 1}, //13
+    {vm_cmd_jle, 1}, //14
+    {vm_cmd_jge, 1}, //15
+    {vm_cmd_in , 2}  //16
 };
 
 void vm_exec_comand() {
@@ -132,6 +233,7 @@ void vm_exec_comand() {
     //Тут надо кидать прерывание!
     if (cmd > CMD_COUNT) {
         printf("Invalid comand!\n");
+        return;
     }
 
     uint8_t i, bytes[4];
@@ -150,7 +252,7 @@ int main()
     vm_mem[2] = 255;
     vm_mem[3] = 255;
 
-    vm_mem[4] = 8;
+    vm_mem[4] = 10;
     vm_mem[5] = 0;
     vm_mem[6] = 0;
 
