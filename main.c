@@ -98,6 +98,16 @@ void vm_cmd_lhb(uint8_t args[]) {
     vm_reg[reg] |= byt << 8;
 }
 
+void vm_cmd_lvar(uint8_t args[]) {
+	uint8_t reg,seg;
+	reg = args[0];
+	seg= args[1];
+	if (vm_seg_regs[seg].ro || !vm_seg_regs[seg].type) segfault();
+	printf("%d\n",vm_reg[reg]);
+	vm_mem[args[2]]=vm_reg[reg];
+	printf("%d\n",args[2]);
+}
+
 /*
  * Арифметические операции
  */
@@ -229,7 +239,7 @@ void vm_cmd_in(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 17
+#define CMD_COUNT 18
 
 struct {
     void (*func)();
@@ -252,13 +262,14 @@ struct {
     {vm_cmd_jgt, 1}, //13
     {vm_cmd_jle, 1}, //14
     {vm_cmd_jge, 1}, //15
-    {vm_cmd_in , 2}  //16
+    {vm_cmd_in , 2},  //16
+    {vm_cmd_lvar, 3} //17
 };
 
-void vm_exec_comand(uint8_t code, uint8_t data /*TODO: слить в одну переменную*/) {
-	if (vm_seg_regs[code].type || !vm_seg_regs[data].type) segfault();
+void vm_exec_comand(uint8_t seg) {
+	if (vm_seg_regs[seg].type) segfault();
     uint8_t cmd;
-    cmd = vm_mem[translate_addr(code,vm_reg[REG_PC]++)];
+    cmd = vm_mem[translate_addr(seg,vm_reg[REG_PC]++)];
     //Тут надо кидать прерывание!
     if (cmd > CMD_COUNT) {
         printf("Invalid comand!\n");
@@ -266,7 +277,7 @@ void vm_exec_comand(uint8_t code, uint8_t data /*TODO: слить в одну п
     }
     uint8_t i, bytes[4];
     for(i = 0; i < vm_cmd[cmd].argc; i++) {
-        bytes[i] = vm_mem[translate_addr(data,vm_reg[REG_AC]++)];
+        bytes[i] = vm_mem[translate_addr(seg,vm_reg[REG_PC]++)];
     }
     vm_cmd[cmd].func(&bytes);
 }
@@ -275,38 +286,43 @@ int main() {
     printf("TINY RISC MACHINE 1975.\n");
     access=0;
     vm_seg_regs[0].base=0;
-    vm_seg_regs[0].limit=30000;
+    vm_seg_regs[0].limit=200;
     vm_seg_regs[0].access=0;
     vm_seg_regs[0].ro=0;
     vm_seg_regs[0].type=0;
-    vm_seg_regs[1].base=30000;
+    vm_seg_regs[1].base=200;
     vm_seg_regs[1].limit=65535;
     vm_seg_regs[1].access=0;
     vm_seg_regs[1].ro=0;
     vm_seg_regs[1].type=1;
     vm_reg[0] = 'L';
     vm_mem[translate_addr(0,0)] = 16;
-    vm_mem[translate_addr(1,0)] = 0;
-    vm_mem[translate_addr(1,1)] = 1;
+    vm_mem[translate_addr(0,1)] = 0;
+    vm_mem[translate_addr(0,2)] = 1;
     vm_reg[1] = 'O';
-    vm_mem[translate_addr(0,1)] = 16;
-    vm_mem[translate_addr(1,2)] = 1;
-    vm_mem[translate_addr(1,3)] = 1;
+    vm_mem[translate_addr(0,3)] = 16;
+    vm_mem[translate_addr(0,4)] = 1;
+    vm_mem[translate_addr(0,5)] = 1;
     vm_reg[2] = 'L';
-    vm_mem[translate_addr(0,2)] = 16;
-    vm_mem[translate_addr(1,4)] = 2;
-    vm_mem[translate_addr(1,5)] = 1;
+    vm_mem[translate_addr(0,6)] = 16;
+    vm_mem[translate_addr(0,7)] = 2;
+    vm_mem[translate_addr(0,8)] = 1;
+    vm_exec_comand(0);
+    vm_exec_comand(0);
+    vm_exec_comand(0);
+    vm_reg[0] = 15;
+    vm_mem[translate_addr(0,9)] = 17;
+    vm_mem[translate_addr(0,10)] = 0;
+    vm_mem[translate_addr(0,11)] = 1;
+    vm_mem[translate_addr(0,12)] = translate_addr(1,0);
+    vm_exec_comand(0);
+    printf("%d",vm_mem[translate_addr(1,0)]);
     //вызовем сегфолт
     //vm_mem[translate_addr(0,3)] = 1;
     /*
      * Возрадуйся, Илья, ибо прямой доступ к памяти все еще возможен!
      * Эта врезка посвящается тебе. Такая модель памяти (когда все сегменты
-     * начинаются с начала и закончиваются в конце памяти) называется flat
-     * Увы, данные таки придется размещать отдельно от кода - да и это
-     * ведь правильно! Но я все же постараюсь придумать что-нибудь еще вместо
-     * счетчика REG_AC
-     * 
-     * Или может аргументы передавать в сегменте кода? Не знаю уже...
+     * начинаются с начала и закончиваются в конце памяти) называется "flat"
     access=0;
     vm_seg_regs[0].base=0;
     vm_seg_regs[0].limit=65535;
@@ -332,8 +348,8 @@ int main() {
     vm_mem[translate_addr(1,105)] = 1;
     vm_reg[REG_AC]=100;
     */
-    vm_exec_comand(0,1);
-    vm_exec_comand(0,1);
-    vm_exec_comand(0,1);
+    vm_exec_comand(0);
+    vm_exec_comand(0);
+    vm_exec_comand(0);
     return 0;
 }
