@@ -26,10 +26,38 @@
 #define REG_PC 0xf
 #define REG_SP 0xe
 #define REG_BP 0xd
+#define REG_AC 0xc
+
+typedef struct {
+	uint16_t base;
+	uint16_t limit;
+	uint8_t type; //0 - код, 1 - данные
+	uint8_t ro; //только чтение
+	uint8_t access; //уровень доступа
+} selector;
 
 uint16_t vm_reg[REG_COUNT];
+selector vm_seg_regs[4]; //4 сегмента это мало
 uint8_t  vm_mem[MEM_SIZE];
 uint16_t vm_pio[PORTS_CNT];
+uint8_t access; //текущие привилегии
+
+void segfault() {
+	int* ptr = (int*)0;
+	*ptr = 1;
+}
+
+//внутренняя функция ВМ
+uint16_t translate_addr(uint8_t reg, uint16_t vaddr) {
+	if (access>vm_seg_regs[reg].access) segfault();
+	//физический адрес
+	uint16_t paddr;
+	paddr=vm_seg_regs[reg].base+vaddr;
+	if (paddr>vm_seg_regs[reg].limit) {
+		segfault();
+		//тут должно быть исключение, сообщающее о пиздеце, но прерываний пока нет
+	} else return paddr;
+}
 
 /*
  * Команды ВМ
@@ -204,10 +232,11 @@ void vm_cmd_in(uint8_t args[]) {
 #define CMD_COUNT 17
 
 struct {
-    void    (*func)();
+    void (*func)();
     uint8_t argc;
 } vm_cmd[CMD_COUNT] = {
     {vm_cmd_nop, 0}, //0 пока ассемблера нет, пользуемся этим
+    //а вот были бы в C ассоциативные массивы...
     {vm_cmd_ldw, 3}, //1
     {vm_cmd_ldb, 2}, //2
     {vm_cmd_llb, 2}, //3
@@ -226,37 +255,85 @@ struct {
     {vm_cmd_in , 2}  //16
 };
 
-void vm_exec_comand() {
+void vm_exec_comand(uint8_t code, uint8_t data /*TODO: слить в одну переменную*/) {
+	if (vm_seg_regs[code].type || !vm_seg_regs[data].type) segfault();
     uint8_t cmd;
-    cmd = vm_mem[vm_reg[REG_PC]++];
-
+    cmd = vm_mem[translate_addr(code,vm_reg[REG_PC]++)];
     //Тут надо кидать прерывание!
     if (cmd > CMD_COUNT) {
         printf("Invalid comand!\n");
         return;
     }
-
     uint8_t i, bytes[4];
     for(i = 0; i < vm_cmd[cmd].argc; i++) {
-        bytes[i] = vm_mem[vm_reg[REG_PC]++];
+        bytes[i] = vm_mem[translate_addr(data,vm_reg[REG_AC]++)];
     }
-
     vm_cmd[cmd].func(&bytes);
 }
 
-int main()
-{
+int main() {
     printf("TINY RISC MACHINE 1975.\n");
-    vm_mem[0] = 1;
-    vm_mem[1] = 0;
-    vm_mem[2] = 255;
-    vm_mem[3] = 255;
-
-    vm_mem[4] = 10;
-    vm_mem[5] = 0;
-    vm_mem[6] = 0;
-
-    vm_exec_comand();
-    vm_exec_comand();
+    access=0;
+    vm_seg_regs[0].base=0;
+    vm_seg_regs[0].limit=30000;
+    vm_seg_regs[0].access=0;
+    vm_seg_regs[0].ro=0;
+    vm_seg_regs[0].type=0;
+    vm_seg_regs[1].base=30000;
+    vm_seg_regs[1].limit=65535;
+    vm_seg_regs[1].access=0;
+    vm_seg_regs[1].ro=0;
+    vm_seg_regs[1].type=1;
+    vm_reg[0] = 'L';
+    vm_mem[translate_addr(0,0)] = 16;
+    vm_mem[translate_addr(1,0)] = 0;
+    vm_mem[translate_addr(1,1)] = 1;
+    vm_reg[1] = 'O';
+    vm_mem[translate_addr(0,1)] = 16;
+    vm_mem[translate_addr(1,2)] = 1;
+    vm_mem[translate_addr(1,3)] = 1;
+    vm_reg[2] = 'L';
+    vm_mem[translate_addr(0,2)] = 16;
+    vm_mem[translate_addr(1,4)] = 2;
+    vm_mem[translate_addr(1,5)] = 1;
+    //вызовем сегфолт
+    //vm_mem[translate_addr(0,3)] = 1;
+    /*
+     * Возрадуйся, Илья, ибо прямой доступ к памяти все еще возможен!
+     * Эта врезка посвящается тебе. Такая модель памяти (когда все сегменты
+     * начинаются с начала и закончиваются в конце памяти) называется flat
+     * Увы, данные таки придется размещать отдельно от кода - да и это
+     * ведь правильно! Но я все же постараюсь придумать что-нибудь еще вместо
+     * счетчика REG_AC
+     * 
+     * Или может аргументы передавать в сегменте кода? Не знаю уже...
+    access=0;
+    vm_seg_regs[0].base=0;
+    vm_seg_regs[0].limit=65535;
+    vm_seg_regs[0].access=0;
+    vm_seg_regs[0].ro=0;
+    vm_seg_regs[0].type=0;
+    vm_seg_regs[1].base=0;
+    vm_seg_regs[1].limit=65535;
+    vm_seg_regs[1].access=0;
+    vm_seg_regs[1].ro=0;
+    vm_seg_regs[1].type=1;
+    vm_reg[0] = 'L';
+    vm_mem[translate_addr(0,0)] = 16;
+    vm_mem[translate_addr(1,100)] = 0;
+    vm_mem[translate_addr(1,101)] = 1;
+    vm_reg[1] = 'O';
+    vm_mem[translate_addr(0,1)] = 16;
+    vm_mem[translate_addr(1,102)] = 1;
+    vm_mem[translate_addr(1,103)] = 1;
+    vm_reg[2] = 'L';
+    vm_mem[translate_addr(0,2)] = 16;
+    vm_mem[translate_addr(1,104)] = 2;
+    vm_mem[translate_addr(1,105)] = 1;
+    vm_reg[REG_AC]=100;
+    */
+    vm_exec_comand(0,1);
+    vm_exec_comand(0,1);
+    vm_exec_comand(0,1);
     return 0;
 }
