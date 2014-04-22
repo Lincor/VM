@@ -56,21 +56,34 @@ void segfault() { //Это жестоко :)
 	*ptr = 1;
 }
 
-//внутренняя функция ВМ
+/*
+ * Внутренние функции ВМ
+ */
 uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
+	/*
 	if (vm_access > vm_seg_regs[reg].access) { //Я обернул все сегфолты в скобки и добваил return, на будущее. Не всегда же приложению валится xD
 		segfault();
 		return;
 	}
+	*/
 	//физический адрес
 	uint16_t paddr;
 	paddr = vm_seg_regs[reg].base + vaddr;
+	/*
 	if (paddr > vm_seg_regs[reg].limit) {
 		segfault();
 		//тут должно быть исключение, сообщающее о пиздеце, но прерываний пока нет
 	} else {
+	*/
 		return paddr;
+	//}
+}
+
+void set(uint8_t seg, uint16_t dest, uint16_t src) {
+	if (vm_seg_regs[seg].ro || vm_access > vm_seg_regs[seg].access || dest > vm_seg_regs[seg].limit) {
+		segfault();
 	}
+	vm_mem[dest]=src;
 }
 
 /*
@@ -110,6 +123,19 @@ void vm_cmd_lhb(uint8_t args[]) {
     byt = args[1];
     vm_reg[reg] &= 0x00ff;
     vm_reg[reg] |= byt << 8;
+}
+
+void vm_cmd_copy(uint8_t args[]) {
+	//регистр и значение
+	if (args[1]) {
+		uint8_t reg = args[0] & 0xf;
+		uint16_t wrd = (args[1] << 8) | args[2];
+		vm_reg[reg]=wrd;
+	} else { //регистр и регистр
+		uint8_t rga = args[0] >> 4;
+		uint8_t rgb = args[0] & 0xf;
+		vm_reg[rga]=vm_reg[rgb];
+	}
 }
 
 //lvar
@@ -166,6 +192,38 @@ void vm_cmd_shr(uint8_t args[]) {
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] >>= vm_reg[rgb];
+}
+
+/*
+ * Логические операции
+ */
+ 
+void vm_cmd_or(uint8_t args[]) {
+	uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    vm_reg[rga]|=vm_reg[rgb];
+}
+
+void vm_cmd_and(uint8_t args[]) {
+	uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    vm_reg[rga]&=vm_reg[rgb];
+}
+
+void vm_cmd_xor(uint8_t args[]) {
+	uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    vm_reg[rga]=~vm_reg[rgb];
+}
+
+void vm_cmd_not(uint8_t args[]) {
+	uint8_t rga, rgb;
+    rga = args[0] >> 4;
+    rgb = args[0] & 0xf;
+    vm_reg[rga]=!vm_reg[rgb];
 }
 
 /*
@@ -260,7 +318,7 @@ void vm_cmd_in(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 19
+#define CMD_COUNT 25
 
 struct {
     void (*func)();
@@ -284,7 +342,13 @@ struct {
     {vm_cmd_jge,  1}, //15
     {vm_cmd_in ,  2}, //16
 	{vm_cmd_shl,  1}, //17
-	{vm_cmd_shr,  1}  //18
+	{vm_cmd_shr,  1}, //18
+	{vm_cmd_copy, 1}, //19
+	{vm_cmd_copy, 2}, //20
+	{vm_cmd_or,   1}, //21
+	{vm_cmd_and,  1}, //22
+	{vm_cmd_xor,  1}, //23
+	{vm_cmd_not,  1}, //24
 };
 
 void vm_exec_comand(uint8_t seg) {
@@ -323,33 +387,30 @@ int main() {
     vm_seg_regs[1].type=SEG_DATA;
 
     vm_reg[0] = 'L';
-    vm_mem[vm_translate_addr(0,0)] = 16;
-    vm_mem[vm_translate_addr(0,1)] = 0;
-    vm_mem[vm_translate_addr(0,2)] = 1;
+    set(0,vm_translate_addr(0,0),16);
+    set(0,vm_translate_addr(0,1),0);
+    set(0,vm_translate_addr(0,2),1);
 
     vm_reg[1] = 'O';
-    vm_mem[vm_translate_addr(0,3)] = 16;
-    vm_mem[vm_translate_addr(0,4)] = 1;
-    vm_mem[vm_translate_addr(0,5)] = 1;
+    set(0,vm_translate_addr(0,3),16);
+    set(0,vm_translate_addr(0,4),1);
+    set(0,vm_translate_addr(0,5),1);
 
     vm_reg[2] = 'L';
-    vm_mem[vm_translate_addr(0,6)] = 16;
-    vm_mem[vm_translate_addr(0,7)] = 2;
-    vm_mem[vm_translate_addr(0,8)] = 1;
+    set(0,vm_translate_addr(0,6),16);
+    set(0,vm_translate_addr(0,7),2);
+    set(0,vm_translate_addr(0,8),1);
 
     vm_exec_comand(0);
     vm_exec_comand(0);
     vm_exec_comand(0);
 
     vm_reg[0] = 15;
-    vm_mem[vm_translate_addr(0,9)] = 16;
-    vm_mem[vm_translate_addr(0,10)] = 0;
-    vm_mem[vm_translate_addr(0,11)] = 0;
-
-    vm_mem[vm_translate_addr(0,12)] = vm_translate_addr(1,0);
+    set(0,vm_translate_addr(0,9),16);
+    set(0,vm_translate_addr(0,10),0);
+    set(0,vm_translate_addr(0,11),0);
 
     vm_exec_comand(0);
-    printf("%d",vm_mem[vm_translate_addr(1,0)]);
     //вызовем сегфолт
     //vm_mem[vm_translate_addr(0,3)] = 1;
     /*
