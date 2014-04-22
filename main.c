@@ -125,19 +125,6 @@ void vm_cmd_lhb(uint8_t args[]) {
     vm_reg[reg] |= byt << 8;
 }
 
-void vm_cmd_copy(uint8_t args[]) {
-	//регистр и значение
-	if (args[1]) {
-		uint8_t reg = args[0] & 0xf;
-		uint16_t wrd = (args[1] << 8) | args[2];
-		vm_reg[reg]=wrd;
-	} else { //регистр и регистр
-		uint8_t rga = args[0] >> 4;
-		uint8_t rgb = args[0] & 0xf;
-		vm_reg[rga]=vm_reg[rgb];
-	}
-}
-
 //lvar
 //svar (для записи с помощью сегментных регистров)
 
@@ -343,12 +330,10 @@ struct {
     {vm_cmd_in ,  2}, //16
 	{vm_cmd_shl,  1}, //17
 	{vm_cmd_shr,  1}, //18
-	{vm_cmd_copy, 1}, //19
-	{vm_cmd_copy, 2}, //20
-	{vm_cmd_or,   1}, //21
-	{vm_cmd_and,  1}, //22
-	{vm_cmd_xor,  1}, //23
-	{vm_cmd_not,  1}, //24
+	{vm_cmd_or,   1}, //19
+	{vm_cmd_and,  1}, //20
+	{vm_cmd_xor,  1}, //21
+	{vm_cmd_not,  1}, //22
 };
 
 void vm_exec_comand(uint8_t seg) {
