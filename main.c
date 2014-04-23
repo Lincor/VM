@@ -31,13 +31,13 @@
 #define SEG_READ_WRITE 0
 #define SEG_READ_ONLY  1
 
-struct { //структура жа только в одном месте используется? Тогда можно не засорять глобальное пространство, а просто запилить массив регистров.
+struct {
 	uint16_t base;
 	uint16_t limit;
-	uint8_t type;	//0 - код, 1 - данные //Не надо так, позязя. Сделал клевенькие дефайны
-	uint8_t ro;		//только чтение
-	uint8_t access;	//уровень доступа
-} vm_seg_regs[4];	//4 сегмента это мало
+	uint8_t type;	// SEG_CODE || SEG_DATA
+	uint8_t ro;		// SEG_READ_WRITE || SEG_READ_ONLY
+	uint8_t access;	// Access level
+} vm_seg_regs[4];
 
 // Имена спец. регистров
 #define REG_PC 0xf
@@ -48,9 +48,9 @@ struct { //структура жа только в одном месте исп�
 uint16_t vm_reg[REG_COUNT];
 uint8_t  vm_mem[MEM_SIZE];
 uint16_t vm_pio[PORTS_CNT];
-uint8_t  vm_access; //текущие привилегии
+uint8_t  vm_access;
 
-void segfault() { //Это жестоко :)
+void segfault() {
     printf("Surpise!\n");
 	int* ptr = (int*)0;
 	*ptr = 1;
@@ -287,7 +287,7 @@ void vm_cmd_jge(uint8_t args[]) {
 /*
  * Команды безусловного перехода
  */
- 
+
 void vm_cmd_jmp(uint8_t args[]) {
     uint16_t wrd;
     wrd = (args[0] << 8) | args[1];
@@ -328,7 +328,7 @@ struct {
     void (*func)();
     uint8_t argc;
 } vm_cmd[CMD_COUNT] = {
-    {vm_cmd_nop,  0}, //0 пока ассемблера нет, пользуемся этим //а вот были бы в C ассоциативные массивы... //Они именно ЗДЕСЬ, не нужны :) А так, можно же запилить, не сложно.
+    {vm_cmd_nop,  0}, //0
     {vm_cmd_ldw,  3}, //1
     {vm_cmd_ldb,  2}, //2
     {vm_cmd_llb,  2}, //3
@@ -351,10 +351,12 @@ struct {
     {vm_cmd_and,  1}, //20
     {vm_cmd_xor,  1}, //21
     {vm_cmd_not,  1}, //22
+    {vm_cmd_jmp,  2}, //23
+    {vm_cmd_jpr,  1}  //24
 };
 
 void vm_exec_comand(uint8_t seg) {
-    if (vm_seg_regs[seg].type != SEG_CODE) { //Мы же только код исполнять можем, верно?
+    if (vm_seg_regs[seg].type != SEG_CODE) {
         segfault();
         return;
     }
@@ -413,39 +415,6 @@ int main() {
     vm_set(0,vm_translate_addr(0,11),0);
 
     vm_exec_comand(0);
-    //вызовем сегфолт
-    //vm_mem[vm_translate_addr(0,3)] = 1;
-    /*
-     * Возрадуйся, Илья, ибо прямой доступ к памяти все еще возможен!
-     * Эта врезка посвящается тебе. Такая модель памяти (когда все сегменты
-     * начинаются с начала и закончиваются в конце памяти) называется "flat"
-    vm_access=0;
-    vm_seg_regs[0].base=0;
-    vm_seg_regs[0].limit=65535;
-    vm_seg_regs[0].vm_access=0;
-    vm_seg_regs[0].ro=0;
-    vm_seg_regs[0].type=0;
-    vm_seg_regs[1].base=0;
-    vm_seg_regs[1].limit=65535;
-    vm_seg_regs[1].vm_access=0;
-    vm_seg_regs[1].ro=0;
-    vm_seg_regs[1].type=1;
-    vm_reg[0] = 'L';
-    vm_mem[vm_translate_addr(0,0)] = 16;
-    vm_mem[vm_translate_addr(1,100)] = 0;
-    vm_mem[vm_translate_addr(1,101)] = 1;
-    vm_reg[1] = 'O';
-    vm_mem[vm_translate_addr(0,1)] = 16;
-    vm_mem[vm_translate_addr(1,102)] = 1;
-    vm_mem[vm_translate_addr(1,103)] = 1;
-    vm_reg[2] = 'L';
-    vm_mem[vm_translate_addr(0,2)] = 16;
-    vm_mem[vm_translate_addr(1,104)] = 2;
-    vm_mem[vm_translate_addr(1,105)] = 1;
-    vm_reg[REG_AC]=100;
-    */
-    //vm_exec_comand(0);
-    //vm_exec_comand(0);
-    //vm_exec_comand(0);
+
     return 0;
 }
