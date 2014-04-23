@@ -180,31 +180,31 @@ void vm_cmd_shr(uint8_t args[]) {
  */
 
 void vm_cmd_or(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] |= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] |= vm_reg[rgb];
 }
 
 void vm_cmd_and(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] &= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] &= vm_reg[rgb];
 }
 
 void vm_cmd_xor(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] = ~vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] = ~vm_reg[rgb];
 }
 // А не логичнее сделать побитовое отрицание?
 void vm_cmd_not(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] = !vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] = !vm_reg[rgb];
 }
 
 /*
@@ -212,75 +212,75 @@ void vm_cmd_not(uint8_t args[]) {
  */
 
 void vm_cmd_jeq(uint8_t args[]) {
-    uint8_t seg, rga, rgb;
-    seg = args[0] >> 4;
-    rga = args[1] >> 4;
-    rgb = args[1] & 0xf;
-    uint16_t wrd;
-    wrd = (args[2] << 8) | args[3];
-    if (vm_reg[rga] == vm_reg[rgb]) {
-        vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
-    }
+	uint8_t seg, rga, rgb;
+	seg = args[0] & 0xf;
+	rga = args[1] >> 4;
+	rgb = args[1] & 0xf;
+	uint16_t wrd;
+	wrd = (args[2] << 8) | args[3];
+	if (vm_reg[rga] == vm_reg[rgb]) {
+		vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
+	}
 }
 
 void vm_cmd_jne(uint8_t args[]) {
-    uint8_t rga, rgb, seg;
-    seg = args[0] >> 4;
-    rga = args[1] >> 4;
-    rgb = args[1] & 0xf;
-    uint16_t wrd;
-    wrd = (args[2] << 8) | args[3];
-    if (vm_reg[rga] != vm_reg[rgb]) {
-        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
-    }
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
+	rga = args[1] >> 4;
+	rgb = args[1] & 0xf;
+	uint16_t wrd;
+	wrd = (args[2] << 8) | args[3];
+	if (vm_reg[rga] != vm_reg[rgb]) {
+		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+	}
 }
 
 void vm_cmd_jlt(uint8_t args[]) {
-    uint8_t rga, rgb, seg;
-    seg = args[0] >> 4;
-    rga = args[1] >> 4;
-    rgb = args[1] & 0xf;
-    uint16_t wrd;
-    wrd = (args[2] << 8) | args[3];
-    if (vm_reg[rga] < vm_reg[rgb]) {
-        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
-    }
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
+	rga = args[1] >> 4;
+	rgb = args[1] & 0xf;
+	uint16_t wrd;
+	wrd = (args[2] << 8) | args[3];
+	if (vm_reg[rga] < vm_reg[rgb]) {
+		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+	}
 }
 
 void vm_cmd_jgt(uint8_t args[]) {
-    uint8_t rga, rgb;
-    uint8_t seg = args[0] >> 4;
-    rga = args[1] >> 4;
-    rgb = args[1] & 0xf;
-    uint16_t wrd;
-    wrd = (args[2] << 8) | args[3];
-    if (vm_reg[rga] > vm_reg[rgb]) {
-        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
-    }
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
+	rga = args[1] >> 4;
+	rgb = args[1] & 0xf;
+	uint16_t wrd;
+	wrd = (args[2] << 8) | args[3];
+	if (vm_reg[rga] > vm_reg[rgb]) {
+		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+	}
 }
 
 void vm_cmd_jle(uint8_t args[]) {
-    uint8_t rga, rgb;
-    uint8_t seg = args[0] >> 4;
-    rga = args[1] >> 4;
-    rgb = args[1] & 0xf;
-    uint16_t wrd;
-    wrd = (args[2] << 8) | args[3];
-    if (vm_reg[rga] <= vm_reg[rgb]) {
-        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
-    }
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
+	rga = args[1] >> 4;
+	rgb = args[1] & 0xf;
+	uint16_t wrd;
+	wrd = (args[2] << 8) | args[3];
+	if (vm_reg[rga] <= vm_reg[rgb]) {
+		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+	}
 }
 
 void vm_cmd_jge(uint8_t args[]) {
-    uint8_t rga, rgb;
-    uint8_t seg = args[0] >> 4;
-    rga = args[1] >> 4;
-    rgb = args[1] & 0xf;
-    uint16_t wrd;
-    wrd = (args[2] << 8) | args[3];
-    if (vm_reg[rga] >= vm_reg[rgb]) {
-        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
-    }
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
+	rga = args[1] >> 4;
+	rgb = args[1] & 0xf;
+	uint16_t wrd;
+	wrd = (args[2] << 8) | args[3];
+	if (vm_reg[rga] >= vm_reg[rgb]) {
+		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+	}
 }
 
 /*
@@ -288,16 +288,16 @@ void vm_cmd_jge(uint8_t args[]) {
  */
 
 void vm_cmd_jmp(uint8_t args[]) {
-    uint16_t seg,wrd;
-    seg = args[0] >> 4;
-    wrd = (args[1] << 8) | args[2];
-    vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+	uint16_t seg,wrd;
+	seg = args[0] >> 4;
+	wrd = (args[1] << 8) | args[2];
+	vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
 }
 
 void vm_cmd_jpr(uint8_t args[]) {
-    uint8_t reg;
-    reg = args[0] & 0xf;
-    vm_reg[REG_PC] = vm_reg[reg];
+	uint8_t reg;
+	reg = args[0] & 0xf;
+	vm_reg[REG_PC] = vm_reg[reg];
 }
 
 /*
@@ -305,19 +305,17 @@ void vm_cmd_jpr(uint8_t args[]) {
  */
 
 void vm_cmd_in(uint8_t args[]) {
-    uint8_t reg, prt;
-    reg = args[0] & 0xf;
-    prt = args[1];
-    switch (prt) {
-    case 0: {
-        printf("%d", vm_reg[reg]);
-    }
-    break;
-    case 1: {
-        printf("%c", vm_reg[reg]);
-    }
-    break;
-    }
+	uint8_t reg, prt;
+	reg = args[0] & 0xf;
+	prt = args[1];
+	switch (prt) {
+		case 0: {
+			printf("%d", vm_reg[reg]);
+		} break;
+		case 1: {
+        		printf("%c", vm_reg[reg]);
+		} break;
+	}
 }
 
 /*
@@ -327,101 +325,101 @@ void vm_cmd_in(uint8_t args[]) {
 #define CMD_COUNT 25
 
 struct {
-    void (*func)();
-    uint8_t argc;
+	void (*func)();
+	uint8_t argc;
 } vm_cmd[CMD_COUNT] = {
-    {vm_cmd_nop,  0}, //0
-    {vm_cmd_ldw,  3}, //1
-    {vm_cmd_ldb,  2}, //2
-    {vm_cmd_llb,  2}, //3
-    {vm_cmd_lhb,  2}, //4
-    {vm_cmd_add,  1}, //5
-    {vm_cmd_sub,  1}, //6
-    {vm_cmd_mul,  1}, //7
-    {vm_cmd_div,  1}, //8
-    {vm_cmd_mod,  1}, //9
-    {vm_cmd_jeq,  1}, //10
-    {vm_cmd_jne,  1}, //11
-    {vm_cmd_jlt,  1}, //12
-    {vm_cmd_jgt,  1}, //13
-    {vm_cmd_jle,  1}, //14
-    {vm_cmd_jge,  1}, //15
-    {vm_cmd_in ,  2}, //16
-    {vm_cmd_shl,  1}, //17
-    {vm_cmd_shr,  1}, //18
-    {vm_cmd_or,   1}, //19
-    {vm_cmd_and,  1}, //20
-    {vm_cmd_xor,  1}, //21
-    {vm_cmd_not,  1}, //22
-    {vm_cmd_jmp,  3}, //23
-    {vm_cmd_jpr,  1}  //24
+	{vm_cmd_nop,  0}, //0
+	{vm_cmd_ldw,  3}, //1
+	{vm_cmd_ldb,  2}, //2
+	{vm_cmd_llb,  2}, //3
+	{vm_cmd_lhb,  2}, //4
+	{vm_cmd_add,  1}, //5
+	{vm_cmd_sub,  1}, //6
+	{vm_cmd_mul,  1}, //7
+	{vm_cmd_div,  1}, //8
+	{vm_cmd_mod,  1}, //9
+	{vm_cmd_jeq,  1}, //10
+	{vm_cmd_jne,  1}, //11
+	{vm_cmd_jlt,  1}, //12
+	{vm_cmd_jgt,  1}, //13
+	{vm_cmd_jle,  1}, //14
+	{vm_cmd_jge,  1}, //15
+	{vm_cmd_in ,  2}, //16
+	{vm_cmd_shl,  1}, //17
+	{vm_cmd_shr,  1}, //18
+	{vm_cmd_or,   1}, //19
+	{vm_cmd_and,  1}, //20
+	{vm_cmd_xor,  1}, //21
+	{vm_cmd_not,  1}, //22
+	{vm_cmd_jmp,  3}, //23
+	{vm_cmd_jpr,  1}  //24
 };
 
 void vm_exec_comand(uint8_t seg) {
-    if (vm_seg_regs[seg].type != SEG_CODE) {
-        segfault();
-        return;
-    }
-    uint8_t cmd;
-    cmd = vm_get(seg, vm_reg[REG_PC]++);
-    //Тут надо кидать прерывание!
-    if (cmd > CMD_COUNT) {
-        printf("Invalid comand!\n");
-        return;
-    }
-    uint8_t i, bytes[4];
-    for(i = 0; i < vm_cmd[cmd].argc; i++) {
-        bytes[i] = vm_get(seg, vm_reg[REG_PC]++);
-    }
-    vm_cmd[cmd].func(&bytes);
+	if (vm_seg_regs[seg].type != SEG_CODE) {
+		segfault();
+		return;
+	}
+	uint8_t cmd;
+	cmd = vm_get(seg, vm_reg[REG_PC]++);
+	//Тут надо кидать прерывание!
+	if (cmd > CMD_COUNT) {
+		printf("Invalid comand!\n");
+		return;
+	}
+	uint8_t i, bytes[4];
+	for(i = 0; i < vm_cmd[cmd].argc; i++) {
+		bytes[i] = vm_get(seg, vm_reg[REG_PC]++);
+	}
+	vm_cmd[cmd].func(&bytes);
 }
 
 int main() {
-    printf("TINY RISC MACHINE 1975.\n");
-    vm_access=0;
+	printf("TINY RISC MACHINE 1975.\n");
+	vm_access=0;
 
-    vm_seg_regs[0].base=0;
-    vm_seg_regs[0].limit=200;
-    vm_seg_regs[0].access=0;
-    vm_seg_regs[0].ro=SEG_READ_WRITE;
-    vm_seg_regs[0].type=SEG_CODE;
+	vm_seg_regs[0].base=0;
+	vm_seg_regs[0].limit=200;
+	vm_seg_regs[0].access=0;
+	vm_seg_regs[0].ro=SEG_READ_WRITE;
+	vm_seg_regs[0].type=SEG_CODE;
 
-    vm_seg_regs[1].base=200;
-    vm_seg_regs[1].limit=65535;
-    vm_seg_regs[1].access=0;
-    vm_seg_regs[1].ro=SEG_READ_WRITE;
-    vm_seg_regs[1].type=SEG_DATA;
+	vm_seg_regs[1].base=200;
+	vm_seg_regs[1].limit=65535;
+	vm_seg_regs[1].access=0;
+	vm_seg_regs[1].ro=SEG_READ_WRITE;
+	vm_seg_regs[1].type=SEG_DATA;
 
-    vm_reg[0] = 'L';
-    vm_set(0,0,16);
-    vm_set(0,1,0);
-    vm_set(0,2,1);
+	vm_reg[0] = 'L';
+	vm_set(0,0,16);
+	vm_set(0,1,0);
+	vm_set(0,2,1);
     
-    vm_set(0,3,23);
-    vm_set(0,4,0);
-    vm_set(0,5,0);
-    vm_set(0,6,10);
+	vm_set(0,3,23);
+	vm_set(0,4,0);
+	vm_set(0,5,0);
+	vm_set(0,6,10);
 
-    vm_reg[1] = 'O';
-    vm_set(0,7,16);
-    vm_set(0,8,1);
-    vm_set(0,9,1);
+	vm_reg[1] = 'O';
+	vm_set(0,7,16);
+	vm_set(0,8,1);
+	vm_set(0,9,1);
 
-    vm_reg[2] = 'L';
-    vm_set(0,10,16);
-    vm_set(0,11,2);
-    vm_set(0,12,1);
+	vm_reg[2] = 'L';
+	vm_set(0,10,16);
+	vm_set(0,11,2);
+	vm_set(0,12,1);
 
-    vm_exec_comand(0);
-    vm_exec_comand(0);
-    vm_exec_comand(0);
+	vm_exec_comand(0);
+	vm_exec_comand(0);
+	vm_exec_comand(0);
 
-    vm_reg[0] = 15;
-    vm_set(0,13,16);
-    vm_set(0,14,0);
-    vm_set(0,15,0);
+	vm_reg[0] = 15;
+	vm_set(0,13,16);
+	vm_set(0,14,0);
+	vm_set(0,15,0);
 
-    vm_exec_comand(0);
+	vm_exec_comand(0);
 
-    return 0;
+	return 0;
 }
