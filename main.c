@@ -79,11 +79,12 @@ uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
 	//}
 }
 
-void set(uint8_t seg, uint16_t dest, uint16_t src) {
+void vm_set(uint8_t seg, uint16_t dest, uint16_t src) {
 	if (vm_seg_regs[seg].ro || vm_access > vm_seg_regs[seg].access || dest > vm_seg_regs[seg].limit) {
 		segfault();
+		return;
 	}
-	vm_mem[dest]=src;
+	vm_mem[dest] = src;
 }
 
 /*
@@ -139,28 +140,28 @@ void vm_cmd_add(uint8_t args[]) {
     vm_reg[rga] += vm_reg[rgb];
 }
 
-void vm_cmd_sub(uint8_t *args) {
+void vm_cmd_sub(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] -= vm_reg[rgb];
 }
 
-void vm_cmd_mul(uint8_t *args) {
+void vm_cmd_mul(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] *= vm_reg[rgb];
 }
 
-void vm_cmd_div(uint8_t *args) {
+void vm_cmd_div(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] /= vm_reg[rgb];
 }
 
-void vm_cmd_mod(uint8_t *args) {
+void vm_cmd_mod(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
@@ -184,40 +185,40 @@ void vm_cmd_shr(uint8_t args[]) {
 /*
  * Логические операции
  */
- 
+
 void vm_cmd_or(uint8_t args[]) {
 	uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
-    vm_reg[rga]|=vm_reg[rgb];
+    vm_reg[rga] |= vm_reg[rgb];
 }
 
 void vm_cmd_and(uint8_t args[]) {
 	uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
-    vm_reg[rga]&=vm_reg[rgb];
+    vm_reg[rga] &= vm_reg[rgb];
 }
 
 void vm_cmd_xor(uint8_t args[]) {
 	uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
-    vm_reg[rga]=~vm_reg[rgb];
+    vm_reg[rga] = ~vm_reg[rgb];
 }
-
+// А не логичнее сделать побитовое отрицание?
 void vm_cmd_not(uint8_t args[]) {
 	uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
-    vm_reg[rga]=!vm_reg[rgb];
+    vm_reg[rga] = !vm_reg[rgb];
 }
 
 /*
  * Команды условного перехода
  */
 
-void vm_cmd_jeq(uint8_t *args) {
+void vm_cmd_jeq(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
@@ -228,7 +229,7 @@ void vm_cmd_jeq(uint8_t *args) {
     }
 }
 
-void vm_cmd_jne(uint8_t *args) {
+void vm_cmd_jne(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
@@ -239,7 +240,7 @@ void vm_cmd_jne(uint8_t *args) {
     }
 }
 
-void vm_cmd_jlt(uint8_t *args) {
+void vm_cmd_jlt(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
@@ -250,7 +251,7 @@ void vm_cmd_jlt(uint8_t *args) {
     }
 }
 
-void vm_cmd_jgt(uint8_t *args) {
+void vm_cmd_jgt(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
@@ -261,7 +262,7 @@ void vm_cmd_jgt(uint8_t *args) {
     }
 }
 
-void vm_cmd_jle(uint8_t *args) {
+void vm_cmd_jle(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
@@ -272,7 +273,7 @@ void vm_cmd_jle(uint8_t *args) {
     }
 }
 
-void vm_cmd_jge(uint8_t *args) {
+void vm_cmd_jge(uint8_t args[]) {
     uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
@@ -281,6 +282,22 @@ void vm_cmd_jge(uint8_t *args) {
     if (vm_reg[rga] >= vm_reg[rgb]) {
         vm_reg[REG_PC] = wrd;
     }
+}
+
+/*
+ * Команды безусловного перехода
+ */
+ 
+void vm_cmd_jmp(uint8_t args[]) {
+    uint16_t wrd;
+    wrd = (args[0] << 8) | args[1];
+    vm_reg[REG_PC] = wrd;
+}
+
+void vm_cmd_jpr(uint8_t args[]) {
+    uint8_t reg;
+    reg = args[0] & 0xf;
+    vm_reg[REG_PC] = vm_reg[reg];
 }
 
 /*
@@ -328,19 +345,19 @@ struct {
     {vm_cmd_jle,  1}, //14
     {vm_cmd_jge,  1}, //15
     {vm_cmd_in ,  2}, //16
-	{vm_cmd_shl,  1}, //17
-	{vm_cmd_shr,  1}, //18
-	{vm_cmd_or,   1}, //19
-	{vm_cmd_and,  1}, //20
-	{vm_cmd_xor,  1}, //21
-	{vm_cmd_not,  1}, //22
+    {vm_cmd_shl,  1}, //17
+    {vm_cmd_shr,  1}, //18
+    {vm_cmd_or,   1}, //19
+    {vm_cmd_and,  1}, //20
+    {vm_cmd_xor,  1}, //21
+    {vm_cmd_not,  1}, //22
 };
 
 void vm_exec_comand(uint8_t seg) {
-	if (vm_seg_regs[seg].type != SEG_CODE) { //Мы же только код исполнять можем, верно?
-		segfault();
-		return;
-	}
+    if (vm_seg_regs[seg].type != SEG_CODE) { //Мы же только код исполнять можем, верно?
+        segfault();
+        return;
+    }
     uint8_t cmd;
     cmd = vm_mem[vm_translate_addr(seg, vm_reg[REG_PC]++)];
     //Тут надо кидать прерывание!
@@ -372,28 +389,28 @@ int main() {
     vm_seg_regs[1].type=SEG_DATA;
 
     vm_reg[0] = 'L';
-    set(0,vm_translate_addr(0,0),16);
-    set(0,vm_translate_addr(0,1),0);
-    set(0,vm_translate_addr(0,2),1);
+    vm_set(0,vm_translate_addr(0,0),16);
+    vm_set(0,vm_translate_addr(0,1),0);
+    vm_set(0,vm_translate_addr(0,2),1);
 
     vm_reg[1] = 'O';
-    set(0,vm_translate_addr(0,3),16);
-    set(0,vm_translate_addr(0,4),1);
-    set(0,vm_translate_addr(0,5),1);
+    vm_set(0,vm_translate_addr(0,3),16);
+    vm_set(0,vm_translate_addr(0,4),1);
+    vm_set(0,vm_translate_addr(0,5),1);
 
     vm_reg[2] = 'L';
-    set(0,vm_translate_addr(0,6),16);
-    set(0,vm_translate_addr(0,7),2);
-    set(0,vm_translate_addr(0,8),1);
+    vm_set(0,vm_translate_addr(0,6),16);
+    vm_set(0,vm_translate_addr(0,7),2);
+    vm_set(0,vm_translate_addr(0,8),1);
 
     vm_exec_comand(0);
     vm_exec_comand(0);
     vm_exec_comand(0);
 
     vm_reg[0] = 15;
-    set(0,vm_translate_addr(0,9),16);
-    set(0,vm_translate_addr(0,10),0);
-    set(0,vm_translate_addr(0,11),0);
+    vm_set(0,vm_translate_addr(0,9),16);
+    vm_set(0,vm_translate_addr(0,10),0);
+    vm_set(0,vm_translate_addr(0,11),0);
 
     vm_exec_comand(0);
     //вызовем сегфолт
