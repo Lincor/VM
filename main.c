@@ -32,11 +32,11 @@
 #define SEG_READ_ONLY  1
 
 struct {
-	uint16_t base;
-	uint16_t limit;
-	uint8_t type;	// SEG_CODE || SEG_DATA
-	uint8_t ro;		// SEG_READ_WRITE || SEG_READ_ONLY
-	uint8_t access;	// Access level
+    uint16_t base;
+    uint16_t limit;
+    uint8_t type;	// SEG_CODE || SEG_DATA
+    uint8_t ro;		// SEG_READ_WRITE || SEG_READ_ONLY
+    uint8_t access;	// Access level
 } vm_seg_regs[4];
 
 // Имена спец. регистров
@@ -52,39 +52,39 @@ uint8_t  vm_access;
 
 void segfault() {
     printf("Surpise!\n");
-	int* ptr = (int*)0;
-	*ptr = 1;
+    int* ptr = (int*)0;
+    *ptr = 1;
 }
 
 /*
  * Внутренние функции ВМ
  */
 uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
-	/*
-	if (vm_access > vm_seg_regs[reg].access) { //Я обернул все сегфолты в скобки и добваил return, на будущее. Не всегда же приложению валится xD
-		segfault();
-		return;
-	}
-	*/
-	//физический адрес
-	uint16_t paddr;
-	paddr = vm_seg_regs[reg].base + vaddr;
-	/*
-	if (paddr > vm_seg_regs[reg].limit) {
-		segfault();
-		//тут должно быть исключение, сообщающее о пиздеце, но прерываний пока нет
-	} else {
-	*/
-		return paddr;
-	//}
+    /*
+    if (vm_access > vm_seg_regs[reg].access) { //Я обернул все сегфолты в скобки и добваил return, на будущее. Не всегда же приложению валится xD
+    	segfault();
+    	return;
+    }
+    */
+    //физический адрес
+    uint16_t paddr;
+    paddr = vm_seg_regs[reg].base + vaddr;
+    /*
+    if (paddr > vm_seg_regs[reg].limit) {
+    	segfault();
+    	//тут должно быть исключение, сообщающее о пиздеце, но прерываний пока нет
+    } else {
+    */
+    return paddr;
+    //}
 }
 
 void vm_set(uint8_t seg, uint16_t dest, uint16_t src) {
-	if (vm_seg_regs[seg].ro || vm_access > vm_seg_regs[seg].access || dest > vm_seg_regs[seg].limit) {
-		segfault();
-		return;
-	}
-	vm_mem[dest] = src;
+    if (vm_seg_regs[seg].ro || vm_access > vm_seg_regs[seg].access || dest > vm_seg_regs[seg].limit) {
+        segfault();
+        return;
+    }
+    vm_mem[dest] = src;
 }
 
 /*
@@ -187,28 +187,28 @@ void vm_cmd_shr(uint8_t args[]) {
  */
 
 void vm_cmd_or(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] |= vm_reg[rgb];
 }
 
 void vm_cmd_and(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] &= vm_reg[rgb];
 }
 
 void vm_cmd_xor(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] = ~vm_reg[rgb];
 }
 // А не логичнее сделать побитовое отрицание?
 void vm_cmd_not(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] = !vm_reg[rgb];
@@ -309,12 +309,14 @@ void vm_cmd_in(uint8_t args[]) {
     reg = args[0] & 0xf;
     prt = args[1];
     switch (prt) {
-        case 0: {
-            printf("%d", vm_reg[reg]);
-        } break;
-        case 1: {
-            printf("%c", vm_reg[reg]);
-        } break;
+    case 0: {
+        printf("%d", vm_reg[reg]);
+    }
+    break;
+    case 1: {
+        printf("%c", vm_reg[reg]);
+    }
+    break;
     }
 }
 
