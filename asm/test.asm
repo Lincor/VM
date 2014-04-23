@@ -1,0 +1,4 @@
+_start:
+	ldw %a, $0x14
+	ldw %b, $0x45
+	add %a, %b # %a = 0x14 + 0x45
