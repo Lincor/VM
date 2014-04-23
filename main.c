@@ -43,7 +43,7 @@ uint16_t vm_pio[PORTS_CNT];
 uint8_t  vm_access;
 
 void segfault() {
-    printf("Surprise!\n");
+	printf("Surprise!\n");
 	int* ptr = (int*)0;
 	*ptr = 1;
 }
@@ -73,11 +73,11 @@ void vm_set(uint8_t seg, uint16_t dest, uint16_t src) {
 		segfault();
 		return;
 	}
-	vm_mem[vm_translate_addr(seg,dest)] = src;
+	vm_mem[vm_translate_addr(seg, dest)] = src;
 }
 
 uint8_t vm_get(uint8_t seg, uint16_t addr) {
-	return vm_mem[vm_translate_addr(seg,addr)];
+	return vm_mem[vm_translate_addr(seg, addr)];
 }
 
 /*
@@ -89,34 +89,34 @@ void vm_cmd_nop(uint8_t args[]) {
 }
 
 void vm_cmd_ldw(uint8_t args[]) {
-    uint8_t  reg;
-    uint16_t wrd;
-    reg = args[0] & 0xf;
-    wrd = (args[1] << 8) | args[2];
-    vm_reg[reg] = wrd;
+	uint8_t  reg;
+	uint16_t wrd;
+	reg = args[0] & 0xf;
+	wrd = (args[1] << 8) | args[2];
+	vm_reg[reg] = wrd;
 }
 
 void vm_cmd_ldb(uint8_t args[]) {
-    uint8_t reg, byt;
-    reg = args[0] & 0xf;
-    byt = args[1];
-    vm_reg[reg] = byt;
+	uint8_t reg, byt;
+	reg = args[0] & 0xf;
+	byt = args[1];
+	vm_reg[reg] = byt;
 }
 
 void vm_cmd_llb(uint8_t args[]) {
-    uint8_t reg, byt;
-    reg = args[0] & 0xf;
-    byt = args[1];
-    vm_reg[reg] &= 0xff00;
-    vm_reg[reg] |= byt;
+	uint8_t reg, byt;
+	reg = args[0] & 0xf;
+	byt = args[1];
+	vm_reg[reg] &= 0xff00;
+	vm_reg[reg] |= byt;
 }
 
 void vm_cmd_lhb(uint8_t args[]) {
-    uint8_t reg, byt;
-    reg = args[0] & 0xf0;
-    byt = args[1];
-    vm_reg[reg] &= 0x00ff;
-    vm_reg[reg] |= byt << 8;
+	uint8_t reg, byt;
+	reg = args[0] & 0xf0;
+	byt = args[1];
+	vm_reg[reg] &= 0x00ff;
+	vm_reg[reg] |= byt << 8;
 }
 
 //lvar
@@ -127,52 +127,52 @@ void vm_cmd_lhb(uint8_t args[]) {
  */
 
 void vm_cmd_add(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] += vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] += vm_reg[rgb];
 }
 
 void vm_cmd_sub(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] -= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] -= vm_reg[rgb];
 }
 
 void vm_cmd_mul(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] *= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] *= vm_reg[rgb];
 }
 
 void vm_cmd_div(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] /= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] /= vm_reg[rgb];
 }
 
 void vm_cmd_mod(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] %= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] %= vm_reg[rgb];
 }
 
 void vm_cmd_shl(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] <<= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] <<= vm_reg[rgb];
 }
 
 void vm_cmd_shr(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
-    vm_reg[rga] >>= vm_reg[rgb];
+	uint8_t rga, rgb;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	vm_reg[rga] >>= vm_reg[rgb];
 }
 
 /*
@@ -219,13 +219,13 @@ void vm_cmd_jeq(uint8_t args[]) {
     uint16_t wrd;
     wrd = (args[2] << 8) | args[3];
     if (vm_reg[rga] == vm_reg[rgb]) {
-        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+        vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
     }
 }
 
 void vm_cmd_jne(uint8_t args[]) {
-    uint8_t rga, rgb;
-    uint8_t seg = args[0] >> 4;
+    uint8_t rga, rgb, seg;
+    seg = args[0] >> 4;
     rga = args[1] >> 4;
     rgb = args[1] & 0xf;
     uint16_t wrd;
@@ -236,8 +236,8 @@ void vm_cmd_jne(uint8_t args[]) {
 }
 
 void vm_cmd_jlt(uint8_t args[]) {
-    uint8_t rga, rgb;
-    uint8_t seg = args[0] >> 4;
+    uint8_t rga, rgb, seg;
+    seg = args[0] >> 4;
     rga = args[1] >> 4;
     rgb = args[1] & 0xf;
     uint16_t wrd;
