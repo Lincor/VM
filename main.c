@@ -23,19 +23,11 @@
 #define MEM_SIZE    65536
 #define PORTS_CNT   64
 
-/*
- * Сегментные регистры ВМ
- */
-#define SEG_CODE 0
-#define SEG_DATA 1
-#define SEG_READ_WRITE 0
-#define SEG_READ_ONLY  1
-
 struct {
 	uint16_t base;
 	uint16_t limit;
-	uint8_t type;	// SEG_CODE || SEG_DATA
-	uint8_t ro;		// SEG_READ_WRITE || SEG_READ_ONLY
+	enum {SEG_CODE, SEG_DATA} type;
+	enum {SEG_READ_WRITE, SEG_READ_ONLY} ro;
 	uint8_t access;	// Access level
 } vm_seg_regs[4];
 
@@ -51,7 +43,7 @@ uint16_t vm_pio[PORTS_CNT];
 uint8_t  vm_access;
 
 void segfault() {
-    printf("Surpise!\n");
+    printf("Surprise!\n");
 	int* ptr = (int*)0;
 	*ptr = 1;
 }
@@ -60,31 +52,32 @@ void segfault() {
  * Внутренние функции ВМ
  */
 uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
-	/*
 	if (vm_access > vm_seg_regs[reg].access) { //Я обернул все сегфолты в скобки и добваил return, на будущее. Не всегда же приложению валится xD
 		segfault();
 		return;
 	}
-	*/
 	//физический адрес
 	uint16_t paddr;
 	paddr = vm_seg_regs[reg].base + vaddr;
-	/*
 	if (paddr > vm_seg_regs[reg].limit) {
 		segfault();
 		//тут должно быть исключение, сообщающее о пиздеце, но прерываний пока нет
 	} else {
-	*/
 		return paddr;
-	//}
+	}
+	return 0; //чтоб компилятор не ругался
 }
 
 void vm_set(uint8_t seg, uint16_t dest, uint16_t src) {
-	if (vm_seg_regs[seg].ro || vm_access > vm_seg_regs[seg].access || dest > vm_seg_regs[seg].limit) {
+	if (vm_seg_regs[seg].ro) {
 		segfault();
 		return;
 	}
-	vm_mem[dest] = src;
+	vm_mem[vm_translate_addr(seg,dest)] = src;
+}
+
+uint8_t vm_get(uint8_t seg, uint16_t addr) {
+	return vm_mem[vm_translate_addr(seg,addr)];
 }
 
 /*
@@ -219,68 +212,74 @@ void vm_cmd_not(uint8_t args[]) {
  */
 
 void vm_cmd_jeq(uint8_t args[]) {
-    uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
+    uint8_t seg, rga, rgb;
+    seg = args[0] >> 4;
+    rga = args[1] >> 4;
+    rgb = args[1] & 0xf;
     uint16_t wrd;
-    wrd = (args[1] << 8) | args[2];
+    wrd = (args[2] << 8) | args[3];
     if (vm_reg[rga] == vm_reg[rgb]) {
-        vm_reg[REG_PC] = wrd;
+        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
     }
 }
 
 void vm_cmd_jne(uint8_t args[]) {
     uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
+    uint8_t seg = args[0] >> 4;
+    rga = args[1] >> 4;
+    rgb = args[1] & 0xf;
     uint16_t wrd;
-    wrd = (args[1] << 8) | args[2];
+    wrd = (args[2] << 8) | args[3];
     if (vm_reg[rga] != vm_reg[rgb]) {
-        vm_reg[REG_PC] = wrd;
+        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
     }
 }
 
 void vm_cmd_jlt(uint8_t args[]) {
     uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
+    uint8_t seg = args[0] >> 4;
+    rga = args[1] >> 4;
+    rgb = args[1] & 0xf;
     uint16_t wrd;
-    wrd = (args[1] << 8) | args[2];
+    wrd = (args[2] << 8) | args[3];
     if (vm_reg[rga] < vm_reg[rgb]) {
-        vm_reg[REG_PC] = wrd;
+        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
     }
 }
 
 void vm_cmd_jgt(uint8_t args[]) {
     uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
+    uint8_t seg = args[0] >> 4;
+    rga = args[1] >> 4;
+    rgb = args[1] & 0xf;
     uint16_t wrd;
-    wrd = (args[1] << 8) | args[2];
+    wrd = (args[2] << 8) | args[3];
     if (vm_reg[rga] > vm_reg[rgb]) {
-        vm_reg[REG_PC] = wrd;
+        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
     }
 }
 
 void vm_cmd_jle(uint8_t args[]) {
     uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
+    uint8_t seg = args[0] >> 4;
+    rga = args[1] >> 4;
+    rgb = args[1] & 0xf;
     uint16_t wrd;
-    wrd = (args[1] << 8) | args[2];
+    wrd = (args[2] << 8) | args[3];
     if (vm_reg[rga] <= vm_reg[rgb]) {
-        vm_reg[REG_PC] = wrd;
+        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
     }
 }
 
 void vm_cmd_jge(uint8_t args[]) {
     uint8_t rga, rgb;
-    rga = args[0] >> 4;
-    rgb = args[0] & 0xf;
+    uint8_t seg = args[0] >> 4;
+    rga = args[1] >> 4;
+    rgb = args[1] & 0xf;
     uint16_t wrd;
-    wrd = (args[1] << 8) | args[2];
+    wrd = (args[2] << 8) | args[3];
     if (vm_reg[rga] >= vm_reg[rgb]) {
-        vm_reg[REG_PC] = wrd;
+        vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
     }
 }
 
@@ -289,9 +288,10 @@ void vm_cmd_jge(uint8_t args[]) {
  */
 
 void vm_cmd_jmp(uint8_t args[]) {
-    uint16_t wrd;
-    wrd = (args[0] << 8) | args[1];
-    vm_reg[REG_PC] = wrd;
+    uint16_t seg,wrd;
+    seg = args[0] >> 4;
+    wrd = (args[1] << 8) | args[2];
+    vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
 }
 
 void vm_cmd_jpr(uint8_t args[]) {
@@ -351,7 +351,7 @@ struct {
     {vm_cmd_and,  1}, //20
     {vm_cmd_xor,  1}, //21
     {vm_cmd_not,  1}, //22
-    {vm_cmd_jmp,  2}, //23
+    {vm_cmd_jmp,  3}, //23
     {vm_cmd_jpr,  1}  //24
 };
 
@@ -361,7 +361,7 @@ void vm_exec_comand(uint8_t seg) {
         return;
     }
     uint8_t cmd;
-    cmd = vm_mem[vm_translate_addr(seg, vm_reg[REG_PC]++)];
+    cmd = vm_get(seg, vm_reg[REG_PC]++);
     //Тут надо кидать прерывание!
     if (cmd > CMD_COUNT) {
         printf("Invalid comand!\n");
@@ -369,7 +369,7 @@ void vm_exec_comand(uint8_t seg) {
     }
     uint8_t i, bytes[4];
     for(i = 0; i < vm_cmd[cmd].argc; i++) {
-        bytes[i] = vm_mem[vm_translate_addr(seg, vm_reg[REG_PC]++)];
+        bytes[i] = vm_get(seg, vm_reg[REG_PC]++);
     }
     vm_cmd[cmd].func(&bytes);
 }
@@ -391,28 +391,33 @@ int main() {
     vm_seg_regs[1].type=SEG_DATA;
 
     vm_reg[0] = 'L';
-    vm_set(0,vm_translate_addr(0,0),16);
-    vm_set(0,vm_translate_addr(0,1),0);
-    vm_set(0,vm_translate_addr(0,2),1);
+    vm_set(0,0,16);
+    vm_set(0,1,0);
+    vm_set(0,2,1);
+    
+    vm_set(0,3,23);
+    vm_set(0,4,0);
+    vm_set(0,5,0);
+    vm_set(0,6,10);
 
     vm_reg[1] = 'O';
-    vm_set(0,vm_translate_addr(0,3),16);
-    vm_set(0,vm_translate_addr(0,4),1);
-    vm_set(0,vm_translate_addr(0,5),1);
+    vm_set(0,7,16);
+    vm_set(0,8,1);
+    vm_set(0,9,1);
 
     vm_reg[2] = 'L';
-    vm_set(0,vm_translate_addr(0,6),16);
-    vm_set(0,vm_translate_addr(0,7),2);
-    vm_set(0,vm_translate_addr(0,8),1);
+    vm_set(0,10,16);
+    vm_set(0,11,2);
+    vm_set(0,12,1);
 
     vm_exec_comand(0);
     vm_exec_comand(0);
     vm_exec_comand(0);
 
     vm_reg[0] = 15;
-    vm_set(0,vm_translate_addr(0,9),16);
-    vm_set(0,vm_translate_addr(0,10),0);
-    vm_set(0,vm_translate_addr(0,11),0);
+    vm_set(0,13,16);
+    vm_set(0,14,0);
+    vm_set(0,15,0);
 
     vm_exec_comand(0);
 
