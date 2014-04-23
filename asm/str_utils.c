@@ -14,6 +14,8 @@ static bool isdecdigit(char c);
 static bool ishexdigit(char c);
 static uint8_t char_to_digit(char c);
 
+extern cmd_info cmd_table[];
+
 string_list *string_tokenizer(char *str, const char *delim, const char *opr)
 {
 	string_list *list = NULL;

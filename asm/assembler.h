@@ -21,6 +21,12 @@
 #define TK_IMM    (0x5)
 #define TK_COMMA  (0x6)
 
+/*------- Command argument types ----------*/
+#define CA_LABEL   (0x0)
+#define CA_REG     (0x1)
+#define CA_IMM     (0x2)
+#define CA_ADDRESS (0x3)
+
 /*------------------------------------------*
 *                  TYPEDEFS                 *
 *------------------------------------------*/
@@ -37,3 +43,16 @@ typedef struct token_list_st {
 	token *first_token;
 	struct token_list_st *next;
 } token_list;
+
+typedef struct arg_st {
+	uint8_t type;
+	uint16_t v1, v2, v3, v4;
+	char *value_s;
+	struct arg_st *next;
+} arg;
+
+typedef struct cmd_st {
+	uint8_t cmd_i;
+	arg *args;
+	struct cmd_st *next;
+} cmd;

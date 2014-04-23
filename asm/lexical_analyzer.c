@@ -7,6 +7,7 @@
 #include "assembler.h"
 #include "str_utils.h"
 #include "lexical_analyzer.h"
+#include "syntax_analyzer.h"
 
 static bool classify_token(char *tok, token *token_item);
 
@@ -166,34 +167,35 @@ static bool classify_token(char *tok, token *token_item)
 	return true;
 }
 
-//int main(void)
-//[>{<]
-	//FILE *f = fopen("test.asm", "r");
-	//token_list *tl;
-	//lexical_analyzer(f, &tl);
-	//while (tl) {
-		//token *t;
-		//t = tl->first_token;
-		//while (t) {
-			//switch (t->type) {
-				//case 1:
-				//case 2:
-				//case 3:
-					//printf(" %d %s;", t->type, t->value_s);
-					//break;
-				//case 4:
-				//case 5:
-					//printf(" %d %d;", t->type, t->value);
-					//break;
-				//case 6:
-					//printf(" comma;");
-					//break;
-			//}
-			//t = t->next;
-		//}
-		//printf("\n");
-		//tl = tl->next;
-	//}
+/*int main(void)*/
+/*{*/
+	/*FILE *f = fopen("test.asm", "r");*/
+	/*token_list *tl;*/
+	/*lexical_analyzer(f, &tl);*/
+	/*printf("Syntax: %s\n", syntax_analyzer(tl) ? "OK" : "FAIL");*/
+	/*while (tl) {*/
+		/*token *t;*/
+		/*t = tl->first_token;*/
+		/*while (t) {*/
+			/*switch (t->type) {*/
+				/*case 1:*/
+				/*case 2:*/
+				/*case 3:*/
+					/*printf(" %d %s;", t->type, t->value_s);*/
+					/*break;*/
+				/*case 4:*/
+				/*case 5:*/
+					/*printf(" %d %d;", t->type, t->value);*/
+					/*break;*/
+				/*case 6:*/
+					/*printf(" comma;");*/
+					/*break;*/
+			/*}*/
+			/*t = t->next;*/
+		/*}*/
+		/*printf("\n");*/
+		/*tl = tl->next;*/
+	/*}*/
 
-	//return 0;
-//}
+	/*return 0;*/
+/*}*/
