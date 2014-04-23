@@ -68,12 +68,12 @@ uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
 	return 0; //чтоб компилятор не ругался
 }
 
-void vm_set(uint8_t seg, uint16_t dest, uint16_t src) {
+void vm_set(uint8_t seg, uint16_t dest, uint16_t val) {
 	if (vm_seg_regs[seg].ro) {
 		segfault();
 		return;
 	}
-	vm_mem[vm_translate_addr(seg, dest)] = src;
+	vm_mem[vm_translate_addr(seg, dest)] = val;
 }
 
 uint8_t vm_get(uint8_t seg, uint16_t addr) {
