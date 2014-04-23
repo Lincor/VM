@@ -180,28 +180,28 @@ void vm_cmd_shr(uint8_t args[]) {
  */
 
 void vm_cmd_or(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] |= vm_reg[rgb];
 }
 
 void vm_cmd_and(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] &= vm_reg[rgb];
 }
 
 void vm_cmd_xor(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] = ~vm_reg[rgb];
 }
 // А не логичнее сделать побитовое отрицание?
 void vm_cmd_not(uint8_t args[]) {
-	uint8_t rga, rgb;
+    uint8_t rga, rgb;
     rga = args[0] >> 4;
     rgb = args[0] & 0xf;
     vm_reg[rga] = !vm_reg[rgb];
@@ -309,12 +309,14 @@ void vm_cmd_in(uint8_t args[]) {
     reg = args[0] & 0xf;
     prt = args[1];
     switch (prt) {
-        case 0: {
-            printf("%d", vm_reg[reg]);
-        } break;
-        case 1: {
-            printf("%c", vm_reg[reg]);
-        } break;
+    case 0: {
+        printf("%d", vm_reg[reg]);
+    }
+    break;
+    case 1: {
+        printf("%c", vm_reg[reg]);
+    }
+    break;
     }
 }
 
