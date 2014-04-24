@@ -21,10 +21,10 @@ bool lexical_analyzer(FILE *file, token_list **list)
 	string_list *line_tokens;
 	token *first_token = NULL, *cur_token = NULL, *next_token;
 	token_list *first_token_list = NULL, *cur_token_list = NULL, *next_token_list;
-	int braces;
+	int brackets;
 
 	code_line = 1;
-	braces = 0;
+	brackets = 0;
 
 	while(fgets(line, sizeof(line), file)) {
 		line_tokens = string_tokenizer(line, delim, opr);
@@ -49,31 +49,28 @@ bool lexical_analyzer(FILE *file, token_list **list)
 					return false; //TODO
 			}
 
-			else if (line_tokens->string[0] == '(') {
-				braces++;
-				if (line_tokens->next) {
-					if (!((line_tokens->next->next && line_tokens->next->next->string[0] == ')') ||  //(base)
-						(line_tokens->next->next && line_tokens->next->next->next &&
-						 line_tokens->next->next->next->next && line_tokens->next->next->next->next->next &&
-						 (line_tokens->next->next->next->next->next->string[0] == ')' ||  //(,index,multiplier)
-						  (line_tokens->next->next->next->next->next->next &&
-						   line_tokens->next->next->next->next->next->next->string[0] == ')'))))) //(base,index,nultiplier)
-						return false; //TODO
-
-				} else
-					return false; //TODO
-			}
-
-			else if (line_tokens->string[0] == ')') {
-				braces--;
-				if (braces < 0)
-					return false; //TODO
-			}
-
 			else if (line_tokens->string[0] == '#')
 				break;
 
 			else {
+				if (line_tokens->string[0] == '(') {
+					brackets++;
+					if (line_tokens->next) {
+						if (!((line_tokens->next->next && line_tokens->next->next->string[0] == ')') ||  //(base)
+							(line_tokens->next->next && line_tokens->next->next->next &&
+							 line_tokens->next->next->next->next && line_tokens->next->next->next->next->next &&
+							 (line_tokens->next->next->next->next->next->string[0] == ')' ||  //(,index,multiplier)
+							  (line_tokens->next->next->next->next->next->next &&
+							   line_tokens->next->next->next->next->next->next->string[0] == ')'))))) //(base,index,nultiplier)
+							return false; //TODO
+					} else
+						return false; //TODO
+				} else if (line_tokens->string[0] == ')') {
+					brackets--;
+					if (brackets < 0)
+						return false; //TODO
+				}
+
 				if (!first_token) {
 					cur_token = malloc(sizeof(token));
 					first_token = cur_token;
@@ -85,6 +82,7 @@ bool lexical_analyzer(FILE *file, token_list **list)
 
 				if (!classify_token(line_tokens->string, cur_token))
 					return false; //TODO
+
 				cur_token->code_column = line_tokens->code_column;
 			}
 
@@ -92,13 +90,14 @@ bool lexical_analyzer(FILE *file, token_list **list)
 			line_tokens = line_tokens->next;
 		}
 
-		if (braces > 0)
+		if (brackets > 0)
 			return false; //TODO
 
 		cur_token_list->first_token = first_token;
 		cur_token_list->code_line = code_line;
 
-		cur_token->next = NULL;
+		if (cur_token)
+			cur_token->next = NULL;
 		first_token = NULL;
 
 		code_line++;
@@ -124,9 +123,14 @@ static bool classify_token(char *tok, token *token_item)
 	}
 
 	/* COMMA */	
-	else if (tok[0] == ',') {
+	else if (tok[0] == ',')
 		token_item->type = TK_COMMA;
-	}
+
+	/* BRACKETS */
+	else if (tok[0] == '(')
+		token_item->type = TK_OBRACKET;
+	else if (tok[0] == ')')
+		token_item->type = TK_CBRACKET;
 
 	/* REGISTER */
 	else if (tok[0] == '%') {
@@ -166,36 +170,3 @@ static bool classify_token(char *tok, token *token_item)
 
 	return true;
 }
-
-/*int main(void)*/
-/*{*/
-	/*FILE *f = fopen("test.asm", "r");*/
-	/*token_list *tl;*/
-	/*lexical_analyzer(f, &tl);*/
-	/*printf("Syntax: %s\n", syntax_analyzer(tl) ? "OK" : "FAIL");*/
-	/*while (tl) {*/
-		/*token *t;*/
-		/*t = tl->first_token;*/
-		/*while (t) {*/
-			/*switch (t->type) {*/
-				/*case 1:*/
-				/*case 2:*/
-				/*case 3:*/
-					/*printf(" %d %s;", t->type, t->value_s);*/
-					/*break;*/
-				/*case 4:*/
-				/*case 5:*/
-					/*printf(" %d %d;", t->type, t->value);*/
-					/*break;*/
-				/*case 6:*/
-					/*printf(" comma;");*/
-					/*break;*/
-			/*}*/
-			/*t = t->next;*/
-		/*}*/
-		/*printf("\n");*/
-		/*tl = tl->next;*/
-	/*}*/
-
-	/*return 0;*/
-/*}*/

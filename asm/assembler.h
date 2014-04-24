@@ -13,13 +13,15 @@
 #define uint32_t unsigned int
 
 /*------------ Token types ----------------*/
-#define TK_NONE   (0x0)
-#define TK_LABEL  (0x1)
-#define TK_SYMBOL (0x2)
-#define TK_CMD    (0x3)
-#define TK_REG    (0x4)
-#define TK_IMM    (0x5)
-#define TK_COMMA  (0x6)
+#define TK_NONE     (0x0)
+#define TK_LABEL    (0x1)
+#define TK_SYMBOL   (0x2)
+#define TK_CMD      (0x3)
+#define TK_REG      (0x4)
+#define TK_IMM      (0x5)
+#define TK_COMMA    (0x6)
+#define TK_OBRACKET (0x7)
+#define TK_CBRACKET (0x8)
 
 /*------- Command argument types ----------*/
 #define CA_LABEL   (0x0)

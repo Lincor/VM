@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assembler.h"
+#include <stdbool.h>
 
 /*------------------------------------------*
 *                  TYPEDEFS                 *

@@ -3,3 +3,4 @@ main
 *.o
 *~
 *.bak
+test

@@ -50,53 +50,61 @@ string_list *string_tokenizer(char *str, const char *delim, const char *opr)
 
 static void string_tokenizer_opr(string_list *list, const char *opr)
 {
+	if (!list)
+		return;
 	string_list *temp1, *temp2;
+	string_list *next = list->next;
+	int i;
+	for (i = 0; list->string[i]; i++)
+		if (strchr(opr, list->string[i]) && !(i == 0 && list->string[i + 1] == '\0')) {
+			if (i == 0) { // the operator is at the beginning of the line
+				temp1 = malloc(sizeof(string_list));
+				temp1->string = strdup(list->string + 1);
+				temp1->code_column = list->code_column + 1;
 
-	while (list) {
-		int i;
-		for (i = 0; list->string[i]; i++)
-			if (strchr(opr, list->string[i]) && !(i == 0 && list->string[i + 1] == '\0')) {
-				if (i == 0) { // the operator is in the beginning of the line
-					temp1 = malloc(sizeof(string_list));
-					temp1->string = strdup(list->string + 1);
-					temp1->code_column = list->code_column + 1;
+				list->string[1] = '\0';
 
-					temp1->next = list->next;
-					list->next = temp1;
-				} else if (list->string[i + 1] == '\0') { // the operator is in the end of the line
-					temp1 = malloc(sizeof(string_list));
-					temp1->string = malloc(sizeof(char) * 2);
-					temp1->string[0] = list->string[i];
-					temp1->string[1] = '\0';
-					temp1->code_column = list->code_column + i;
+				temp1->next = list->next;
+				list->next = temp1;
+				
+				next = temp1;
+			} else if (list->string[i + 1] == '\0') { // the operator at in the end of the line
+				temp1 = malloc(sizeof(string_list));
+				temp1->string = malloc(sizeof(char) * 2);
+				temp1->string[0] = list->string[i];
+				temp1->string[1] = '\0';
+				temp1->code_column = list->code_column + i;
 
-					temp1->next = list->next;
-					list->next = temp1;
+				temp1->next = list->next;
+				list->next = temp1;
 
-					list->string[i] = '\0';
-				} else { // the operator is inside the line
-					temp1 = malloc(sizeof(string_list));
-					temp1->string = malloc(sizeof(char) * 2);
-					temp1->string[0] = list->string[i];
-					temp1->string[1] = '\0';
-					temp1->code_column = list->code_column + i;
+				list->string[i] = '\0';
 
-					temp1->next = list->next;
-					list->next = temp1;
-					
-					temp2 = malloc(sizeof(string_list));
-					temp2->string = strdup(list->string + i + 1);
-					temp2->code_column = temp1->code_column + 1;
+				next = temp1->next;
+			} else { // the operator is inside the line
+				temp1 = malloc(sizeof(string_list));
+				temp1->string = malloc(sizeof(char) * 2);
+				temp1->string[0] = list->string[i];
+				temp1->string[1] = '\0';
+				temp1->code_column = list->code_column + i;
 
-					temp2->next = temp1->next;
-					temp1->next = temp2;
+				temp1->next = list->next;
+				list->next = temp1;
+				
+				temp2 = malloc(sizeof(string_list));
+				temp2->string = strdup(list->string + i + 1);
+				temp2->code_column = temp1->code_column + 1;
 
-					list->string[i] = '\0';
-				}
-				break;
+				temp2->next = temp1->next;
+				temp1->next = temp2;
+
+				list->string[i] = '\0';
+
+				next = temp2;
 			}
-		list = list->next;	
-	}
+			break;
+		}
+		string_tokenizer_opr(next, opr);
 }
 
 void print_string_list(string_list *list)
