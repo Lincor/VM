@@ -1,13 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* TODO:
- * 1) Реализовать весь набор команд
- * 2) Перывания
- * 3) Оборудование
- * 4) Виртуальная память
- * 5) slb/shb и llb/lhb
- * 6) Проверять переполнение при арфиметических операциях
+/* TODO по проекту:
+ * 1) Реализовать весь набор команд ВМ
+ * 2) Написать ассемблер, протестировать ВМ
+ * 3) Добавить оборудование для ВМ
+ * 4) Напистаь загрузчик ОС для ВМ
+ * 5) Напистаь компилятор Си
+ * 6) Написать ОС (Может MINIX портировать? Красивая маленькая ОС)
+ *
+ * TODO по ВМ (более приоритетные задачи):
+ * 1) Переполнения, прерывания
+ * 2) Знаковая арифметика
+ * 2) Загрузка бинарника из файла
  */
 
 /*
@@ -67,16 +72,16 @@ uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
 	return 0; //чтоб компилятор не ругался
 }
 
-void vm_set(uint8_t seg, uint16_t dest, uint16_t src) {
+void vm_set(uint8_t seg, uint16_t dest, uint16_t val) {
 	if (vm_seg_regs[seg].ro) {
 		segfault();
 		return;
 	}
-	vm_mem[vm_translate_addr(seg,dest)] = src;
+	vm_mem[vm_translate_addr(seg, dest)] = val;
 }
 
 uint8_t vm_get(uint8_t seg, uint16_t addr) {
-	return vm_mem[vm_translate_addr(seg,addr)];
+	return vm_mem[vm_translate_addr(seg, addr)];
 }
 
 /*
@@ -212,19 +217,19 @@ void vm_cmd_not(uint8_t args[]) {
 
 void vm_cmd_jeq(uint8_t args[]) {
 	uint8_t seg, rga, rgb;
-	seg = args[0] >> 4;
+	seg = args[0] & 0xf;
 	rga = args[1] >> 4;
 	rgb = args[1] & 0xf;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] == vm_reg[rgb]) {
-		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+		vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
 	}
 }
 
 void vm_cmd_jne(uint8_t args[]) {
-	uint8_t rga, rgb;
-	uint8_t seg = args[0] >> 4;
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
 	rga = args[1] >> 4;
 	rgb = args[1] & 0xf;
 	uint16_t wrd;
@@ -237,6 +242,7 @@ void vm_cmd_jne(uint8_t args[]) {
 void vm_cmd_jlt(uint8_t args[]) {
 	uint8_t rga, rgb;
 	uint8_t seg = args[0] >> 4;
+	seg = args[0] & 0xf;
 	rga = args[1] >> 4;
 	rgb = args[1] & 0xf;
 	uint16_t wrd;
@@ -247,8 +253,8 @@ void vm_cmd_jlt(uint8_t args[]) {
 }
 
 void vm_cmd_jgt(uint8_t args[]) {
-	uint8_t rga, rgb;
-	uint8_t seg = args[0] >> 4;
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
 	rga = args[1] >> 4;
 	rgb = args[1] & 0xf;
 	uint16_t wrd;
@@ -259,8 +265,8 @@ void vm_cmd_jgt(uint8_t args[]) {
 }
 
 void vm_cmd_jle(uint8_t args[]) {
-	uint8_t rga, rgb;
-	uint8_t seg = args[0] >> 4;
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
 	rga = args[1] >> 4;
 	rgb = args[1] & 0xf;
 	uint16_t wrd;
@@ -271,8 +277,8 @@ void vm_cmd_jle(uint8_t args[]) {
 }
 
 void vm_cmd_jge(uint8_t args[]) {
-	uint8_t rga, rgb;
-	uint8_t seg = args[0] >> 4;
+	uint8_t rga, rgb, seg;
+	seg = args[0] & 0xf;
 	rga = args[1] >> 4;
 	rgb = args[1] & 0xf;
 	uint16_t wrd;
