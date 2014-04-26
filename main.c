@@ -329,15 +329,18 @@ void vm_cmd_in(uint8_t args[]) {
  * Работа со стеком
  */
  
-void vm_cmd_push(uint8_t args[]) {
+void vm_cmd_pushr(uint8_t args[]) {
+	uint8_t seg;
+	seg = args[0] & 0xf;
+	vm_set(seg,(vm_reg[REG_SP]-=16),vm_reg[args[1]]);
+	
+}
+ 
+void vm_cmd_pushv(uint8_t args[]) {
 	uint16_t seg,wrd;
 	seg = args[0] & 0xf;
-	if ((args[0] >> 4)!=1) { //значение
-		wrd = (args[1] << 8) | args[2];
-		vm_set(seg,--vm_reg[REG_SP],wrd);
-	} else { //регистр
-		vm_set(seg,--vm_reg[REG_SP],vm_reg[args[0] >> 4]);
-	}
+	wrd = (args[1] << 8) | args[2];
+	vm_set(seg,--vm_reg[REG_SP],wrd);
 }
 
 void vm_cmd_pop(uint8_t args[]) {
@@ -381,8 +384,8 @@ struct {
 	{vm_cmd_not,  1}, //22
 	{vm_cmd_jmp,  3}, //23
 	{vm_cmd_jpr,  1}, //24
-	{vm_cmd_push, 1}, //25
-	{vm_cmd_push, 3}, //26
+	{vm_cmd_pushr, 2}, //25
+	{vm_cmd_pushv, 3}, //26
 	{vm_cmd_pop,  2}, //27
 };
 
