@@ -12,7 +12,6 @@
  * TODO по ВМ (более приоритетные задачи):
  * 1) Переполнения, прерывания
  * 2) Знаковая арифметика
- * 2) Загрузка бинарника из файла
  */
 
 /*
@@ -82,6 +81,16 @@ void vm_set(uint8_t seg, uint16_t dest, uint16_t val) {
 
 uint8_t vm_get(uint8_t seg, uint16_t addr) {
 	return vm_mem[vm_translate_addr(seg, addr)];
+}
+
+uint8_t vm_load(char* name) {
+	FILE* f = fopen(name,"rb");
+	if (f == NULL) return 1; //ошибка
+	fseek(f,0,SEEK_END);
+	int size = ftell(f);
+	fseek(f,0,SEEK_SET);
+	fread(vm_mem,1,size,f);
+	return 0;
 }
 
 /*
@@ -433,6 +442,10 @@ int main() {
 	vm_reg[REG_SP]=65535;
 
 	vm_reg[0] = 'L';
+	vm_reg[2] = 'L';
+	vm_reg[3] = 15;
+	vm_load("test");
+	/*
 	vm_set(0,0,16);
 	vm_set(0,1,0);
 	vm_set(0,2,1);
@@ -450,7 +463,6 @@ int main() {
 	vm_set(0,11,1);
 	vm_set(0,12,1);
 
-	vm_reg[2] = 'L';
 	vm_set(0,13,16);
 	vm_set(0,14,2);
 	vm_set(0,15,1);
@@ -463,9 +475,15 @@ int main() {
 
 	vm_reg[0] = 15;
 	vm_set(0,16,16);
-	vm_set(0,17,0);
+	vm_set(0,17,3);
 	vm_set(0,18,0);
+	*/
 
+	vm_exec_comand(0);
+	vm_exec_comand(0);
+	vm_exec_comand(0);
+	vm_exec_comand(0);
+	vm_exec_comand(0);
 	vm_exec_comand(0);
 
 	return 0;
