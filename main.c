@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <conio.h>
 
 /* TODO по проекту:
  * 1) Реализовать весь набор команд ВМ
@@ -340,11 +341,11 @@ void vm_cmd_in(uint8_t args[]) {
 	reg = args[1];
 	switch (prt) {
 		case 0: {
-			scanf("%u",&vm_reg[reg]);
+			scanf("%u", &vm_reg[reg]);
 		}
 		break;
 		case 1: {
-			scanf("%c",&vm_reg[reg]);
+			vm_reg[reg] = getch()
 		}
 	}
 }
