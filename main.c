@@ -457,9 +457,9 @@ int main() {
 	vm_seg_regs[2].type=SEG_STACK;
 	vm_reg[REG_SP]=65535;
 
-	vm_reg[0] = 'L';
-	vm_reg[2] = 'L';
-	vm_reg[3] = 15;
+	//vm_reg[0] = 'L';
+	//vm_reg[2] = 'L';
+	//vm_reg[3] = 15;
 	vm_load("test");
 	/*
 	vm_set(0,0,16);
@@ -495,6 +495,9 @@ int main() {
 	vm_set(0,18,0);
 	*/
 
+	vm_exec_comand(0);
+	vm_exec_comand(0);
+	vm_exec_comand(0);
 	vm_exec_comand(0);
 	vm_exec_comand(0);
 	vm_exec_comand(0);
