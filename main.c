@@ -323,14 +323,14 @@ void vm_cmd_out(uint8_t args[]) {
 	reg = args[0] & 0xf;
 	prt = args[1];
 	switch (prt) {
-	case 0: {
-		printf("%d", vm_reg[reg]);
-	}
-	break;
-	case 1: {
-		printf("%c", vm_reg[reg]);
-	}
-	break;
+		case 0: {
+			printf("%d", vm_reg[reg]);
+		}
+		break;
+		case 1: {
+			printf("%c", vm_reg[reg]);
+		}
+		break;
 	}
 }
 
