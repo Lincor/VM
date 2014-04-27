@@ -210,14 +210,14 @@ void vm_cmd_xor(uint8_t args[]) {
 	uint8_t rga, rgb;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	vm_reg[rga] = ~vm_reg[rgb];
+	vm_reg[rga] ^= vm_reg[rgb];
 }
-// А не логичнее сделать побитовое отрицание?
+
 void vm_cmd_not(uint8_t args[]) {
 	uint8_t rga, rgb;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	vm_reg[rga] = !vm_reg[rgb];
+	vm_reg[rga] = ~vm_reg[rgb];
 }
 
 /*
@@ -318,7 +318,7 @@ void vm_cmd_jpr(uint8_t args[]) {
  * Работа с портами ввода/вывода
  */
 
-void vm_cmd_in(uint8_t args[]) {
+void vm_cmd_out(uint8_t args[]) {
 	uint8_t reg, prt;
 	reg = args[0] & 0xf;
 	prt = args[1];
@@ -331,6 +331,21 @@ void vm_cmd_in(uint8_t args[]) {
 		printf("%c", vm_reg[reg]);
 	}
 	break;
+	}
+}
+
+void vm_cmd_in(uint8_t args[]) {
+	uint8_t reg, prt;
+	prt = args[0] & 0xf;
+	reg = args[1];
+	switch (prt) {
+		case 0: {
+			scanf("%u",&vm_reg[reg]);
+		}
+		break;
+		case 1: {
+			scanf("%c",&vm_reg[reg]);
+		}
 	}
 }
 
@@ -363,7 +378,7 @@ void vm_cmd_pop(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 28
+#define CMD_COUNT 29
 
 struct {
 	void (*func)();
@@ -385,7 +400,7 @@ struct {
 	{vm_cmd_jgt,  1}, //13
 	{vm_cmd_jle,  1}, //14
 	{vm_cmd_jge,  1}, //15
-	{vm_cmd_in ,  2}, //16
+	{vm_cmd_out , 2}, //16
 	{vm_cmd_shl,  1}, //17
 	{vm_cmd_shr,  1}, //18
 	{vm_cmd_or,   1}, //19
@@ -394,9 +409,10 @@ struct {
 	{vm_cmd_not,  1}, //22
 	{vm_cmd_jmp,  3}, //23
 	{vm_cmd_jpr,  1}, //24
-	{vm_cmd_pushr, 2}, //25
-	{vm_cmd_pushv, 3}, //26
+	{vm_cmd_pushr,2}, //25
+	{vm_cmd_pushv,3}, //26
 	{vm_cmd_pop,  2}, //27
+	{vm_cmd_in,   2}, //28
 };
 
 void vm_exec_comand(uint8_t seg) {
