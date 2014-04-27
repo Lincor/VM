@@ -1,7 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __unix__
+
+#include "getch.c"
+
+#else
+
 #include <conio.h>
 
+#endif
 /* TODO по проекту:
  * 1) Реализовать весь набор команд ВМ
  * 2) Написать ассемблер, протестировать ВМ
@@ -345,7 +352,7 @@ void vm_cmd_in(uint8_t args[]) {
 		}
 		break;
 		case 1: {
-			vm_reg[reg] = getch()
+			vm_reg[reg] = getch();
 		}
 	}
 }
