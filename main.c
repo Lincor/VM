@@ -84,12 +84,12 @@ uint8_t vm_get(uint8_t seg, uint16_t addr) {
 }
 
 uint8_t vm_load(char* name) {
-	FILE* f = fopen(name,"rb");
+	FILE* f = fopen(name, "rb");
 	if (f == NULL) return 1; //ошибка
-	fseek(f,0,SEEK_END);
+	fseek(f, 0, SEEK_END);
 	int size = ftell(f);
-	fseek(f,0,SEEK_SET);
-	fread(vm_mem,1,size,f);
+	fseek(f, 0, SEEK_SET);
+	fread(vm_mem, 1, size, f);
 	return 0;
 }
 
