@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifdef __unix__
-
-#include "getch.c"
-
+	#include "getch.c"
 #else
-
-#include <conio.h>
-
+	#include <conio.h>
 #endif
+
 /* TODO по проекту:
  * 1) Реализовать весь набор команд ВМ
  * 2) Написать ассемблер, протестировать ВМ
@@ -311,7 +309,7 @@ void vm_cmd_jge(uint8_t args[]) {
 
 void vm_cmd_jmp(uint8_t args[]) {
 	uint16_t seg,wrd;
-	seg = args[0] >> 4;
+	seg = args[0] & 0xf;
 	wrd = (args[1] << 8) | args[2];
 	vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
 }
