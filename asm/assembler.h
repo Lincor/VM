@@ -13,21 +13,24 @@
 #define uint32_t unsigned int
 
 /*------------ Token types ----------------*/
-#define TK_NONE     (0x0)
-#define TK_LABEL    (0x1)
-#define TK_SYMBOL   (0x2)
-#define TK_CMD      (0x3)
-#define TK_REG      (0x4)
-#define TK_IMM      (0x5)
-#define TK_COMMA    (0x6)
-#define TK_OBRACKET (0x7)
-#define TK_CBRACKET (0x8)
+#define TK_LABEL    (0x0)
+#define TK_SYMBOL   (0x1)
+#define TK_CMD      (0x2)
+#define TK_REG      (0x3)
+#define TK_IMM      (0x4)
+#define TK_COMMA    (0x5)
+#define TK_OBRACKET (0x6)
+#define TK_CBRACKET (0x7)
 
 /*------- Command argument types ----------*/
 #define CA_LABEL   (0x0)
 #define CA_REG     (0x1)
 #define CA_IMM     (0x2)
 #define CA_ADDRESS (0x3)
+
+/*--------- Code line types ---------------*/
+#define CL_CMD   (0x0)
+#define CL_LABEL (0x1)
 
 /*------------------------------------------*
 *                  TYPEDEFS                 *
@@ -56,5 +59,12 @@ typedef struct arg_st {
 typedef struct cmd_st {
 	uint8_t cmd_i;
 	arg *args;
-	struct cmd_st *next;
 } cmd;
+
+typedef struct line_st {
+	uint8_t type;
+	uint32_t code_line;
+	cmd *command;
+	char *label;
+	struct line_st *next;
+} line;

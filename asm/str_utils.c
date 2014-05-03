@@ -145,20 +145,22 @@ bool str_to_uint16_t(const char *str, uint16_t *num)
 {
 	uint8_t radix = 10;
 	bool (*exam)(char) = isdecdigit;
-	if (!strncmp(str, "0b", 2)) {
-		radix = 2;
-		exam = isbindigit;
-		str += 2;
-	} else if (!strncmp(str, "0o", 2)) {
-		radix = 8;
-		exam = isoctdigit;
-		str += 2;
-	} else if (!strncmp(str, "0d", 2))
-		str += 2;
-	else if (!strncmp(str, "0x", 2)) {
-		radix = 16;
-		exam = ishexdigit;
-		str += 2;
+	if (strlen(str) > 2) {
+		if (!strncmp(str, "0b", 2)) {
+			radix = 2;
+			exam = isbindigit;
+			str += 2;
+		} else if (!strncmp(str, "0o", 2)) {
+			radix = 8;
+			exam = isoctdigit;
+			str += 2;
+		} else if (!strncmp(str, "0d", 2))
+			str += 2;
+		else if (!strncmp(str, "0x", 2)) {
+			radix = 16;
+			exam = ishexdigit;
+			str += 2;
+		}
 	}
 
 	int i;

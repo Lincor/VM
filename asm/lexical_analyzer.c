@@ -23,6 +23,8 @@ bool lexical_analyzer(FILE *file, token_list **list)
 	token_list *first_token_list = NULL, *cur_token_list = NULL, *next_token_list;
 	int brackets;
 
+	*list = NULL;
+
 	code_line = 1;
 	brackets = 0;
 
@@ -33,9 +35,11 @@ bool lexical_analyzer(FILE *file, token_list **list)
 			first_token_list = malloc(sizeof(token_list));
 			cur_token_list = first_token_list;
 		} else {
-			next_token_list = malloc(sizeof(token_list));
-			cur_token_list->next = next_token_list;
-			cur_token_list = next_token_list;
+			if (cur_token_list->first_token) {
+				next_token_list = malloc(sizeof(token_list));
+				cur_token_list->next = next_token_list;
+				cur_token_list = next_token_list;
+			}
 		}
 
 		while (line_tokens) {
