@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 
 #ifdef __unix__
 	#include "getch.c"
@@ -23,6 +25,7 @@
 /*
  * Типы данных для ВМ
  */
+#define uint32_t unsigned int
 #define uint16_t unsigned short
 #define uint8_t unsigned char
 
@@ -308,7 +311,7 @@ void vm_cmd_jge(uint8_t args[]) {
  */
 
 void vm_cmd_jmp(uint8_t args[]) {
-	uint16_t seg,wrd;
+	uint16_t seg, wrd;
 	seg = args[0] & 0xf;
 	wrd = (args[1] << 8) | args[2];
 	vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
@@ -358,14 +361,14 @@ void vm_cmd_in(uint8_t args[]) {
 /*
  * Работа со стеком
  */
- 
+
 void vm_cmd_pushr(uint8_t args[]) {
 	uint8_t seg;
 	seg = args[0] & 0xf;
 	vm_set(seg,(vm_reg[REG_SP]-=2),vm_reg[args[1]]);
-	
+
 }
- 
+
 void vm_cmd_pushv(uint8_t args[]) {
 	uint16_t seg,wrd;
 	seg = args[0] & 0xf;
@@ -440,6 +443,28 @@ void vm_exec_comand(uint8_t seg) {
 	vm_cmd[cmd].func(&bytes);
 }
 
+#define IPS 100000
+
+void vm_exec_loop() {
+	uint32_t ips = 0; //Сначала было uint16_t, но этого мало
+	double old_time, sleep_time;
+	old_time = time(0);
+
+	while (1) {
+		if (ips++ < IPS) {
+			vm_exec_comand(0);
+		} else {
+			printf("Instructions: %d @ time: %f ms\n", ips, (time(0) - old_time));
+			sleep_time = (1000 - (time(0) - old_time)); //отнимаем от секунды время затраченное на выполнение инструкций
+			if (sleep_time > 0) {
+				usleep(sleep_time);
+				old_time = time(0);
+				ips = 0;
+			}
+		}
+	}
+}
+
 int main() {
 	printf("TINY RISC MACHINE 1975.\n");
 	vm_access=0;
@@ -455,7 +480,7 @@ int main() {
 	vm_seg_regs[1].access=0;
 	vm_seg_regs[1].ro=SEG_READ_WRITE;
 	vm_seg_regs[1].type=SEG_DATA;
-	
+
 	vm_seg_regs[2].base=64535;
 	vm_seg_regs[2].limit=65535;
 	vm_seg_regs[2].access=0;
@@ -467,16 +492,12 @@ int main() {
 	//vm_reg[2] = 'L';
 	//vm_reg[3] = 15;
 	vm_load("test");
-	/*
-	vm_set(0,0,16);
-	vm_set(0,1,0);
-	vm_set(0,2,1);
-	
-	vm_set(0,3,26);
+
+	/*vm_set(0,3,26);
 	vm_set(0,4,2);
 	vm_set(0,5,0);
 	vm_set(0,6,'O');
-	
+
 	vm_set(0,7,27);
 	vm_set(0,8,2);
 	vm_set(0,9,1);
@@ -501,15 +522,7 @@ int main() {
 	vm_set(0,18,0);
 	*/
 
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
+	vm_exec_loop();
 
 	return 0;
 }
