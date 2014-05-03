@@ -141,6 +141,10 @@ void vm_cmd_lhb(uint8_t args[]) {
 	vm_reg[reg] |= byt << 8;
 }
 
+void vm_cmd_hlt(uint8_t args[]) {
+	exit(0);
+}
+
 //lvar
 //svar (для записи с помощью сегментных регистров)
 
@@ -387,7 +391,7 @@ void vm_cmd_pop(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 29
+#define CMD_COUNT 30
 
 struct {
 	void (*func)();
@@ -422,6 +426,7 @@ struct {
 	{vm_cmd_pushv,3}, //26
 	{vm_cmd_pop,  2}, //27
 	{vm_cmd_in,   2}, //28
+	{vm_cmd_hlt,  0}  //29
 };
 
 void vm_exec_comand(uint8_t seg) {
