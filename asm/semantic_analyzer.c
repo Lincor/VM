@@ -66,8 +66,11 @@ bool semantic_analyzer(token_list *list, line** lines)
 			if (t->type == TK_COMMA) {
 				new_arg = false;
 				goto next_token;
-			} else if (t->type == TK_LABEL) {
-				cur_arg->type = CA_LABEL;
+			} else if (t->type == TK_SYMBOL) {
+				cur_arg->type = CA_SYMBOL;
+				cur_arg->value_s = strdup(t->value_s);
+			} else if (t->type == TK_SYMBOL_ADR) {
+				cur_arg->type = CA_SYMBOL_ADR;
 				cur_arg->value_s = strdup(t->value_s);
 			} else if (t->type == TK_REG) {
 				cur_arg->type = CA_REG;

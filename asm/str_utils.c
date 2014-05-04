@@ -22,9 +22,8 @@ string_list *string_tokenizer(char *str, const char *delim, const char *opr)
 	string_list *cur_list, *next_list;
 
 	char *tok;
-	char *first_s;
 
-	first_s = tok = strtok(str, delim);
+	tok = strtok(str, delim);
 
 	while (tok)  {
 		if (!list) {
@@ -37,7 +36,7 @@ string_list *string_tokenizer(char *str, const char *delim, const char *opr)
 		}
 
 		cur_list->string = strdup(tok);
-		cur_list->code_column = tok - first_s + 1;
+		cur_list->code_column = tok - str + 1;
 		cur_list->next = NULL;
 
 		tok = strtok(NULL, delim);

@@ -67,8 +67,11 @@ int main(int argc, char **argv)
 					printf("\targs:\n");
 				while (a) {
 					switch (a->type) {
-						case CA_LABEL:
-							printf("\t\tlabel: %s\n", a->value_s);
+						case CA_SYMBOL:
+							printf("\t\tsymbol: %s\n", a->value_s);
+							break;
+						case CA_SYMBOL_ADR:
+							printf("\t\tsymbol_adr: %s\n", a->value_s);
 							break;
 						case CA_REG:
 							printf("\t\treg: %d\n", a->v1);

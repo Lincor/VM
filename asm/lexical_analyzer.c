@@ -19,8 +19,8 @@ bool lexical_analyzer(FILE *file, token_list **list)
 	uint32_t code_line;
 	char line[MAX_LINE_LEN + 1];
 	string_list *line_tokens;
-	token *first_token = NULL, *cur_token = NULL, *next_token;
-	token_list *first_token_list = NULL, *cur_token_list = NULL, *next_token_list;
+	token *first_token = NULL,*cur_token = NULL, *next_token;
+	token_list *first_token_list = NULL, *prev_token_list = NULL, *cur_token_list = NULL, *next_token_list;
 	int brackets;
 
 	*list = NULL;
@@ -36,6 +36,7 @@ bool lexical_analyzer(FILE *file, token_list **list)
 			cur_token_list = first_token_list;
 		} else {
 			if (cur_token_list->first_token) {
+				prev_token_list = cur_token_list;
 				next_token_list = malloc(sizeof(token_list));
 				cur_token_list->next = next_token_list;
 				cur_token_list = next_token_list;
@@ -106,7 +107,11 @@ bool lexical_analyzer(FILE *file, token_list **list)
 
 		code_line++;
 	}
-	cur_token_list->next = NULL;
+
+	if (cur_token_list->first_token)
+		cur_token_list->next = NULL;
+	else
+		prev_token_list->next = NULL;
 
 	*list = first_token_list;
 	
@@ -118,7 +123,10 @@ static bool classify_token(char *tok, token *token_item)
 	/* IMMEDIATE */
 	if (tok[0] == '$') {
 		uint16_t imm;
-		if (str_to_uint16_t(tok + 1, &imm)) {
+		if (!isdigit(tok[1])) {
+			token_item->type = TK_SYMBOL_ADR;
+			token_item->value_s = strdup(tok);
+		} else if (str_to_uint16_t(tok + 1, &imm)) {
 			token_item->type = TK_IMM;
 			token_item->value = imm;
 		} else {
