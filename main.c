@@ -41,6 +41,14 @@ struct {
 	uint8_t access;	// Access level
 } vm_seg_regs[4];
 
+#define ITERRUPTS_MAX	128		// максимальное кол-во прерываний
+#define ITERRUPTS_SEG	3		// сегмент со смещение по которому хранится таблица прерываний
+
+struct {
+	uint16_t addr[ITERRUPTS_MAX];
+	uint16_t ptr;
+} vm_iterrupts;
+
 // Имена спец. регистров
 #define REG_PC 0xf
 #define REG_SP 0xe
@@ -97,6 +105,15 @@ uint8_t vm_load(char* name) {
 	fseek(f, 0, SEEK_SET);
 	fread(vm_mem, 1, size, f);
 	return 0;
+}
+
+uint8_t vm_iterrupt_add(uint8_t number) {
+	if (vm_iterrupts.ptr < ITERRUPTS_MAX) {
+		vm_iterrupts.addr[vm_iterrupts.ptr++] = number;
+	} else {
+		// Печаль беда
+		// А если серьезно, то надо с этим что то деалать. Но я хз, что лучше сделать в таком случае
+	}
 }
 
 /*
