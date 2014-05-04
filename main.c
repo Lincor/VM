@@ -49,7 +49,7 @@ struct {
 
 struct {
 	uint16_t addr[ITERRUPTS_MAX];
-	uint16_t ptr;
+	uint8_t  ptr;
 } vm_iterrupts;
 
 // Имена спец. регистров
@@ -113,10 +113,30 @@ uint8_t vm_load(char* name) {
 uint8_t vm_iterrupt_add(uint8_t number) {
 	if (vm_iterrupts.ptr < ITERRUPTS_MAX) {
 		vm_iterrupts.addr[vm_iterrupts.ptr++] = number;
+		return 1;
 	} else {
 		// Печаль беда
 		// А если серьезно, то надо с этим что то деалать. Но я хз, что лучше сделать в таком случае
+		return 0;
 	}
+}
+
+uint8_t vm_iterrupt_get() {
+	uint8_t number = vm_iterrupts.addr[0];
+	uint8_t i;
+	for(i = 0; i < vm_iterrupts.ptr; i++)
+		vm_iterrupts.addr[i] = vm_iterrupts.addr[i + 1];
+	vm_iterrupts.addr[i] = 0;
+	--vm_iterrupts.ptr;
+	// А что будет, если достигнуто максимальное кол-во прерываний? Куда запишется 0?
+	// Пусть пока хоть так
+}
+
+void print_iters() {
+	uint8_t i;
+	for(i = 0; i < vm_iterrupts.ptr; i++)
+		printf("%d ", vm_iterrupts.addr[i]);
+	printf("\n");
 }
 
 /*
@@ -543,8 +563,24 @@ int main() {
 	vm_set(0,17,3);
 	vm_set(0,18,0);
 	*/
+	
+	vm_iterrupt_add(1);
+	vm_iterrupt_add(2);
+	vm_iterrupt_add(3);
+	vm_iterrupt_add(4);
+	
+	print_iters();
+	
+	vm_iterrupt_get();
+	
+	print_iters();
+	
+	vm_iterrupt_add(30);
+	vm_iterrupt_add(44);
+	
+	print_iters();
 
-	vm_exec_loop();
+	//vm_exec_loop();
 
 	return 0;
 }
