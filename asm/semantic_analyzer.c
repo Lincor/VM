@@ -7,7 +7,7 @@
 
 extern cmd_info cmd_table[];
 
-static uint8_t parse_address(token *t, arg *a, token** out);
+static uint8_t parse_address(token *t, arg *a, token** out, int code_line);
 
 uint8_t semantic_analyzer(token_list *list, line** lines)
 {
@@ -77,15 +77,15 @@ uint8_t semantic_analyzer(token_list *list, line** lines)
 				cur_arg->v1 = t->value;
 			} else if ((t->type == TK_IMM && t->next && t->next->type == TK_OBRACKET)
 				|| (t->type == TK_OBRACKET)) {
-				uint8_t err = parse_address(t, cur_arg, &t);
+				uint8_t err = parse_address(t, cur_arg, &t, cur_line->code_line);
 				if (err != ERR_NO_ERROR)
-					return err;
+					asm_error(err, cur_line->code_line, t->code_column);
 			} else if (t->type == TK_IMM) {
 				cur_arg->type = CA_IMM;
 				cur_arg->v1 = t->value & 0x000000ff;
 				cur_arg->v2 = (t->value & 0x0000ff00) >> 8;
 			} else
-				return ERR_INV_TK;
+				asm_error(ERR_INV_TK, cur_line->code_line, t->code_column);
 
 next_token:
 			t = t->next;
@@ -108,47 +108,54 @@ next:
 	return ERR_NO_ERROR;
 }
 
-static uint8_t parse_address(token *t, arg *a, token** out) // parse structures of the form $a(%b,%c,$d)
+static uint8_t parse_address(token *t, arg *a, token** out, int code_line) // parse structures of the form $a(%b,%c,$d)
 {
 	uint8_t v1 = 0, v2 = 0, v3 = 0, v4 = 1;
+
+	token *pt = t;
 	
 	if (t->type == TK_IMM) {
 		v1 = t->value & 0xff;
+		pt = t;
 		t = t->next;
 	}
 
 	if ((t = t->next) && (t->type == TK_REG)) {
 		v2 = t->value;
+		pt = t;
 		if (!(t = t->next))
-			return ERR_EXP_CBRC_COM_AFT_REG;
+			asm_error(ERR_EXP_CBRC_COM_AFT_REG, code_line, pt->code_column);
 		if (t->type == TK_CBRACKET)
 			goto end;
 	} else
-		return ERR_EXP_REG_AFT_OBRC;
+		asm_error(ERR_EXP_REG_AFT_OBRC, code_line, pt->code_column);
 
 	if (t->type != TK_COMMA)
-		return ERR_EXP_REG_COM_AFT_OBRC;
+		asm_error(ERR_EXP_REG_COM_AFT_OBRC, code_line, pt->code_column);
 
+	pt = t;
 	if (!(t = t->next) || (t->type != TK_REG))
-		return ERR_EXP_REG_AFT_COM;
+		asm_error(ERR_EXP_REG_AFT_COM, code_line, pt->code_column);
 	else
 		v3 = t->value;
 
+	pt = t;
 	if (!(t = t->next))
-		return ERR_EXP_CBRC_COM_AFT_REG;
+		asm_error(ERR_EXP_CBRC_COM_AFT_REG, code_line, pt->code_column);
 	if (t->type == TK_CBRACKET)
 		goto end;
 	else if (t->type != TK_COMMA)
-		return ERR_EXP_CBRC_COM_AFT_REG;
+		asm_error(ERR_EXP_CBRC_COM_AFT_REG, code_line, pt->code_column);
 
+	pt = t;
 	if (!(t = t->next) || (t->type != TK_IMM))
-		return ERR_EXP_IMM_AFT_COM;
+		asm_error(ERR_EXP_IMM_AFT_COM, code_line, pt->code_column);
 	else
 		if ((t->value == 1) || (t->value == 2) || (t->value) == 4) {
 			v4 = t->value;
 			t = t->next;
 		} else
-			return ERR_INV_IMM_1_2_4;
+			asm_error(ERR_INV_IMM_1_2_4, code_line, t->code_column);
 
 end:
 

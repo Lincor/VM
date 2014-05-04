@@ -8,8 +8,9 @@
 #include "str_utils.h"
 #include "lexical_analyzer.h"
 #include "syntax_analyzer.h"
+#include "asm_error.h"
 
-static uint8_t classify_token(char *tok, token *token_item);
+static uint8_t classify_token(char *tok, token *token_item, int code_line);
 
 const char *delim = " \n\t\v";
 const char *opr = ",:#()";
@@ -49,9 +50,9 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 					if (cur_token->type == TK_SYMBOL)
 						cur_token->type = TK_LABEL;
 					else
-						return ERR_EXP_LBL_BEF_COL;
+						asm_error(ERR_EXP_LBL_BEF_COL, code_line, line_tokens->code_column);
 				else
-					return ERR_EXP_LBL_BEF_COL;
+					asm_error(ERR_EXP_LBL_BEF_COL, code_line, line_tokens->code_column);
 			}
 
 			else if (line_tokens->string[0] == '#')
@@ -72,13 +73,13 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 							 (line_tokens->next->next->next->next->next->string[0] == ')' ||  //(,index,multiplier)
 							  (line_tokens->next->next->next->next->next->next &&
 							   line_tokens->next->next->next->next->next->next->string[0] == ')'))))) //(base,index,multiplier)
-							return ERR_INV_ADR;
+							asm_error(ERR_INV_ADR, code_line, line_tokens->code_column);
 					} else
-						return ERR_EXP_REG_COM_AFT_OBRC;
+						asm_error(ERR_EXP_REG_COM_AFT_OBRC, code_line, line_tokens->code_column);
 				} else if (line_tokens->string[0] == ')') {
 					brackets--;
 					if (brackets < 0)
-						return ERR_MANY_CBRC;
+						asm_error(ERR_MANY_CBRC, code_line, line_tokens->code_column);
 				}
 
 				if (!first_token) {
@@ -90,11 +91,11 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 					cur_token = next_token;
 				}
 
-				uint8_t err = classify_token(line_tokens->string, cur_token);
-				if (err != ERR_NO_ERROR)
-					return err;
-
 				cur_token->code_column = line_tokens->code_column;
+
+				uint8_t err = classify_token(line_tokens->string, cur_token, code_line);
+				if (err != ERR_NO_ERROR)
+					asm_error(err, code_line, line_tokens->code_column);
 			}
 
 
@@ -102,7 +103,7 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 		}
 
 		if (brackets > 0)
-			return ERR_MANY_OBRC;
+			asm_error(ERR_MANY_OBRC, code_line, line_tokens->code_column);
 
 		cur_token_list->first_token = first_token;
 		cur_token_list->code_line = code_line;
@@ -124,7 +125,7 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 	return ERR_NO_ERROR;
 }
 
-static uint8_t classify_token(char *tok, token *token_item)
+static uint8_t classify_token(char *tok, token *token_item, int code_line)
 {
 	/* IMMEDIATE OR SYMBOL_ADR */
 	if (tok[0] == '$') {
@@ -136,7 +137,7 @@ static uint8_t classify_token(char *tok, token *token_item)
 			token_item->type = TK_IMM;
 			token_item->value = imm;
 		} else {
-			return ERR_INV_DLR;
+			asm_error(ERR_INV_DLR, code_line, token_item->code_column);
 		}
 	}
 
@@ -157,7 +158,7 @@ static uint8_t classify_token(char *tok, token *token_item)
 			token_item->type = TK_REG;
 			token_item->value = reg;
 		} else {
-			return ERR_INV_REG;
+			asm_error(ERR_INV_REG, code_line, token_item->code_column);
 		}
 	}
 
@@ -176,12 +177,12 @@ static uint8_t classify_token(char *tok, token *token_item)
 				int i;
 				for (i = 0; tok[i]; i++)
 					if (tok[i] != '_' && !isalnum(tok[i]))
-						return ERR_ILL_CHR_SYM;
+						asm_error(ERR_ILL_CHR_SYM, code_line, token_item->code_column);
 
 				token_item->type = TK_SYMBOL;
 				token_item->value_s = strdup(tok);
 			} else
-				return ERR_LONG_SYM;
+				asm_error(ERR_LONG_SYM, code_line, token_item->code_column);
 		}
 	}
 

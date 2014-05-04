@@ -6,7 +6,6 @@
 /*------------------------------------------*
 *                  TYPEDEFS                 *
 *------------------------------------------*/
-
 typedef struct string_list_st {
 	char *string;
 	uint32_t code_column;

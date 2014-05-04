@@ -1,8 +1,6 @@
 #pragma once
 
-#include "assembler.h"
-
 /*------------------------------------------*
 *            FUNCTION PROTOTYPES            *
 *------------------------------------------*/
-uint8_t syntax_analyzer(token_list *list);
+void asm_error(uint8_t err, int line, int column);
