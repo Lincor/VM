@@ -11,4 +11,4 @@
 /*------------------------------------------*
 *            FUNCTION PROTOTYPES            *
 *------------------------------------------*/
-bool semantic_analyzer(token_list *list, line **lines);
+uint8_t semantic_analyzer(token_list *list, line **lines);

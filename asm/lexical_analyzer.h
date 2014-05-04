@@ -12,4 +12,4 @@
 /*------------------------------------------*
 *            FUNCTION PROTOTYPES            *
 *------------------------------------------*/
-bool lexical_analyzer(FILE *file, token_list **list);
+uint8_t lexical_analyzer(FILE *file, token_list **list);

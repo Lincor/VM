@@ -6,7 +6,7 @@
 
 extern cmd_info cmd_table[];
 
-bool syntax_analyzer(token_list *list)
+uint8_t syntax_analyzer(token_list *list)
 {
 	token_list *tl = list;
 	token *t = NULL;
@@ -19,7 +19,7 @@ bool syntax_analyzer(token_list *list)
 
 		if (t->type == TK_LABEL)
 			if (t->next)
-				return false; //TODO
+				return ERR_UNEXP_TK_AFT_LBL;
 			else
 				goto next;
 		
@@ -39,20 +39,20 @@ bool syntax_analyzer(token_list *list)
 					(t->type != TK_COMMA && !t->next)))
 					count++;
 				if (t->next && t->type == TK_COMMA && t->next->type == TK_COMMA) 
-					return false; //TODO
+					return ERR_MANY_COM;
 				if (t->type == TK_COMMA && !t->next)
-					return false; //TODO
+					return ERR_EXP_TK_AFT_COM;
 				t = t->next;
 			}
 
 			if (count > argc)
-				return false; //TODO
+				return ERR_MANY_ARGS;
 			else if (count < argc)
-				return false; //TODO
+				return ERR_FEW_ARGS;
 		} else
-			return false; //TODO
+			return ERR_EXP_LBL_CMD_AT_BEG;
 next:
 		tl = tl->next;
 	}
-	return true;
+	return ERR_NO_ERROR;
 }

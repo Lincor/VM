@@ -9,12 +9,12 @@
 #include "lexical_analyzer.h"
 #include "syntax_analyzer.h"
 
-static bool classify_token(char *tok, token *token_item);
+static uint8_t classify_token(char *tok, token *token_item);
 
 const char *delim = " \n\t\v";
 const char *opr = ",:#()";
 
-bool lexical_analyzer(FILE *file, token_list **list)
+uint8_t lexical_analyzer(FILE *file, token_list **list)
 {
 	uint32_t code_line;
 	char line[MAX_LINE_LEN + 1];
@@ -49,9 +49,9 @@ bool lexical_analyzer(FILE *file, token_list **list)
 					if (cur_token->type == TK_SYMBOL)
 						cur_token->type = TK_LABEL;
 					else
-						return false; //TODO
+						return ERR_EXP_LBL_BEF_COL;
 				else
-					return false; //TODO
+					return ERR_EXP_LBL_BEF_COL;
 			}
 
 			else if (line_tokens->string[0] == '#')
@@ -63,17 +63,22 @@ bool lexical_analyzer(FILE *file, token_list **list)
 					if (line_tokens->next) {
 						if (!((line_tokens->next->next && line_tokens->next->next->string[0] == ')') ||  //(base)
 							(line_tokens->next->next && line_tokens->next->next->next &&
+							 line_tokens->next->next->next->string[0] == ')') || //(,index)
+							(line_tokens->next->next && line_tokens->next->next->next &&
+							 line_tokens->next->next->next->next &&
+							 line_tokens->next->next->next->next->string[0] == ')') || //(base,index)
+							(line_tokens->next->next && line_tokens->next->next->next &&
 							 line_tokens->next->next->next->next && line_tokens->next->next->next->next->next &&
 							 (line_tokens->next->next->next->next->next->string[0] == ')' ||  //(,index,multiplier)
 							  (line_tokens->next->next->next->next->next->next &&
-							   line_tokens->next->next->next->next->next->next->string[0] == ')'))))) //(base,index,nultiplier)
-							return false; //TODO
+							   line_tokens->next->next->next->next->next->next->string[0] == ')'))))) //(base,index,multiplier)
+							return ERR_INV_ADR;
 					} else
-						return false; //TODO
+						return ERR_EXP_REG_COM_AFT_OBRC;
 				} else if (line_tokens->string[0] == ')') {
 					brackets--;
 					if (brackets < 0)
-						return false; //TODO
+						return ERR_MANY_CBRC;
 				}
 
 				if (!first_token) {
@@ -85,8 +90,9 @@ bool lexical_analyzer(FILE *file, token_list **list)
 					cur_token = next_token;
 				}
 
-				if (!classify_token(line_tokens->string, cur_token))
-					return false; //TODO
+				uint8_t err = classify_token(line_tokens->string, cur_token);
+				if (err != ERR_NO_ERROR)
+					return err;
 
 				cur_token->code_column = line_tokens->code_column;
 			}
@@ -96,7 +102,7 @@ bool lexical_analyzer(FILE *file, token_list **list)
 		}
 
 		if (brackets > 0)
-			return false; //TODO
+			return ERR_MANY_OBRC;
 
 		cur_token_list->first_token = first_token;
 		cur_token_list->code_line = code_line;
@@ -115,12 +121,12 @@ bool lexical_analyzer(FILE *file, token_list **list)
 
 	*list = first_token_list;
 	
-	return true;
+	return ERR_NO_ERROR;
 }
 
-static bool classify_token(char *tok, token *token_item)
+static uint8_t classify_token(char *tok, token *token_item)
 {
-	/* IMMEDIATE */
+	/* IMMEDIATE OR SYMBOL_ADR */
 	if (tok[0] == '$') {
 		uint16_t imm;
 		if (!isdigit(tok[1])) {
@@ -130,7 +136,7 @@ static bool classify_token(char *tok, token *token_item)
 			token_item->type = TK_IMM;
 			token_item->value = imm;
 		} else {
-			return false;
+			return ERR_INV_DLR;
 		}
 	}
 
@@ -151,7 +157,7 @@ static bool classify_token(char *tok, token *token_item)
 			token_item->type = TK_REG;
 			token_item->value = reg;
 		} else {
-			return false;
+			return ERR_INV_REG;
 		}
 	}
 
@@ -170,15 +176,15 @@ static bool classify_token(char *tok, token *token_item)
 				int i;
 				for (i = 0; tok[i]; i++)
 					if (tok[i] != '_' && !isalnum(tok[i]))
-						return false;
+						return ERR_ILL_CHR_SYM;
 
 				token_item->type = TK_SYMBOL;
 				token_item->value_s = strdup(tok);
 			} else
-				return false;
+				return ERR_LONG_SYM;
 		}
 	}
 
 
-	return true;
+	return ERR_NO_ERROR;
 }

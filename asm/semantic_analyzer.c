@@ -7,9 +7,9 @@
 
 extern cmd_info cmd_table[];
 
-bool parse_address(token *t, arg *a, token** out);
+static uint8_t parse_address(token *t, arg *a, token** out);
 
-bool semantic_analyzer(token_list *list, line** lines)
+uint8_t semantic_analyzer(token_list *list, line** lines)
 {
 	line *first_line = NULL, *cur_line = NULL, *next_line;
 	arg *first_arg = NULL, *cur_arg = NULL, *next_arg;
@@ -44,7 +44,7 @@ bool semantic_analyzer(token_list *list, line** lines)
 			cur_line->command = malloc(sizeof(cmd));
 			cur_line->command->cmd_i = t->value;
 		} else
-			return false; //TODO
+			return ERR_EXP_LBL_CMD_AT_BEG;
 
 		bool new_arg = true;
 		t = t->next;
@@ -62,7 +62,7 @@ bool semantic_analyzer(token_list *list, line** lines)
 					new_arg = true;
 			}
 
-			
+	
 			if (t->type == TK_COMMA) {
 				new_arg = false;
 				goto next_token;
@@ -77,14 +77,15 @@ bool semantic_analyzer(token_list *list, line** lines)
 				cur_arg->v1 = t->value;
 			} else if ((t->type == TK_IMM && t->next && t->next->type == TK_OBRACKET)
 				|| (t->type == TK_OBRACKET)) {
-				if (!parse_address(t, cur_arg, &t))
-					return false; //TODO
+				uint8_t err = parse_address(t, cur_arg, &t);
+				if (err != ERR_NO_ERROR)
+					return err;
 			} else if (t->type == TK_IMM) {
 				cur_arg->type = CA_IMM;
 				cur_arg->v1 = t->value & 0x000000ff;
 				cur_arg->v2 = (t->value & 0x0000ff00) >> 8;
 			} else
-				return false; //TODO
+				return ERR_INV_TK;
 
 next_token:
 			t = t->next;
@@ -104,58 +105,50 @@ next:
 	if (cur_line)
 		cur_line->next = NULL;
 
-	return true;
+	return ERR_NO_ERROR;
 }
 
-bool parse_address(token *t, arg *a, token** out) // parse structures like $a(%b,%c,$d)
+static uint8_t parse_address(token *t, arg *a, token** out) // parse structures of the form $a(%b,%c,$d)
 {
 	uint8_t v1 = 0, v2 = 0, v3 = 0, v4 = 1;
 	
-	if (!t)
-		return false;
 	if (t->type == TK_IMM) {
 		v1 = t->value & 0xff;
 		t = t->next;
 	}
 
-	if (!(t = t->next))
-		return false; //TODO
-	if (t->type != TK_REG)
-		return false; //TODO
-	else
+	if ((t = t->next) && (t->type == TK_REG)) {
 		v2 = t->value;
+		if (!(t = t->next))
+			return ERR_EXP_CBRC_COM_AFT_REG;
+		if (t->type == TK_CBRACKET)
+			goto end;
+	} else
+		return ERR_EXP_REG_AFT_OBRC;
 
+	if (t->type != TK_COMMA)
+		return ERR_EXP_REG_COM_AFT_OBRC;
 
-	if (!(t = t->next))
-		return false; //TODO
-	if (t->type == TK_CBRACKET)
-		goto end;
-	else if (t->type != TK_COMMA)
-		return false; //TODO
-
-	if (!(t = t->next))
-		return false; //TODO
-	if (t->type != TK_REG)
-		return false; //TODO
+	if (!(t = t->next) || (t->type != TK_REG))
+		return ERR_EXP_REG_AFT_COM;
 	else
 		v3 = t->value;
 
 	if (!(t = t->next))
-		return false; //TODO
+		return ERR_EXP_CBRC_COM_AFT_REG;
 	if (t->type == TK_CBRACKET)
 		goto end;
 	else if (t->type != TK_COMMA)
-		return false; //TODO
+		return ERR_EXP_CBRC_COM_AFT_REG;
 
-	if (!(t = t->next))
-		return false; //TODO
-	if (t->type != TK_IMM)
-		return false; //TODO
+	if (!(t = t->next) || (t->type != TK_IMM))
+		return ERR_EXP_IMM_AFT_COM;
 	else
-		if ((t->value == 1) || (t->value == 2) || (t->value) == 4)
+		if ((t->value == 1) || (t->value == 2) || (t->value) == 4) {
 			v4 = t->value;
-		else
-			return false; //TODO
+			t = t->next;
+		} else
+			return ERR_INV_IMM_1_2_4;
 
 end:
 
@@ -165,9 +158,7 @@ end:
 	a->v3 = v3;
 	a->v4 = v4;
 
-	*out = t->next; // we're ommiting the next token
-					// because the lexer guarantees
-					// that it's a closed bracket
+	*out = t;
 
-	return true;
+	return ERR_NO_ERROR;
 }

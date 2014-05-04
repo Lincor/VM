@@ -6,4 +6,4 @@
 /*------------------------------------------*
 *            FUNCTION PROTOTYPES            *
 *------------------------------------------*/
-bool syntax_analyzer(token_list *list);
+uint8_t syntax_analyzer(token_list *list);

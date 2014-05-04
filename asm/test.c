@@ -13,13 +13,15 @@ int main(int argc, char **argv)
 	FILE *f = fopen(argc > 1 ? argv[1] : "test.asm", "r");
 
 	token_list *tl, *ttl;
-	if (!lexical_analyzer(f, &tl)) {
-		printf("There's a lexical error in the code.\n");
+	uint8_t err;
+	if ((err = lexical_analyzer(f, &tl)) != ERR_NO_ERROR) {
+		printf("There's a lexical error in the code: %d.\n", err);
 
 		return EXIT_FAILURE;
 	}
 
-	printf("Syntax: %s\n", syntax_analyzer(tl) ? "OK" : "FAIL");
+	if ((err = syntax_analyzer(tl)) != ERR_NO_ERROR)
+		printf("There's a syntax error in the code: %d.\n", err);
 
 	ttl = tl;
 	while (tl) {
@@ -30,14 +32,21 @@ int main(int argc, char **argv)
 				case 0:
 				case 1:
 				case 2:
+				case 3:
 					printf(" %d %s;", t->type, t->value_s);
 					break;
-				case 3:
 				case 4:
+				case 5:
 					printf(" %d %d;", t->type, t->value);
 					break;
-				case 5:
+				case 6:
 					printf(" comma;");
+					break;
+				case 7:
+					printf(" (;");
+					break;
+				case 8:
+					printf(" );");
 					break;
 			}
 			t = t->next;
@@ -48,8 +57,8 @@ int main(int argc, char **argv)
 	tl = ttl;
 
 	line *lines;
-	if (!semantic_analyzer(tl, &lines)) {
-		printf("There's a semantic error in the code.\n");
+	if ((err = semantic_analyzer(tl, &lines)) != ERR_NO_ERROR) {
+		printf("There's a semantic error in the code: %d.\n", err);
 
 		return EXIT_FAILURE;
 	}
@@ -77,7 +86,7 @@ int main(int argc, char **argv)
 							printf("\t\treg: %d\n", a->v1);
 							break;
 						case CA_IMM:
-							printf("\t\tconst: %d\n", (a->v1 << 8) | a->v2);
+							printf("\t\tconst: %d\n", (a->v1) | (a->v2 << 8));
 							break;
 						case CA_ADDRESS:
 							printf("\t\taddress: %d(%d,%d,%d)\n", a->v1, a->v2, a->v3, a->v4);
