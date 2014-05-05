@@ -11,6 +11,7 @@
 #include "asm_error.h"
 
 static uint8_t classify_token(char *tok, token *token_item, int code_line);
+static int closed_bracket_dist(string_list *list, int start, int fail);
 
 const char *delim = " \n\t\v";
 const char *opr = ",:#()";
@@ -62,17 +63,8 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 				if (line_tokens->string[0] == '(') {
 					brackets++;
 					if (line_tokens->next) {
-						if (!((line_tokens->next->next && line_tokens->next->next->string[0] == ')') ||  //(base)
-							(line_tokens->next->next && line_tokens->next->next->next &&
-							 line_tokens->next->next->next->string[0] == ')') || //(,index)
-							(line_tokens->next->next && line_tokens->next->next->next &&
-							 line_tokens->next->next->next->next &&
-							 line_tokens->next->next->next->next->string[0] == ')') || //(base,index)
-							(line_tokens->next->next && line_tokens->next->next->next &&
-							 line_tokens->next->next->next->next && line_tokens->next->next->next->next->next &&
-							 (line_tokens->next->next->next->next->next->string[0] == ')' ||  //(,index,multiplier)
-							  (line_tokens->next->next->next->next->next->next &&
-							   line_tokens->next->next->next->next->next->next->string[0] == ')'))))) //(base,index,multiplier)
+						int dist = closed_bracket_dist(line_tokens->next, 0, -1);
+						if (dist < 2 || dist > 6)
 							asm_error(ERR_INV_ADR, code_line, line_tokens->code_column);
 					} else
 						asm_error(ERR_EXP_REG_COM_AFT_OBRC, code_line, line_tokens->code_column);
@@ -188,4 +180,14 @@ static uint8_t classify_token(char *tok, token *token_item, int code_line)
 
 
 	return ERR_NO_ERROR;
+}
+
+static int closed_bracket_dist(string_list *list, int start, int fail)
+{
+	if (!list)
+		return fail;
+	else if (list->string[0] == ')')
+		return start + 1;
+	else
+		return closed_bracket_dist(list->next, start + 1, fail);	
 }

@@ -22,7 +22,7 @@ static char *error_to_str(uint8_t err)
 			str = "no error";
 			break;
 		case ERR_INV_ADR:
-			str = "invalid construction of the form $a(%%b, %%c, $d)";
+			str = "invalid construction of the form $a(\%b, \%c, $d)";
 			break;
 		case ERR_INV_TK:
 			str = "invalid token";
