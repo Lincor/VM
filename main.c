@@ -50,7 +50,7 @@ struct {
 struct {
 	uint16_t addr[ITERRUPTS_MAX];
 	uint8_t  ptr;
-} vm_iterrupts;
+} vm_interrupts;
 
 // Имена спец. регистров
 #define REG_PC 0xf
@@ -110,7 +110,7 @@ uint8_t vm_load(char* name) {
 	return 0;
 }
 
-uint8_t vm_iterrupt_add(uint8_t number) {
+uint8_t vm_interrupt_add(uint8_t number) {
 	if (vm_iterrupts.ptr < ITERRUPTS_MAX) {
 		vm_iterrupts.addr[vm_iterrupts.ptr++] = number;
 		return 1;
@@ -121,7 +121,7 @@ uint8_t vm_iterrupt_add(uint8_t number) {
 	}
 }
 
-uint8_t vm_iterrupt_get() {
+uint8_t vm_interrupt_get() {
 	uint8_t number = vm_iterrupts.addr[0];
 	uint8_t i;
 	for(i = 0; i < vm_iterrupts.ptr; i++)
@@ -132,7 +132,7 @@ uint8_t vm_iterrupt_get() {
 	// Пусть пока хоть так
 }
 
-void print_iters() {
+void print_inters() {
 	uint8_t i;
 	for(i = 0; i < vm_iterrupts.ptr; i++)
 		printf("%d ", vm_iterrupts.addr[i]);
@@ -564,21 +564,21 @@ int main() {
 	vm_set(0,18,0);
 	*/
 	
-	vm_iterrupt_add(1);
-	vm_iterrupt_add(2);
-	vm_iterrupt_add(3);
-	vm_iterrupt_add(4);
+	vm_interrupt_add(1);
+	vm_interrupt_add(2);
+	vm_interrupt_add(3);
+	vm_interrupt_add(4);
 	
-	print_iters();
+	print_inters();
 	
-	vm_iterrupt_get();
+	vm_interrupt_get();
 	
-	print_iters();
+	print_inters();
 	
-	vm_iterrupt_add(30);
-	vm_iterrupt_add(44);
+	vm_interrupt_add(30);
+	vm_interrupt_add(44);
 	
-	print_iters();
+	print_inters();
 
 	//vm_exec_loop();
 
