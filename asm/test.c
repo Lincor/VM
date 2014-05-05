@@ -29,23 +29,23 @@ int main(int argc, char **argv)
 		t = tl->first_token;
 		while (t) {
 			switch (t->type) {
-				case 0:
-				case 1:
-				case 2:
-				case 3:
+				case TK_LABEL:
+				case TK_SYMBOL:
+				case TK_SYMBOL_ADR:
+				case TK_CMD:
 					printf(" %d %s;", t->type, t->value_s);
 					break;
-				case 4:
-				case 5:
+				case TK_REG:
+				case TK_IMM:
 					printf(" %d %d;", t->type, t->value);
 					break;
-				case 6:
+				case TK_COMMA:
 					printf(" comma;");
 					break;
-				case 7:
+				case TK_OBRACKET:
 					printf(" (;");
 					break;
-				case 8:
+				case TK_CBRACKET:
 					printf(" );");
 					break;
 			}
