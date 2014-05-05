@@ -1,5 +1,6 @@
 a.out
 main
+vm
 *.o
 *~
 *.bak
