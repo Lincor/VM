@@ -44,8 +44,7 @@ struct {
 	uint8_t access;	// Access level
 } vm_seg_regs[4];
 
-#define ITERRUPTS_MAX	128		// максимальное кол-во прерываний
-#define ITERRUPTS_SEG	3		// сегмент со смещение по которому хранится таблица прерываний
+#define INTERRUPTS_MAX	128		// максимальное кол-во прерываний
 
 struct {
 	uint16_t addr[ITERRUPTS_MAX];
@@ -53,9 +52,10 @@ struct {
 } vm_interrupts;
 
 // Имена спец. регистров
-#define REG_PC 0xf
-#define REG_SP 0xe
-#define REG_BP 0xd
+#define REG_PC	0xf
+#define REG_SP	0xe
+#define REG_BP	0xd
+#define REG_INT	0xc
 
 uint16_t vm_reg[REG_COUNT];
 uint8_t  vm_mem[MEM_SIZE];
@@ -111,8 +111,8 @@ uint8_t vm_load(char* name) {
 }
 
 uint8_t vm_interrupt_add(uint8_t number) {
-	if (vm_iterrupts.ptr < ITERRUPTS_MAX) {
-		vm_iterrupts.addr[vm_iterrupts.ptr++] = number;
+	if (vm_interrupts.ptr < INTERRUPTS_MAX) {
+		vm_interrupts.addr[vm_interrupts.ptr++] = number;
 		return 1;
 	} else {
 		// Печаль беда
@@ -122,20 +122,20 @@ uint8_t vm_interrupt_add(uint8_t number) {
 }
 
 uint8_t vm_interrupt_get() {
-	uint8_t number = vm_iterrupts.addr[0];
+	uint8_t number = vm_interrupts.addr[0];
 	uint8_t i;
-	for(i = 0; i < vm_iterrupts.ptr; i++)
-		vm_iterrupts.addr[i] = vm_iterrupts.addr[i + 1];
-	vm_iterrupts.addr[i] = 0;
-	--vm_iterrupts.ptr;
+	for(i = 0; i < vm_interrupts.ptr; i++)
+		vm_interrupts.addr[i] = vm_interrupts.addr[i + 1];
+	vm_interrupts.addr[i] = 0;
+	--vm_interrupts.ptr;
 	// А что будет, если достигнуто максимальное кол-во прерываний? Куда запишется 0?
 	// Пусть пока хоть так
 }
 
 void print_inters() {
 	uint8_t i;
-	for(i = 0; i < vm_iterrupts.ptr; i++)
-		printf("%d ", vm_iterrupts.addr[i]);
+	for(i = 0; i < vm_interrupts.ptr; i++)
+		printf("%d ", vm_interrupts.addr[i]);
 	printf("\n");
 }
 
