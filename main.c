@@ -483,7 +483,8 @@ struct {
 	{vm_cmd_pop,  2}, //27
 	{vm_cmd_in,   2}, //28
 	{vm_cmd_hlt,  0}  //29
-	{vm_cmd_callr,0}  //30
+	{vm_cmd_callr,1}  //30
+	{vm_cmd_callv,3}  //31
 };
 
 void vm_exec_comand(uint8_t seg) {
