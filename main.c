@@ -406,7 +406,7 @@ void vm_cmd_in(uint8_t args[]) {
 void vm_cmd_pushr(uint8_t args[]) {
 	uint8_t seg;
 	seg = args[0] & 0xf;
-	vm_set(seg,(vm_reg[REG_SP]-=2),vm_reg[args[1]]);
+	vm_set(seg, (vm_reg[REG_SP] -= 2), vm_reg[args[1]]);
 
 }
 
@@ -414,7 +414,7 @@ void vm_cmd_pushv(uint8_t args[]) {
 	uint16_t seg,wrd;
 	seg = args[0] & 0xf;
 	wrd = (args[1] << 8) | args[2];
-	vm_set(seg,(vm_reg[REG_SP]-=2),wrd);
+	vm_set(seg, (vm_reg[REG_SP] -= 2), wrd);
 }
 
 void vm_cmd_pop(uint8_t args[]) {
@@ -422,6 +422,25 @@ void vm_cmd_pop(uint8_t args[]) {
 	seg = args[0];
 	vm_reg[args[1]] = vm_get(seg, vm_reg[REG_SP]);
 	vm_reg[REG_SP] += 2;
+}
+
+void vm_cmd_callr(uint8_t args[]) {
+	uint8_t  reg, seg;
+	uint16_t adr;
+	reg = vm_reg[args[0] & 0xf];
+	seg = reg >> 0xc;
+	adr = reg & 0xfff;
+	vm_set(seg, (vm_reg[REG_SP] -= 2), vm_reg[REG_PC] + 1);
+	vm_reg[REG_PC] = vm_translate_addr(seg, adr);
+}
+
+void vm_cmd_callv(uint8_t args[]) {
+	uint8_t  seg;
+	uint16_t wrd;
+	seg = args[0] & 0xf;
+	wrd = (args[1] << 8) | args[2];
+	vm_set(seg, (vm_reg[REG_SP] -= 2), vm_reg[REG_PC] + 1);
+	vm_reg[REG_PC] = vm_translate_addr(seg, adr);
 }
 
 /*
@@ -450,7 +469,7 @@ struct {
 	{vm_cmd_jgt,  1}, //13
 	{vm_cmd_jle,  1}, //14
 	{vm_cmd_jge,  1}, //15
-	{vm_cmd_out , 2}, //16
+	{vm_cmd_out,  2}, //16
 	{vm_cmd_shl,  1}, //17
 	{vm_cmd_shr,  1}, //18
 	{vm_cmd_or,   1}, //19
@@ -464,6 +483,7 @@ struct {
 	{vm_cmd_pop,  2}, //27
 	{vm_cmd_in,   2}, //28
 	{vm_cmd_hlt,  0}  //29
+	{vm_cmd_callr,0}  //30
 };
 
 void vm_exec_comand(uint8_t seg) {
