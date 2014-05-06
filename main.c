@@ -175,6 +175,24 @@ void vm_cmd_lhb(uint8_t args[]) {
 	vm_reg[reg] |= byt << 8;
 }
 
+void vm_cmd_ldmb(uint8_t args[]) {
+	uint8_t  reg, seg;
+	uint16_t wrd;
+	reg = args[0] & 0xf;
+	seg = args[1] & 0x3;
+	wrd = (args[2] << 8) | args[3];
+	vm_reg[reg] = vm_get(seg, wrd);
+}
+
+void vm_cmd_ldmw(uint8_t args[]) {
+	uint8_t  reg, seg;
+	uint16_t wrd;
+	reg = args[0] & 0xf;
+	seg = args[1] & 0x3;
+	wrd = (args[2] << 8) | args[3];
+	vm_reg[reg] = (vm_get(seg, wrd) << 8) | vm_get(seg, wrd + 1);
+}
+
 void vm_cmd_hlt(uint8_t args[]) {
 	exit(0);
 }
