@@ -275,10 +275,10 @@ void vm_cmd_not(uint8_t args[]) {
  */
 
 void vm_cmd_jeq(uint8_t args[]) {
-	uint8_t seg, rga, rgb;
-	seg = args[0] & 0xf;
-	rga = args[1] >> 4;
-	rgb = args[1] & 0xf;
+	uint8_t rga, rgb, seg;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	seg = args[1] & 0xf;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] == vm_reg[rgb]) {
@@ -288,62 +288,61 @@ void vm_cmd_jeq(uint8_t args[]) {
 
 void vm_cmd_jne(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
-	seg = args[0] & 0xf;
-	rga = args[1] >> 4;
-	rgb = args[1] & 0xf;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	seg = args[1] & 0xf;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] != vm_reg[rgb]) {
-		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+		vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
 	}
 }
 
 void vm_cmd_jlt(uint8_t args[]) {
-	uint8_t rga, rgb;
-	uint8_t seg = args[0] >> 4;
-	seg = args[0] & 0xf;
-	rga = args[1] >> 4;
-	rgb = args[1] & 0xf;
+	uint8_t rga, rgb, seg;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	seg = args[1] & 0xf;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] < vm_reg[rgb]) {
-		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+		vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
 	}
 }
 
 void vm_cmd_jgt(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
-	seg = args[0] & 0xf;
-	rga = args[1] >> 4;
-	rgb = args[1] & 0xf;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	seg = args[1] & 0xf;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] > vm_reg[rgb]) {
-		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+		vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
 	}
 }
 
 void vm_cmd_jle(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
-	seg = args[0] & 0xf;
-	rga = args[1] >> 4;
-	rgb = args[1] & 0xf;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	seg = args[1] & 0xf;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] <= vm_reg[rgb]) {
-		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+		vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
 	}
 }
 
 void vm_cmd_jge(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
-	seg = args[0] & 0xf;
-	rga = args[1] >> 4;
-	rgb = args[1] & 0xf;
+	rga = args[0] >> 4;
+	rgb = args[0] & 0xf;
+	seg = args[1] & 0xf;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] >= vm_reg[rgb]) {
-		vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
+		vm_reg[REG_PC] = vm_translate_addr(seg, wrd);
 	}
 }
 
