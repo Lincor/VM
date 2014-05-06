@@ -47,7 +47,7 @@ struct {
 #define INTERRUPTS_MAX	128		// максимальное кол-во прерываний
 
 struct {
-	uint16_t addr[ITERRUPTS_MAX];
+	uint16_t addr[INTERRUPTS_MAX];
 	uint8_t  ptr;
 } vm_interrupts;
 
@@ -126,10 +126,7 @@ uint8_t vm_interrupt_get() {
 	uint8_t i;
 	for(i = 0; i < vm_interrupts.ptr; i++)
 		vm_interrupts.addr[i] = vm_interrupts.addr[i + 1];
-	vm_interrupts.addr[i] = 0;
 	--vm_interrupts.ptr;
-	// А что будет, если достигнуто максимальное кол-во прерываний? Куда запишется 0?
-	// Пусть пока хоть так
 }
 
 void print_inters() {
@@ -182,60 +179,57 @@ void vm_cmd_hlt(uint8_t args[]) {
 	exit(0);
 }
 
-//lvar
-//svar (для записи с помощью сегментных регистров)
-
 /*
  * Арифметические операции
  */
 
 void vm_cmd_add(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] += vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] += vm_reg[src];
 }
 
 void vm_cmd_sub(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] -= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] -= vm_reg[src];
 }
 
 void vm_cmd_mul(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] *= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] *= vm_reg[src];
 }
 
 void vm_cmd_div(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] /= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] /= vm_reg[src];
 }
 
 void vm_cmd_mod(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] %= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] %= vm_reg[src];
 }
 
 void vm_cmd_shl(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] <<= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] <<= vm_reg[src];
 }
 
 void vm_cmd_shr(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] >>= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] >>= vm_reg[src];
 }
 
 /*
@@ -243,31 +237,31 @@ void vm_cmd_shr(uint8_t args[]) {
  */
 
 void vm_cmd_or(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] |= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] |= vm_reg[src];
 }
 
 void vm_cmd_and(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] &= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] &= vm_reg[src];
 }
 
 void vm_cmd_xor(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] ^= vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] ^= vm_reg[src];
 }
 
 void vm_cmd_not(uint8_t args[]) {
-	uint8_t rga, rgb;
-	rga = args[0] >> 4;
-	rgb = args[0] & 0xf;
-	vm_reg[rga] = ~vm_reg[rgb];
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] = ~vm_reg[src];
 }
 
 /*
@@ -278,7 +272,7 @@ void vm_cmd_jeq(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	seg = args[1] & 0xf;
+	seg = args[1] & 0x3;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] == vm_reg[rgb]) {
@@ -290,7 +284,7 @@ void vm_cmd_jne(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	seg = args[1] & 0xf;
+	seg = args[1] & 0x3;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] != vm_reg[rgb]) {
@@ -302,7 +296,7 @@ void vm_cmd_jlt(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	seg = args[1] & 0xf;
+	seg = args[1] & 0x3;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] < vm_reg[rgb]) {
@@ -314,7 +308,7 @@ void vm_cmd_jgt(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	seg = args[1] & 0xf;
+	seg = args[1] & 0x3;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] > vm_reg[rgb]) {
@@ -326,7 +320,7 @@ void vm_cmd_jle(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	seg = args[1] & 0xf;
+	seg = args[1] & 0x3;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] <= vm_reg[rgb]) {
@@ -338,7 +332,7 @@ void vm_cmd_jge(uint8_t args[]) {
 	uint8_t rga, rgb, seg;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-	seg = args[1] & 0xf;
+	seg = args[1] & 0x3;
 	uint16_t wrd;
 	wrd = (args[2] << 8) | args[3];
 	if (vm_reg[rga] >= vm_reg[rgb]) {
@@ -352,7 +346,7 @@ void vm_cmd_jge(uint8_t args[]) {
 
 void vm_cmd_jmp(uint8_t args[]) {
 	uint16_t seg, wrd;
-	seg = args[0] & 0xf;
+	seg = args[0] & 0x3;
 	wrd = (args[1] << 8) | args[2];
 	vm_reg[REG_PC] = vm_translate_addr(seg,wrd);
 }
@@ -403,22 +397,23 @@ void vm_cmd_in(uint8_t args[]) {
  */
 
 void vm_cmd_pushr(uint8_t args[]) {
-	uint8_t seg;
-	seg = args[0] & 0xf;
+	uint8_t seg, reg;
+	seg = args[0] & 0x3;
+	reg = args[1] & 0xf;
 	vm_set(seg, (vm_reg[REG_SP] -= 2), vm_reg[args[1]]);
 
 }
 
 void vm_cmd_pushv(uint8_t args[]) {
 	uint16_t seg,wrd;
-	seg = args[0] & 0xf;
+	seg = args[0] & 0x3;
 	wrd = (args[1] << 8) | args[2];
 	vm_set(seg, (vm_reg[REG_SP] -= 2), wrd);
 }
 
 void vm_cmd_pop(uint8_t args[]) {
 	uint16_t seg;
-	seg = args[0];
+	seg = args[0] & 0x3;
 	vm_reg[args[1]] = vm_get(seg, vm_reg[REG_SP]);
 	vm_reg[REG_SP] += 2;
 }
@@ -435,9 +430,9 @@ void vm_cmd_callr(uint8_t args[]) {
 
 void vm_cmd_callv(uint8_t args[]) {
 	uint8_t  seg;
-	uint16_t wrd;
-	seg = args[0] & 0xf;
-	wrd = (args[1] << 8) | args[2];
+	uint16_t adr;
+	seg = args[0] & 0x3;
+	adr = (args[1] << 8) | args[2];
 	vm_set(seg, (vm_reg[REG_SP] -= 2), vm_reg[REG_PC] + 1);
 	vm_reg[REG_PC] = vm_translate_addr(seg, adr);
 }
@@ -446,44 +441,49 @@ void vm_cmd_callv(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 30
+#define CMD_COUNT 32
 
 struct {
 	void (*func)();
 	uint8_t argc;
 } vm_cmd[CMD_COUNT] = {
 	{vm_cmd_nop,  0}, //0
+	{vm_cmd_hlt,  0}, //29
+
 	{vm_cmd_ldw,  3}, //1
 	{vm_cmd_ldb,  2}, //2
 	{vm_cmd_llb,  2}, //3
 	{vm_cmd_lhb,  2}, //4
+
 	{vm_cmd_add,  1}, //5
 	{vm_cmd_sub,  1}, //6
 	{vm_cmd_mul,  1}, //7
 	{vm_cmd_div,  1}, //8
 	{vm_cmd_mod,  1}, //9
-	{vm_cmd_jeq,  1}, //10
-	{vm_cmd_jne,  1}, //11
-	{vm_cmd_jlt,  1}, //12
-	{vm_cmd_jgt,  1}, //13
-	{vm_cmd_jle,  1}, //14
-	{vm_cmd_jge,  1}, //15
-	{vm_cmd_out,  2}, //16
 	{vm_cmd_shl,  1}, //17
 	{vm_cmd_shr,  1}, //18
 	{vm_cmd_or,   1}, //19
 	{vm_cmd_and,  1}, //20
 	{vm_cmd_xor,  1}, //21
 	{vm_cmd_not,  1}, //22
+
+	{vm_cmd_jeq,  4}, //10
+	{vm_cmd_jne,  4}, //11
+	{vm_cmd_jlt,  4}, //12
+	{vm_cmd_jgt,  4}, //13
+	{vm_cmd_jle,  4}, //14
+	{vm_cmd_jge,  4}, //15
 	{vm_cmd_jmp,  3}, //23
 	{vm_cmd_jpr,  1}, //24
+	{vm_cmd_callr,1}, //30
+	{vm_cmd_callv,3}, //31
+
 	{vm_cmd_pushr,2}, //25
 	{vm_cmd_pushv,3}, //26
 	{vm_cmd_pop,  2}, //27
+
 	{vm_cmd_in,   2}, //28
-	{vm_cmd_hlt,  0}  //29
-	{vm_cmd_callr,1}  //30
-	{vm_cmd_callv,3}  //31
+	{vm_cmd_out,  2} //16
 };
 
 void vm_exec_comand(uint8_t seg) {
@@ -583,21 +583,21 @@ int main() {
 	vm_set(0,17,3);
 	vm_set(0,18,0);
 	*/
-	
+
 	vm_interrupt_add(1);
 	vm_interrupt_add(2);
 	vm_interrupt_add(3);
 	vm_interrupt_add(4);
-	
+
 	print_inters();
-	
+
 	vm_interrupt_get();
-	
+
 	print_inters();
-	
+
 	vm_interrupt_add(30);
 	vm_interrupt_add(44);
-	
+
 	print_inters();
 
 	//vm_exec_loop();
