@@ -29,15 +29,9 @@ uint8_t syntax_analyzer(token_list *list)
 			uint8_t count = 0;
 			
 			t = t->next;
-			int brackets = 0;
 			while (t) {
-				if (t->type == TK_OBRACKET)
-					brackets++;
-				else if (t->type == TK_CBRACKET)
-					brackets--;
-				if (brackets == 0 &&
-					((t->type != TK_COMMA && t->next && t->next->type == TK_COMMA) ||
-					(t->type != TK_COMMA && !t->next)))
+				if ((t->type != TK_COMMA && t->next && t->next->type == TK_COMMA) ||
+					(t->type != TK_COMMA && !t->next))
 					count++;
 				if (t->next && t->type == TK_COMMA && t->next->type == TK_COMMA) 
 					asm_error(ERR_MANY_COM, tl->code_line, t->code_column);

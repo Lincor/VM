@@ -20,15 +20,12 @@
 #define TK_REG        (0x4)
 #define TK_IMM        (0x5)
 #define TK_COMMA      (0x6)
-#define TK_OBRACKET   (0x7)
-#define TK_CBRACKET   (0x8)
 
 /*------- Command argument types ----------*/
 #define CA_SYMBOL     (0x0)
 #define CA_SYMBOL_ADR (0x1)
 #define CA_REG        (0x2)
 #define CA_IMM        (0x3)
-#define CA_ADDRESS    (0x4)
 
 /*------------ Code line types ------------*/
 #define CL_CMD   (0x0)
@@ -36,27 +33,20 @@
 
 /*------------- Error codes -------------- */
 #define ERR_NO_ERROR               (0x00) /* No error */
-#define ERR_INV_ADR                (0x01) /* Invalid construction of the form $a(%b,%c,$d) */
-#define ERR_INV_TK                 (0x02) /* Invalid token */
-#define ERR_INV_IMM_1_2_4          (0x03) /* This constant must be 1, 2 or 4 */
-#define ERR_INV_REG                (0x04) /* Invalid register name */
-#define ERR_INV_DLR                (0x05) /* Invalid token of the form $smth */
-#define ERR_EXP_IMM_AFT_COM        (0x06) /* Integer constant after comma expected */
-#define ERR_EXP_REG_AFT_COM        (0x07) /* Register after comma expected */
-#define ERR_EXP_CBRC_COM_AFT_REG   (0x08) /* Closed bracket or comma after register expected */
-#define ERR_EXP_REG_AFT_OBRC       (0x09) /* Register after open bracket expected */
-#define ERR_EXP_LBL_CMD_AT_BEG     (0x0a) /* Label or instruction at the beginning of the line expected */
-#define ERR_EXP_TK_AFT_COM         (0x0b) /* Token after comma expected */
-#define ERR_EXP_REG_COM_AFT_OBRC   (0x0c) /* Register or comma after open bracket expected */
-#define ERR_EXP_LBL_BEF_COL        (0x0d) /* Label before colon expected  */
-#define ERR_UNEXP_TK_AFT_LBL       (0x0e) /* Token after label */
-#define ERR_MANY_ARGS              (0x0f) /* Too many arguments */
-#define ERR_MANY_COM               (0x10) /* Several commas in a row */
-#define ERR_MANY_OBRC              (0x11) /* Too few open brackets */
-#define ERR_MANY_CBRC              (0x12) /* Too many closed brackets */
-#define ERR_FEW_ARGS               (0x13) /* Too few arguments */
-#define ERR_LONG_SYM               (0x14) /* Too long symbol */
-#define ERR_ILL_CHR_SYM            (0x15) /* Illegal character(s) in symbol */
+#define ERR_INV_TK                 (0x01) /* Invalid token */
+#define ERR_INV_REG                (0x02) /* Invalid register name */
+#define ERR_INV_DLR                (0x03) /* Invalid token of the form $smth */
+#define ERR_EXP_IMM_AFT_COM        (0x04) /* Integer constant after comma expected */
+#define ERR_EXP_REG_AFT_COM        (0x05) /* Register after comma expected */
+#define ERR_EXP_LBL_CMD_AT_BEG     (0x06) /* Label or instruction at the beginning of the line expected */
+#define ERR_EXP_TK_AFT_COM         (0x07) /* Token after comma expected */
+#define ERR_EXP_LBL_BEF_COL        (0x08) /* Label before colon expected  */
+#define ERR_UNEXP_TK_AFT_LBL       (0x09) /* Token after label */
+#define ERR_MANY_ARGS              (0x0a) /* Too many arguments */
+#define ERR_MANY_COM               (0x0b) /* Several commas in a row */
+#define ERR_FEW_ARGS               (0x0c) /* Too few arguments */
+#define ERR_LONG_SYM               (0x0d) /* Too long symbol */
+#define ERR_ILL_CHR_SYM            (0x0e) /* Illegal character(s) in symbol */
 
 /*------------------------------------------*
 *                  TYPEDEFS                 *

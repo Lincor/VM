@@ -21,14 +21,8 @@ static char *error_to_str(uint8_t err)
 		case ERR_NO_ERROR:
 			str = "no error";
 			break;
-		case ERR_INV_ADR:
-			str = "invalid construction of the form $a(\%b, \%c, $d)";
-			break;
 		case ERR_INV_TK:
 			str = "invalid token";
-			break;
-		case ERR_INV_IMM_1_2_4:
-			str = "constant must be 1, 2 or 4";
 			break;
 		case ERR_INV_REG:
 			str = "invalid register";
@@ -42,20 +36,11 @@ static char *error_to_str(uint8_t err)
 		case ERR_EXP_REG_AFT_COM:
 			str = "register after comma expected";
 			break;
-		case ERR_EXP_CBRC_COM_AFT_REG:
-			str = "closed bracket or comma after register expected";
-			break;
-		case ERR_EXP_REG_AFT_OBRC:
-			str = "register after open bracket expected";
-			break;
 		case ERR_EXP_LBL_CMD_AT_BEG:
 			str = "label or instruction at the beggining of the line expected";
 			break;
 		case ERR_EXP_TK_AFT_COM:
 			str = "token expected after comma";
-			break;
-		case ERR_EXP_REG_COM_AFT_OBRC:
-			str = "register or comma after open bracket expected";
 			break;
 		case ERR_EXP_LBL_BEF_COL:
 			str = "label before colon expected";
@@ -68,12 +53,6 @@ static char *error_to_str(uint8_t err)
 			break;
 		case ERR_MANY_COM:
 			str = "several commas in a row";
-			break;
-		case ERR_MANY_OBRC:
-			str = "too many open brackets";
-			break;
-		case ERR_MANY_CBRC:
-			str = "too many closed brackets";
 			break;
 		case ERR_FEW_ARGS:
 			str = "too few arguments";

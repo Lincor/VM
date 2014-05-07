@@ -11,10 +11,9 @@
 #include "asm_error.h"
 
 static uint8_t classify_token(char *tok, token *token_item, int code_line);
-static int closed_bracket_dist(string_list *list, int start, int fail);
 
 const char *delim = " \n\t\v";
-const char *opr = ",:#()";
+const char *opr = ",:#";
 
 uint8_t lexical_analyzer(FILE *file, token_list **list)
 {
@@ -23,12 +22,10 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 	string_list *line_tokens;
 	token *first_token = NULL,*cur_token = NULL, *next_token;
 	token_list *first_token_list = NULL, *prev_token_list = NULL, *cur_token_list = NULL, *next_token_list;
-	int brackets;
 
 	*list = NULL;
 
 	code_line = 1;
-	brackets = 0;
 
 	while(fgets(line, sizeof(line), file)) {
 		line_tokens = string_tokenizer(line, delim, opr);
@@ -46,7 +43,7 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 		}
 
 		while (line_tokens) {
-			if (line_tokens->string[0] == ':') {
+			if (line_tokens->string[0] == ':') { //TODO (seg:off)
 				if (cur_token)
 					if (cur_token->type == TK_SYMBOL)
 						cur_token->type = TK_LABEL;
@@ -60,20 +57,6 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 				break;
 
 			else {
-				if (line_tokens->string[0] == '(') {
-					brackets++;
-					if (line_tokens->next) {
-						int dist = closed_bracket_dist(line_tokens->next, 0, -1);
-						if (dist < 2 || dist > 6)
-							asm_error(ERR_INV_ADR, code_line, line_tokens->code_column);
-					} else
-						asm_error(ERR_EXP_REG_COM_AFT_OBRC, code_line, line_tokens->code_column);
-				} else if (line_tokens->string[0] == ')') {
-					brackets--;
-					if (brackets < 0)
-						asm_error(ERR_MANY_CBRC, code_line, line_tokens->code_column);
-				}
-
 				if (!first_token) {
 					cur_token = malloc(sizeof(token));
 					first_token = cur_token;
@@ -93,9 +76,6 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 
 			line_tokens = line_tokens->next;
 		}
-
-		if (brackets > 0)
-			asm_error(ERR_MANY_OBRC, code_line, line_tokens->code_column);
 
 		cur_token_list->first_token = first_token;
 		cur_token_list->code_line = code_line;
@@ -137,12 +117,6 @@ static uint8_t classify_token(char *tok, token *token_item, int code_line)
 	else if (tok[0] == ',')
 		token_item->type = TK_COMMA;
 
-	/* BRACKETS */
-	else if (tok[0] == '(')
-		token_item->type = TK_OBRACKET;
-	else if (tok[0] == ')')
-		token_item->type = TK_CBRACKET;
-
 	/* REGISTER */
 	else if (tok[0] == '%') {
 		uint8_t reg;
@@ -180,14 +154,4 @@ static uint8_t classify_token(char *tok, token *token_item, int code_line)
 
 
 	return ERR_NO_ERROR;
-}
-
-static int closed_bracket_dist(string_list *list, int start, int fail)
-{
-	if (!list)
-		return fail;
-	else if (list->string[0] == ')')
-		return start + 1;
-	else
-		return closed_bracket_dist(list->next, start + 1, fail);	
 }

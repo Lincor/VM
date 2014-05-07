@@ -42,12 +42,6 @@ int main(int argc, char **argv)
 				case TK_COMMA:
 					printf(" comma;");
 					break;
-				case TK_OBRACKET:
-					printf(" (;");
-					break;
-				case TK_CBRACKET:
-					printf(" );");
-					break;
 			}
 			t = t->next;
 		}
@@ -87,9 +81,6 @@ int main(int argc, char **argv)
 							break;
 						case CA_IMM:
 							printf("\t\tconst: %d\n", (a->v1) | (a->v2 << 8));
-							break;
-						case CA_ADDRESS:
-							printf("\t\taddress: %d(%d,%d,%d)\n", a->v1, a->v2, a->v3, a->v4);
 							break;
 					}
 					a = a->next;

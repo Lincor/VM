@@ -7,8 +7,6 @@
 
 extern cmd_info cmd_table[];
 
-static uint8_t parse_address(token *t, arg *a, token** out, int code_line);
-
 uint8_t semantic_analyzer(token_list *list, line** lines)
 {
 	line *first_line = NULL, *cur_line = NULL, *next_line;
@@ -75,11 +73,6 @@ uint8_t semantic_analyzer(token_list *list, line** lines)
 			} else if (t->type == TK_REG) {
 				cur_arg->type = CA_REG;
 				cur_arg->v1 = t->value;
-			} else if ((t->type == TK_IMM && t->next && t->next->type == TK_OBRACKET)
-				|| (t->type == TK_OBRACKET)) {
-				uint8_t err = parse_address(t, cur_arg, &t, cur_line->code_line);
-				if (err != ERR_NO_ERROR)
-					asm_error(err, cur_line->code_line, t->code_column);
 			} else if (t->type == TK_IMM) {
 				cur_arg->type = CA_IMM;
 				cur_arg->v1 = t->value & 0x000000ff;
@@ -104,68 +97,6 @@ next:
 	*lines = first_line;
 	if (cur_line)
 		cur_line->next = NULL;
-
-	return ERR_NO_ERROR;
-}
-
-static uint8_t parse_address(token *t, arg *a, token** out, int code_line) // parse structures of the form $a(%b,%c,$d)
-{
-	uint8_t v1 = 0, v2 = 0, v3 = 0, v4 = 1;
-
-	token *pt = t;
-	
-	if (t->type == TK_IMM) {
-		v1 = t->value & 0xff;
-		pt = t;
-		t = t->next;
-	}
-
-	if ((t = t->next) && (t->type == TK_REG)) {
-		v2 = t->value;
-		pt = t;
-		if (!(t = t->next))
-			asm_error(ERR_EXP_CBRC_COM_AFT_REG, code_line, pt->code_column);
-		if (t->type == TK_CBRACKET)
-			goto end;
-	} else
-		asm_error(ERR_EXP_REG_AFT_OBRC, code_line, pt->code_column);
-
-	if (t->type != TK_COMMA)
-		asm_error(ERR_EXP_REG_COM_AFT_OBRC, code_line, pt->code_column);
-
-	pt = t;
-	if (!(t = t->next) || (t->type != TK_REG))
-		asm_error(ERR_EXP_REG_AFT_COM, code_line, pt->code_column);
-	else
-		v3 = t->value;
-
-	pt = t;
-	if (!(t = t->next))
-		asm_error(ERR_EXP_CBRC_COM_AFT_REG, code_line, pt->code_column);
-	if (t->type == TK_CBRACKET)
-		goto end;
-	else if (t->type != TK_COMMA)
-		asm_error(ERR_EXP_CBRC_COM_AFT_REG, code_line, pt->code_column);
-
-	pt = t;
-	if (!(t = t->next) || (t->type != TK_IMM))
-		asm_error(ERR_EXP_IMM_AFT_COM, code_line, pt->code_column);
-	else
-		if ((t->value == 1) || (t->value == 2) || (t->value) == 4) {
-			v4 = t->value;
-			t = t->next;
-		} else
-			asm_error(ERR_INV_IMM_1_2_4, code_line, t->code_column);
-
-end:
-
-	a->type = CA_ADDRESS;
-	a->v1 = v1;
-	a->v2 = v2;
-	a->v3 = v3;
-	a->v4 = v4;
-
-	*out = t;
 
 	return ERR_NO_ERROR;
 }
