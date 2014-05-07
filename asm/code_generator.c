@@ -47,11 +47,10 @@ uint8_t code_generator(FILE *stream, line* lines)
 							fputc(l && 0xff, stream);
 							break;
 						case CA_IMM:
-							fputc(a->v1, stream);
+							fputc(a->v2, stream);
 							break;
 						default:
-							/*asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);*/ // TODO
-							exit(1);
+							asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);
 							break;
 					}
 					break;
@@ -71,7 +70,7 @@ uint8_t code_generator(FILE *stream, line* lines)
 							fputc(a->v2, stream);
 							break;
 						default:
-							/*asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);*/ // TODO
+							asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);
 							exit(1);
 							break;
 					}
@@ -82,7 +81,7 @@ uint8_t code_generator(FILE *stream, line* lines)
 							fputc(a->v1, stream);
 							break;
 						default:
-							/*asm_error(ERR_EXP_REG, lines->code_line, a->code_column);*/ // TODO
+							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
 							exit(1);
 							break;
 					}
@@ -93,14 +92,14 @@ uint8_t code_generator(FILE *stream, line* lines)
 							if (!a->next)
 								asm_error(ERR_FEW_ARGS, lines->code_line, a->code_column);
 							if (a->next->type != CA_REG) {
-								//asm_error(ERR_EXP_REG, lines->code_line, a->next->code_column); //TODO
+								asm_error(ERR_EXP_REG, lines->code_line, a->next->code_column);
 								exit(1);
 							}
 							fputc((a->v1 << 4) | a->next->v1, stream);
 							a = a->next;
 							break;
 						default:
-							/*asm_error(ERR_EXP_REG, lines->code_line, a->code_column);*/ // TODO
+							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
 							exit(1);
 							break;
 					}
@@ -126,7 +125,7 @@ uint8_t code_generator(FILE *stream, line* lines)
 							}
 							break;
 						default:
-							/*asm_error(ERR_EXP_SEG, lines->code_line, a->code_column);*/ // TODO
+							asm_error(ERR_EXP_SEG, lines->code_line, a->code_column);
 							exit(1);
 							break;
 					}

@@ -54,15 +54,18 @@
 #define ERR_EXP_TK_AFT_COM         (0x08) /* Token after comma expected */
 #define ERR_EXP_LBL_IMM_BEF_COL    (0x09) /* Label or number constant before colon expected  */
 #define ERR_EXP_OFF_AFT_SEG        (0x0a) /* Offset after segment expected */
-#define ERR_UNEXP_TK_AFT_LBL       (0x0b) /* Token after label */
-#define ERR_MANY_ARGS              (0x0c) /* Too many arguments */
-#define ERR_MANY_COM               (0x0d) /* Several commas in a row */
-#define ERR_FEW_ARGS               (0x0e) /* Too few arguments */
-#define ERR_LONG_SYM               (0x0f) /* Too long symbol */
-#define ERR_ILL_CHR_SYM            (0x10) /* Illegal character(s) in symbol */
-#define ERR_UNDEF_LBL              (0x11) /* Undefined label */
-#define ERR_ALDEF_LBL              (0x12) /* The label is defined already */
-#define ERR_VAR                    (0x13) /* We're not able to variables */
+#define ERR_EXP_SYM_ADR_IMM        (0x0b) /* Variable, address or constant expected */
+#define ERR_EXP_REG                (0x0c) /* Register expected */
+#define ERR_EXP_SEG                (0x0d) /* Segment expected */
+#define ERR_UNEXP_TK_AFT_LBL       (0x0e) /* Token after label */
+#define ERR_MANY_ARGS              (0x0f) /* Too many arguments */
+#define ERR_MANY_COM               (0x10) /* Several commas in a row */
+#define ERR_FEW_ARGS               (0x11) /* Too few arguments */
+#define ERR_LONG_SYM               (0x12) /* Too long symbol */
+#define ERR_ILL_CHR_SYM            (0x13) /* Illegal character(s) in symbol */
+#define ERR_UNDEF_LBL              (0x14) /* Undefined label */
+#define ERR_ALDEF_LBL              (0x15) /* The label is defined already */
+#define ERR_VAR                    (0x16) /* We're not able to variables */
 
 /*------------------------------------------*
 *                  TYPEDEFS                 *

@@ -79,6 +79,15 @@ static char *error_to_str(uint8_t err)
 		case ERR_VAR:
 			str = "we're not able to variables";
 			break;
+		case ERR_EXP_SYM_ADR_IMM:
+			str = "variable, address or constant exptected";
+			break;
+		case ERR_EXP_REG:
+			str = "register expected";
+			break;
+		case ERR_EXP_SEG:
+			str = "segment expected";
+			break;
 	}
 
 	return str;
