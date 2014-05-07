@@ -44,7 +44,7 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 
 		prev_tokens = line_tokens;
 		while (line_tokens) {
-			if (line_tokens->string[0] == ':') { //TODO (seg:off)
+			if (line_tokens->string[0] == ':') {
 				if (cur_token)
 					if (cur_token->type == TK_SYMBOL)
 						cur_token->type = TK_LABEL;
@@ -93,12 +93,15 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 		code_line++;
 	}
 
-	if (cur_token_list->first_token)
-		cur_token_list->next = NULL;
-	else
-		prev_token_list->next = NULL;
+	if (first_token_list->first_token) {
+		if (cur_token_list->first_token)
+			cur_token_list->next = NULL;
+		else
+			prev_token_list->next = NULL;
 
-	*list = first_token_list;
+		*list = first_token_list;
+	} else
+		list = NULL;
 	
 	return ERR_NO_ERROR;
 }

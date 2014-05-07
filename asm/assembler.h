@@ -31,6 +31,13 @@
 #define CA_IMM        (0x3)
 #define CA_SEG        (0x4)
 
+/* Command argument types for code generator */
+#define AT_BYTE     (0x1)
+#define AT_WORD     (0x2)
+#define AT_REG      (0x3)
+#define AT_REG_REG  (0x4)
+#define AT_SEG_WORD (0x5)
+
 /*------------ Code line types ------------*/
 #define CL_CMD   (0x0)
 #define CL_LABEL (0x1)
@@ -53,6 +60,9 @@
 #define ERR_FEW_ARGS               (0x0e) /* Too few arguments */
 #define ERR_LONG_SYM               (0x0f) /* Too long symbol */
 #define ERR_ILL_CHR_SYM            (0x10) /* Illegal character(s) in symbol */
+#define ERR_UNDEF_LBL              (0x11) /* Undefined label */
+#define ERR_ALDEF_LBL              (0x12) /* The label is defined already */
+#define ERR_VAR                    (0x13) /* We're not able to variables */
 
 /*------------------------------------------*
 *                  TYPEDEFS                 *
@@ -75,6 +85,7 @@ typedef struct arg_st {
 	uint8_t type;
 	uint16_t v1, v2, v3, v4;
 	char *value_s;
+	int code_column;
 	struct arg_st *next;
 } arg;
 

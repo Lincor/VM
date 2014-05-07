@@ -70,6 +70,15 @@ static char *error_to_str(uint8_t err)
 		case ERR_ILL_CHR_SYM:
 			str = "illegal characters in symbol";
 			break;
+		case ERR_UNDEF_LBL:
+			str = "undefined label";
+			break;
+		case ERR_ALDEF_LBL:
+			str = "redefining of the label";
+			break;
+		case ERR_VAR:
+			str = "we're not able to variables";
+			break;
 	}
 
 	return str;
