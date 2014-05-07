@@ -11,6 +11,7 @@ const cmd_info cmd_table[CMD_COUNT] = {
 	{"mul", 2},
 	{"div", 2},
 	{"mod", 2},
+	{"jmp", 1},
 	{"jeq", 3},
 	{"jne", 3},
 	{"jlt", 3},

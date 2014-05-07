@@ -3,4 +3,4 @@ _start:
 	ldb %b, $0x45
 	nop
 	add %a, %b # %a = 0x14 + 0x45
-	add $_start, %2
+	jmp $4:$_start

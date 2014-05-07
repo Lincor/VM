@@ -37,6 +37,7 @@ int main(int argc, char **argv)
 					break;
 				case TK_REG:
 				case TK_IMM:
+				case TK_SEG:
 					printf(" %d %d;", t->type, t->value);
 					break;
 				case TK_COMMA:
@@ -81,6 +82,22 @@ int main(int argc, char **argv)
 							break;
 						case CA_IMM:
 							printf("\t\tconst: %d\n", (a->v1) | (a->v2 << 8));
+							break;
+						case CA_SEG:
+							switch (a->v3) {
+								case TK_SYMBOL:
+									printf("\t\tseg: %d:(symbol %s)\n", a->v1, a->value_s);
+									break;
+								case TK_SYMBOL_ADR:
+									printf("\t\tseg: %d:(symbol_adr %s)\n", a->v1, a->value_s);
+									break;
+								case TK_REG:
+									printf("\t\tseg: %d:(reg %d)\n", a->v1, a->v2);
+									break;
+								case TK_IMM:
+									printf("\t\tseg: %d:(const %d)\n", a->v1, a->v2);
+									break;
+							}
 							break;
 					}
 					a = a->next;

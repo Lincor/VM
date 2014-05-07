@@ -77,6 +77,26 @@ uint8_t semantic_analyzer(token_list *list, line** lines)
 				cur_arg->type = CA_IMM;
 				cur_arg->v1 = t->value & 0x000000ff;
 				cur_arg->v2 = (t->value & 0x0000ff00) >> 8;
+			} else if (t->type == TK_SEG) {
+				if (!t->next || (t->next->type != TK_SYMBOL && t->next->type != TK_SYMBOL_ADR
+					&& t->next->type != TK_REG && t->next->type != TK_IMM))
+					asm_error(ERR_EXP_OFF_AFT_SEG, cur_line->code_line, t->code_column);
+				else {
+					cur_arg->type = CA_SEG;
+					cur_arg->v1 = t->value;
+					t = t->next;
+					cur_arg->v3 = t->type;
+					switch (t->type) {
+						case TK_SYMBOL:
+						case TK_SYMBOL_ADR:
+							cur_arg->value_s = strdup(t->value_s);
+							break;
+						case TK_REG:
+						case TK_IMM:
+							cur_arg->v2 = t->value;
+							break;
+					}
+				}
 			} else
 				asm_error(ERR_INV_TK, cur_line->code_line, t->code_column);
 

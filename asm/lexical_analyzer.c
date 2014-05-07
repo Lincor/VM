@@ -19,7 +19,7 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 {
 	uint32_t code_line;
 	char line[MAX_LINE_LEN + 1];
-	string_list *line_tokens;
+	string_list *line_tokens, *prev_tokens;
 	token *first_token = NULL,*cur_token = NULL, *next_token;
 	token_list *first_token_list = NULL, *prev_token_list = NULL, *cur_token_list = NULL, *next_token_list;
 
@@ -42,15 +42,21 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 			}
 		}
 
+		prev_tokens = line_tokens;
 		while (line_tokens) {
 			if (line_tokens->string[0] == ':') { //TODO (seg:off)
 				if (cur_token)
 					if (cur_token->type == TK_SYMBOL)
 						cur_token->type = TK_LABEL;
+					else if (cur_token->type == TK_IMM)
+						if (cur_token->value >= 1 && cur_token->value <= 4)
+							cur_token->type = TK_SEG;
+						else
+							asm_error(ERR_INV_SEG_RANGE, code_line, prev_tokens->code_column);
 					else
-						asm_error(ERR_EXP_LBL_BEF_COL, code_line, line_tokens->code_column);
+						asm_error(ERR_EXP_LBL_IMM_BEF_COL, code_line, line_tokens->code_column);
 				else
-					asm_error(ERR_EXP_LBL_BEF_COL, code_line, line_tokens->code_column);
+					asm_error(ERR_EXP_LBL_IMM_BEF_COL, code_line, line_tokens->code_column);
 			}
 
 			else if (line_tokens->string[0] == '#')
@@ -73,7 +79,7 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 					asm_error(err, code_line, line_tokens->code_column);
 			}
 
-
+			prev_tokens = line_tokens;
 			line_tokens = line_tokens->next;
 		}
 

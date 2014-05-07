@@ -30,6 +30,10 @@ static char *error_to_str(uint8_t err)
 		case ERR_INV_DLR:
 			str = "invalid construction of the form $smth";
 			break;
+		case ERR_INV_SEG_RANGE:
+			str = malloc(sizeof(char) * 256);
+			sprintf(str, "segment number must be %d through %d", FIRST_SEG, LAST_SEG);
+			break;
 		case ERR_EXP_IMM_AFT_COM:
 			str = "integer constant after comma expected";
 			break;
@@ -42,8 +46,11 @@ static char *error_to_str(uint8_t err)
 		case ERR_EXP_TK_AFT_COM:
 			str = "token expected after comma";
 			break;
-		case ERR_EXP_LBL_BEF_COL:
-			str = "label before colon expected";
+		case ERR_EXP_LBL_IMM_BEF_COL:
+			str = "label or constant before colon expected";
+			break;
+		case ERR_EXP_OFF_AFT_SEG:
+			str = "offset after segment expected";
 			break;
 		case ERR_UNEXP_TK_AFT_LBL:
 			str = "unexpected token after label";
