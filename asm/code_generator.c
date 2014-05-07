@@ -150,7 +150,7 @@ static void get_labels(pair **labels, line *lines)
 			if (!add_label(labels, lines->label, byte))
 				asm_error(ERR_ALDEF_LBL, lines->code_line, 0);
 		} else if (lines->type == CL_CMD)
-			byte += cmd_table[lines->command->cmd_i].argl;
+			byte += cmd_table[lines->command->cmd_i].argl + 1;
 
 		lines = lines->next;
 	}

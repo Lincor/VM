@@ -6,8 +6,8 @@
 
 /*------------ Parameters -----------------*/
 #define MAX_SYMBOL_SIZE 128
-#define FIRST_SEG 1
-#define LAST_SEG 4
+#define FIRST_SEG 0
+#define LAST_SEG 3
 
 /*------------ VM's data types ------------*/
 #define uint8_t unsigned char

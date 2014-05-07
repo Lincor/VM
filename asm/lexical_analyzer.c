@@ -49,7 +49,7 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 					if (cur_token->type == TK_SYMBOL)
 						cur_token->type = TK_LABEL;
 					else if (cur_token->type == TK_IMM)
-						if (cur_token->value >= 1 && cur_token->value <= 4)
+						if (cur_token->value >= FIRST_SEG && cur_token->value <= LAST_SEG)
 							cur_token->type = TK_SEG;
 						else
 							asm_error(ERR_INV_SEG_RANGE, code_line, prev_tokens->code_column);
