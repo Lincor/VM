@@ -4,6 +4,7 @@ const cmd_info cmd_table[CMD_COUNT] = {
 	{"nop",   0, 0, {0}},
 	{"hlt",   0, 0, {0}},
 
+	{"cpy",   2, 1, {AT_REG_REG, 0}},
 	{"ldw",   2, 3, {AT_REG, AT_WORD, 0}},
 	{"ldb",   2, 2, {AT_REG, AT_BYTE, 0}},
 	{"llb",   2, 2, {AT_REG, AT_BYTE, 0}},
