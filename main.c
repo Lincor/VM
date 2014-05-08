@@ -466,7 +466,7 @@ void vm_cmd_callv(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 32
+#define CMD_COUNT 33
 
 struct {
 	void (*func)();

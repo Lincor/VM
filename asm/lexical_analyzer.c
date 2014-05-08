@@ -111,14 +111,15 @@ static uint8_t classify_token(char *tok, token *token_item, int code_line)
 	/* IMMEDIATE OR SYMBOL_ADR */
 	if (tok[0] == '$') {
 		uint16_t imm;
+		uint8_t err = ERR_INV_DLR;
 		if (!isdigit(tok[1])) {
 			token_item->type = TK_SYMBOL_ADR;
 			token_item->value_s = strdup(tok);
-		} else if (str_to_uint16_t(tok + 1, &imm)) {
+		} else if ((err = str_to_uint16_t(tok + 1, &imm)) == ERR_NO_ERROR) {
 			token_item->type = TK_IMM;
 			token_item->value = imm;
 		} else {
-			asm_error(ERR_INV_DLR, code_line, token_item->code_column);
+			asm_error(err, code_line, token_item->code_column);
 		}
 	}
 

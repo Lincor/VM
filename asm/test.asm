@@ -1,4 +1,4 @@
-	ldb %b, $32 # space char
+	ldb %b, $0c\s
 	ldb %0, $0  # first number
 	ldb %1, $1  # second number
 	ldb %a, $24 # amount of iters
@@ -20,7 +20,7 @@ loop:
 
 	jne %3, %a, $0:$loop
 
-	ldb %3, $10 # new line char
+	ldb %3, $0c\n
 	out %3, $1
 
 	hlt
