@@ -144,6 +144,13 @@ void vm_cmd_nop(uint8_t args[]) {
 	//No oPeration
 }
 
+void vm_cmd_cpy(uint8_t args[]) {
+	uint8_t src, dst;
+	src = args[0] >> 4;
+	dst = args[0] & 0xf;
+	vm_reg[dst] = vm_reg[src];
+}
+
 void vm_cmd_ldw(uint8_t args[]) {
 	uint8_t  reg;
 	uint16_t wrd;
@@ -568,57 +575,9 @@ int main() {
 	vm_seg_regs[2].type=SEG_STACK;
 	vm_reg[REG_SP]=65535;
 
-	//vm_reg[0] = 'L';
-	//vm_reg[2] = 'L';
-	//vm_reg[3] = 15;
 	vm_load("test");
 
-	/*vm_set(0,3,26);
-	vm_set(0,4,2);
-	vm_set(0,5,0);
-	vm_set(0,6,'O');
-
-	vm_set(0,7,27);
-	vm_set(0,8,2);
-	vm_set(0,9,1);
-
-	vm_set(0,10,16);
-	vm_set(0,11,1);
-	vm_set(0,12,1);
-
-	vm_set(0,13,16);
-	vm_set(0,14,2);
-	vm_set(0,15,1);
-
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-	vm_exec_comand(0);
-
-	vm_reg[0] = 15;
-	vm_set(0,16,16);
-	vm_set(0,17,3);
-	vm_set(0,18,0);
-	*/
-
-	vm_interrupt_add(1);
-	vm_interrupt_add(2);
-	vm_interrupt_add(3);
-	vm_interrupt_add(4);
-
-	print_inters();
-
-	vm_interrupt_get();
-
-	print_inters();
-
-	vm_interrupt_add(30);
-	vm_interrupt_add(44);
-
-	print_inters();
-
-	//vm_exec_loop();
+	vm_exec_loop();
 
 	return 0;
 }
