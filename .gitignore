@@ -6,3 +6,4 @@ vm
 *.bak
 test
 .*.swp
+core
