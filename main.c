@@ -475,6 +475,7 @@ struct {
 	{vm_cmd_nop,  0}, //0
 	{vm_cmd_hlt,  0}, //29
 
+	{vm_cmd_cpy,  1}, //5
 	{vm_cmd_ldw,  3}, //1
 	{vm_cmd_ldb,  2}, //2
 	{vm_cmd_llb,  2}, //3
