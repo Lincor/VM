@@ -181,6 +181,8 @@ static uint8_t str_to_chr(const char *str, uint16_t *num)
 {
 	if (str[1] == '\0') // length == 1
 		*num = str[0];
+	else if (!strcmp(str, "\\c"))
+		*num = ',';
 	else if (!strcmp(str, "\\s"))
 		*num = ' ';
 	else if (!strcmp(str, "\\n"))
