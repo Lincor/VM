@@ -442,7 +442,7 @@ void vm_cmd_in(uint8_t args[]) {
 	reg = args[1];
 	switch (prt) {
 		case 0: {
-			scanf("%u", &vm_reg[reg]);
+			scanf("%hu", &vm_reg[reg]);
 		}
 		break;
 		case 1: {
@@ -509,7 +509,7 @@ void vm_cmd_ret(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 33
+#define CMD_COUNT 35
 
 struct {
 	void (*func)();
