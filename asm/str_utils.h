@@ -22,6 +22,6 @@ string_list *string_tokenizer(char *str, const char *delim, const char *opr);
 
 bool str_to_reg(const char *str, uint8_t *reg);
 
-bool str_to_uint16_t(const char *str, uint16_t *num);
+uint8_t str_to_uint16_t(const char *str, uint16_t *num);
 
 bool str_to_cmd(const char *str, uint8_t *cmd);

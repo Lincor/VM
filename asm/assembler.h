@@ -47,25 +47,27 @@
 #define ERR_INV_TK                 (0x01) /* Invalid token */
 #define ERR_INV_REG                (0x02) /* Invalid register name */
 #define ERR_INV_DLR                (0x03) /* Invalid token of the form $smth */
-#define ERR_INV_SEG_RANGE          (0x04) /* Segment number must be FIRST_SEG through LAST_SEG */
-#define ERR_EXP_IMM_AFT_COM        (0x05) /* Integer constant after comma expected */
-#define ERR_EXP_REG_AFT_COM        (0x06) /* Register after comma expected */
-#define ERR_EXP_LBL_CMD_AT_BEG     (0x07) /* Label or instruction at the beginning of the line expected */
-#define ERR_EXP_TK_AFT_COM         (0x08) /* Token after comma expected */
-#define ERR_EXP_LBL_IMM_BEF_COL    (0x09) /* Label or number constant before colon expected  */
-#define ERR_EXP_OFF_AFT_SEG        (0x0a) /* Offset after segment expected */
-#define ERR_EXP_SYM_ADR_IMM        (0x0b) /* Variable, address or constant expected */
-#define ERR_EXP_REG                (0x0c) /* Register expected */
-#define ERR_EXP_SEG                (0x0d) /* Segment expected */
-#define ERR_UNEXP_TK_AFT_LBL       (0x0e) /* Token after label */
-#define ERR_MANY_ARGS              (0x0f) /* Too many arguments */
-#define ERR_MANY_COM               (0x10) /* Several commas in a row */
-#define ERR_FEW_ARGS               (0x11) /* Too few arguments */
-#define ERR_LONG_SYM               (0x12) /* Too long symbol */
-#define ERR_ILL_CHR_SYM            (0x13) /* Illegal character(s) in symbol */
-#define ERR_UNDEF_LBL              (0x14) /* Undefined label */
-#define ERR_ALDEF_LBL              (0x15) /* The label is defined already */
-#define ERR_VAR                    (0x16) /* We're not able to variables */
+#define ERR_INV_IMM                (0x04) /* Invalid integer constant */
+#define ERR_INV_CHR                (0x05) /* Invalid char constant */
+#define ERR_INV_SEG_RANGE          (0x06) /* Segment number must be FIRST_SEG through LAST_SEG */
+#define ERR_EXP_IMM_AFT_COM        (0x07) /* Integer constant after comma expected */
+#define ERR_EXP_REG_AFT_COM        (0x08) /* Register after comma expected */
+#define ERR_EXP_LBL_CMD_AT_BEG     (0x09) /* Label or instruction at the beginning of the line expected */
+#define ERR_EXP_TK_AFT_COM         (0x0a) /* Token after comma expected */
+#define ERR_EXP_LBL_IMM_BEF_COL    (0x0b) /* Label or number constant before colon expected  */
+#define ERR_EXP_OFF_AFT_SEG        (0x0c) /* Offset after segment expected */
+#define ERR_EXP_SYM_ADR_IMM        (0x0d) /* Variable, address or constant expected */
+#define ERR_EXP_REG                (0x0e) /* Register expected */
+#define ERR_EXP_SEG                (0x0f) /* Segment expected */
+#define ERR_UNEXP_TK_AFT_LBL       (0x10) /* Token after label */
+#define ERR_MANY_ARGS              (0x11) /* Too many arguments */
+#define ERR_MANY_COM               (0x12) /* Several commas in a row */
+#define ERR_FEW_ARGS               (0x13) /* Too few arguments */
+#define ERR_LONG_SYM               (0x14) /* Too long symbol */
+#define ERR_ILL_CHR_SYM            (0x15) /* Illegal character(s) in symbol */
+#define ERR_UNDEF_LBL              (0x16) /* Undefined label */
+#define ERR_ALDEF_LBL              (0x17) /* The label is defined already */
+#define ERR_VAR                    (0x18) /* We're not able to variables */
 
 /*------------------------------------------*
 *                  TYPEDEFS                 *

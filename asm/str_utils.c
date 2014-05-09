@@ -13,6 +13,7 @@ static bool isoctdigit(char c);
 static bool isdecdigit(char c);
 static bool ishexdigit(char c);
 static uint8_t char_to_digit(char c);
+static uint8_t str_to_chr(const char *str, uint16_t *num);
 
 extern cmd_info cmd_table[];
 
@@ -140,7 +141,7 @@ bool str_to_reg(const char *str, uint8_t *reg)
 	return true;
 }
 
-bool str_to_uint16_t(const char *str, uint16_t *num)
+uint8_t str_to_uint16_t(const char *str, uint16_t *num)
 {
 	uint8_t radix = 10;
 	bool (*exam)(char) = isdecdigit;
@@ -159,6 +160,9 @@ bool str_to_uint16_t(const char *str, uint16_t *num)
 			radix = 16;
 			exam = ishexdigit;
 			str += 2;
+		} else if (!strncmp(str, "0c", 2)) {
+			str += 2;
+			return str_to_chr(str, num);
 		}
 	}
 
@@ -169,8 +173,38 @@ bool str_to_uint16_t(const char *str, uint16_t *num)
 			*num *= radix;
 			*num += char_to_digit(str[i]);;
 		} else
-			return false;
-	return true;
+			return ERR_INV_IMM;
+	return ERR_NO_ERROR;
+}
+
+static uint8_t str_to_chr(const char *str, uint16_t *num)
+{
+	if (str[1] == '\0') // length == 1
+		*num = str[0];
+	else if (!strcmp(str, "\\s"))
+		*num = ' ';
+	else if (!strcmp(str, "\\n"))
+		*num = '\n';
+	else if (!strcmp(str, "\\t"))
+		*num = '\t';
+	else if (!strcmp(str, "\\v"))
+		*num = '\v';
+	else if (!strcmp(str, "\\b"))
+		*num = '\b';
+	else if (!strcmp(str, "\\r"))
+		*num = '\r';
+	else if (!strcmp(str, "\\f"))
+		*num = '\f';
+	else if (!strcmp(str, "\\a"))
+		*num = '\a';
+	else if (!strcmp(str, "\\\\"))
+		*num = '\\';
+	else if (!strcmp(str, "\\0"))
+		*num = '\0';
+	else
+		return ERR_INV_CHR;
+
+	return ERR_NO_ERROR;
 }
 
 bool str_to_cmd(const char *str, uint8_t *cmd)

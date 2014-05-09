@@ -30,6 +30,12 @@ static char *error_to_str(uint8_t err)
 		case ERR_INV_DLR:
 			str = "invalid construction of the form $smth";
 			break;
+		case ERR_INV_IMM:
+			str = "invalid integer constant";
+			break;
+		case ERR_INV_CHR:
+			str = "invalid char constant";
+			break;
 		case ERR_INV_SEG_RANGE:
 			str = malloc(sizeof(char) * 256);
 			sprintf(str, "segment number must be %d through %d", FIRST_SEG, LAST_SEG);
