@@ -44,7 +44,7 @@ uint8_t code_generator(FILE *stream, line* lines)
 						case CA_SYMBOL_ADR:
 							if ((l = get_label(&labels, a->value_s + 1)) == -1)
 								asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
-							fputc(l && 0xff, stream);
+							fputc(l & 0xff, stream);
 							break;
 						case CA_IMM:
 							fputc(a->v2, stream);
@@ -62,8 +62,8 @@ uint8_t code_generator(FILE *stream, line* lines)
 						case CA_SYMBOL_ADR:
 							if ((l = get_label(&labels, a->value_s + 1)) == -1)
 								asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
-							fputc((l && 0xff00) >> 8, stream);
-							fputc(l && 0xff, stream);
+							fputc((l & 0xff00) >> 8, stream);
+							fputc(l & 0xff, stream);
 							break;
 						case CA_IMM:
 							fputc(a->v1, stream);

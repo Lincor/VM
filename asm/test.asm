@@ -18,7 +18,7 @@ loop:
 
 	ldb %3, $0
 
-	jne %3, %a, $0:$loop
+	jne %3, %a, $loop
 
 	ldb %3, $0c\n
 	out %3, $1
