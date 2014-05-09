@@ -155,12 +155,15 @@ uint8_t vm_interrupt_get() {
 
 uint8_t vm_interrupt_exec() {
 	if (vm_interrupts.ptr > 0) {
-		uint8_t num = vm_interrupt_get() * 3;
-		uint8_t seg = vm_mem[INTERRUPTS_OFF + num];
-		uint16_t adr;
-		adr  = vm_mem[INTERRUPTS_OFF + (num * 3) + 1] << 8;
-		adr |= vm_mem[INTERRUPTS_OFF + (num * 3) + 2];
-		printf("Int %d, s:%d a %d\n", num, seg, adr);
+		uint8_t num = vm_interrupt_get() * 2;
+		uint16_t adr, ret;
+		ret  = vm_reg[REG_PC];
+		adr  = vm_mem[INTERRUPTS_OFF + num + 0] << 8;
+		adr |= vm_mem[INTERRUPTS_OFF + num + 1];
+
+		vm_set(SS, vm_reg[REG_SP]--, ret >> 8);
+		vm_set(SS, vm_reg[REG_SP]--, ret & 0xff);
+		vm_reg[REG_PC] = adr;
 	}
 }
 
@@ -480,21 +483,18 @@ void vm_cmd_pop(uint8_t args[]) {
 }
 
 void vm_cmd_callr(uint8_t args[]) {
-	uint8_t  reg;
-	uint16_t ret;
+	uint8_t reg;
 	reg = vm_reg[args[0] & 0xf];
-	ret = vm_reg[REG_PC] + 1;
-	vm_set(SS, vm_reg[REG_SP]--, ret >> 8);
-	vm_set(SS, vm_reg[REG_SP]--, ret & 0xff);
+	vm_set(SS, vm_reg[REG_SP]--, vm_reg[REG_PC] >> 8);
+	vm_set(SS, vm_reg[REG_SP]--, vm_reg[REG_PC] & 0xff);
 	vm_reg[REG_PC] = reg;
 }
 
 void vm_cmd_callv(uint8_t args[]) {
-	uint16_t adr, ret;
+	uint16_t adr;
 	adr = (args[0] << 8) | args[1];
-	ret = vm_reg[REG_PC] + 1;
-	vm_set(SS, vm_reg[REG_SP]--, ret >> 8);
-	vm_set(SS, vm_reg[REG_SP]--, ret & 0xff);
+	vm_set(SS, vm_reg[REG_SP]--, vm_reg[REG_PC] >> 8);
+	vm_set(SS, vm_reg[REG_SP]--, vm_reg[REG_PC] & 0xff);
 	vm_reg[REG_PC] = adr;
 }
 
@@ -526,36 +526,36 @@ struct {
 	{vm_cmd_llb,  2}, //6
 	{vm_cmd_lhb,  2}, //7
 
-	{vm_cmd_add,  1}, //5
-	{vm_cmd_sub,  1}, //6
-	{vm_cmd_mul,  1}, //7
-	{vm_cmd_div,  1}, //8
-	{vm_cmd_mod,  1}, //9
-	{vm_cmd_shl,  1}, //17
-	{vm_cmd_shr,  1}, //18
-	{vm_cmd_or,   1}, //19
-	{vm_cmd_and,  1}, //20
-	{vm_cmd_xor,  1}, //21
-	{vm_cmd_not,  1}, //22
+	{vm_cmd_add,  1}, //8
+	{vm_cmd_sub,  1}, //9
+	{vm_cmd_mul,  1}, //10
+	{vm_cmd_div,  1}, //11
+	{vm_cmd_mod,  1}, //12
+	{vm_cmd_shl,  1}, //13
+	{vm_cmd_shr,  1}, //14
+	{vm_cmd_or,   1}, //15
+	{vm_cmd_and,  1}, //16
+	{vm_cmd_xor,  1}, //17
+	{vm_cmd_not,  1}, //18
 
-	{vm_cmd_jeq,  3}, //10
-	{vm_cmd_jne,  3}, //11
-	{vm_cmd_jlt,  3}, //12
-	{vm_cmd_jgt,  3}, //13
-	{vm_cmd_jle,  3}, //14
-	{vm_cmd_jge,  3}, //15
-	{vm_cmd_jmp,  2}, //23
-	{vm_cmd_jpr,  1}, //24
+	{vm_cmd_jeq,  3}, //19
+	{vm_cmd_jne,  3}, //20
+	{vm_cmd_jlt,  3}, //21
+	{vm_cmd_jgt,  3}, //22
+	{vm_cmd_jle,  3}, //23
+	{vm_cmd_jge,  3}, //24
+	{vm_cmd_jmp,  2}, //25
+	{vm_cmd_jpr,  1}, //26
 
-	{vm_cmd_callr,1}, //30
-	{vm_cmd_callv,2}, //31
-	{vm_cmd_pushr,1}, //25
-	{vm_cmd_pushv,2}, //26
-	{vm_cmd_pop,  1}, //27
-	{vm_cmd_ret,  0}, //27
+	{vm_cmd_callr,1}, //27
+	{vm_cmd_callv,2}, //28
+	{vm_cmd_pushr,1}, //29
+	{vm_cmd_pushv,2}, //30
+	{vm_cmd_pop,  1}, //31
+	{vm_cmd_ret,  0}, //32
 
-	{vm_cmd_in,   2}, //28
-	{vm_cmd_out,  2} //16
+	{vm_cmd_in,   2}, //33
+	{vm_cmd_out,  2}  //34
 };
 
 void vm_exec_comand(uint8_t seg) {
@@ -567,7 +567,7 @@ void vm_exec_comand(uint8_t seg) {
 	cmd = vm_get(seg, vm_reg[REG_PC]++);
 	//Тут надо кидать прерывание!
 	if (cmd > CMD_COUNT) {
-		printf("Invalid comand!\n");
+		printf("Invalid comand: %d\n", cmd);
 		return;
 	}
 	uint8_t i, bytes[4];
@@ -625,16 +625,41 @@ int main() {
 
 	//vm_load("test");
 
-	vm_set(0, 0, 2);
+	vm_reg[0] = 111;
+	vm_reg[1] = 222;
+	vm_reg[2] = 333;
+
+	//Майн програм
+	// out $0, %0
+	vm_set(0, 0, 34);
 	vm_set(0, 1, 0);
+	vm_set(0, 2, 0);
 
-	vm_set(0, 2, 1);
+	// int %0
+	vm_set(0, 3, 2);
+	vm_set(0, 4, 0);
 
-	vm_set(0,10, 1);
-	//Обработчик прерывания 0 по адресу 10
+	// out $2, %0
+	vm_set(0, 5, 34);
+	vm_set(0, 6, 2);
+	vm_set(0, 7, 0);
+
+	// hlt
+	vm_set(0, 8, 1);
+
+	//Обработчик прерывания
+
+	vm_set(0, 10, 34);
+	vm_set(0, 11, 1);
+	vm_set(0, 12, 0);
+
+	// ret
+	vm_set(0, 13, 32);
+
+
+	//Таблиаца прерываний. Обработчик прерывания 0 по адресу 10
 	vm_set(0, 100, 0);
-	vm_set(0, 101, 0);
-	vm_set(0, 102, 10);
+	vm_set(0, 101, 10);
 
 	vm_exec_loop();
 
