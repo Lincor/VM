@@ -147,10 +147,14 @@ uint8_t vm_interrupt_add(uint8_t number) {
 }
 
 uint8_t vm_interrupt_get() {
-	uint8_t i, number = vm_interrupts.addr[0];
-	for(i = 0; i < vm_interrupts.ptr; i++)
-		vm_interrupts.addr[i] = vm_interrupts.addr[i + 1];
-	--vm_interrupts.ptr;
+	uint8_t number = vm_interrupts.addr[0];
+	if (vm_interrupts.ptr > 0) {
+		uint8_t i;
+		for(i = 0; i < vm_interrupts.ptr; i++)
+			vm_interrupts.addr[i] = vm_interrupts.addr[i + 1];
+		--vm_interrupts.ptr;
+	}
+	return number;
 }
 
 uint8_t vm_interrupt_exec() {
@@ -460,9 +464,10 @@ void vm_cmd_in(uint8_t args[]) {
 
 void vm_cmd_pushr(uint8_t args[]) {
 	uint8_t reg;
-	reg = args[0] & 0xf;
-	vm_set(SS, vm_reg[REG_SP]--, vm_reg[reg] >> 8);
-	vm_set(SS, vm_reg[REG_SP]--, vm_reg[reg] & 0xff);
+	reg = vm_reg[args[0] & 0xf];
+	vm_set(SS, vm_reg[REG_SP]--, reg >> 8);
+	vm_set(SS, vm_reg[REG_SP]--, reg & 0xff);
+
 }
 
 void vm_cmd_pushv(uint8_t args[]) {
@@ -627,38 +632,48 @@ int main() {
 	vm_reg[0] = 111;
 	vm_reg[1] = 222;
 	vm_reg[2] = 333;
+	vm_reg[3] = 444;
 
 	//Майн програм
-	// out $0, %0
+	// out %0, $0
 	vm_set(0, 0, 34);
 	vm_set(0, 1, 0);
 	vm_set(0, 2, 0);
 
-	// int %0
+	// int $0
 	vm_set(0, 3, 2);
 	vm_set(0, 4, 0);
 
-	// out $2, %0
-	vm_set(0, 5, 34);
-	vm_set(0, 6, 2);
-	vm_set(0, 7, 0);
+	// int $1
+	//vm_set(0, 5, 2);
+	//vm_set(0, 6, 1);
+
+	// out %3, $0
+	vm_set(0, 7, 34);
+	vm_set(0, 8, 3);
+	vm_set(0, 9, 0);
 
 	// hlt
-	vm_set(0, 8, 1);
+	vm_set(0,10, 1);
 
-	//Обработчик прерывания
+	// inter 1: out %1, $0
+	vm_set(0, 20, 34);
+	vm_set(0, 21, 1);
+	vm_set(0, 22, 0);
+	vm_set(0, 23, 32);
 
-	vm_set(0, 10, 34);
-	vm_set(0, 11, 1);
-	vm_set(0, 12, 0);
-
-	// ret
-	vm_set(0, 13, 32);
-
+	// inter 2: out %2, $0
+	vm_set(0, 30, 34);
+	vm_set(0, 31, 1);
+	vm_set(0, 32, 0);
+	vm_set(0, 33, 32);
 
 	//Таблиаца прерываний. Обработчик прерывания 0 по адресу 10
 	vm_set(0, 100, 0);
-	vm_set(0, 101, 10);
+	vm_set(0, 101, 30);
+
+	vm_set(0, 100, 0);
+	vm_set(0, 101, 30);
 
 	vm_exec_loop();
 
