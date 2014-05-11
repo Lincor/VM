@@ -461,9 +461,8 @@ void vm_cmd_in(uint8_t args[]) {
 void vm_cmd_pushr(uint8_t args[]) {
 	uint8_t reg;
 	reg = args[0] & 0xf;
-	vm_set(SS, vm_reg[REG_SP]--, reg >> 8);
-	vm_set(SS, vm_reg[REG_SP]--, reg & 0xff);
-
+	vm_set(SS, vm_reg[REG_SP]--, vm_reg[reg] >> 8);
+	vm_set(SS, vm_reg[REG_SP]--, vm_reg[reg] & 0xff);
 }
 
 void vm_cmd_pushv(uint8_t args[]) {
