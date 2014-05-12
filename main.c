@@ -9,13 +9,9 @@
 	#include <conio.h>
 #endif
 
-
-//////// Нужно вынести в отдельный заголовочный файл, полезная штука
 #define BIT_SET(v, n) (v = ((1 << n) | v))
 #define BIT_RST(v, n) (v = ((1 << n) ^ v) & v)
 #define BIT_GET(v, n) ((v >> n) & 0x1)
-/////////////////////////////////////////////////////////////////////
-
 
 /* TODO по проекту:
  * 1) Реализовать весь набор команд ВМ
@@ -38,11 +34,12 @@
 #define uint8_t unsigned char
 
 /*
- * Настройки ВМ
+ * Виртуальная машина
  */
-#define REG_COUNT   16
-#define MEM_SIZE    65536
-#define PORTS_CNT   64
+
+/*
+ * Сегменты
+ */
 
 #define CS 0
 #define DS 1
@@ -60,18 +57,27 @@ struct {
 		SEG_READ_WRITE,
 		SEG_READ_ONLY
 	} ro;
-	uint8_t access;	// Access level
+	uint8_t access;
 } vm_seg_regs[4];
 
-#define INTERRUPTS_MAX	128		// максимальное кол-во прерываний
-#define INTERRUPTS_OFF  100    // потом поменяем
+/*
+ * Прерывания
+ */
+
+#define INTERRUPTS_MAX	128
 
 struct {
-	uint16_t addr[INTERRUPTS_MAX];
+	uint16_t tbl;
+	uint16_t num[INTERRUPTS_MAX];
 	uint8_t  ptr;
 } vm_interrupts;
 
-// Имена спец. регистров
+/*
+ * Регистры
+ */
+
+#define REG_COUNT   16
+
 #define REG_PC	0xf
 #define REG_SP	0xe
 #define REG_BP	0xd
@@ -83,9 +89,28 @@ struct {
 #define REG_FL_BIT_CRR 0x2	// Перенос в знаковый разряд
 
 uint16_t vm_reg[REG_COUNT];
+
+/*
+ * Память
+ */
+
+#define MEM_SIZE    65536
+
 uint8_t  vm_mem[MEM_SIZE];
-uint16_t vm_pio[PORTS_CNT];
 uint8_t  vm_access;
+
+/*
+ * Ввод/вывод
+ */
+
+#define PORTS_CNT   64
+
+uint16_t vm_pio[PORTS_CNT];
+
+/*
+ * Внутренние функции ВМ
+ */
+
 
 void segfault() {
 	printf("Surprise!\n");
@@ -93,9 +118,7 @@ void segfault() {
 	*ptr = 1;
 }
 
-/*
- * Внутренние функции ВМ
- */
+
 uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
 	if (vm_access > vm_seg_regs[reg].access) {
 		segfault();
@@ -150,7 +173,7 @@ uint8_t vm_load(char* name) {
 
 uint8_t vm_interrupt_add(uint8_t number) {
 	if (vm_interrupts.ptr < INTERRUPTS_MAX) {
-		vm_interrupts.addr[vm_interrupts.ptr++] = number;
+		vm_interrupts.num[vm_interrupts.ptr++] = number;
 		return 1;
 	} else {
 		// Печаль беда
@@ -160,11 +183,11 @@ uint8_t vm_interrupt_add(uint8_t number) {
 }
 
 uint8_t vm_interrupt_get() {
-	uint8_t number = vm_interrupts.addr[0];
+	uint8_t number = vm_interrupts.num[0];
 	if (vm_interrupts.ptr > 0) {
 		uint8_t i;
 		for(i = 0; i < vm_interrupts.ptr; i++)
-			vm_interrupts.addr[i] = vm_interrupts.addr[i + 1];
+			vm_interrupts.num[i] = vm_interrupts.num[i + 1];
 		--vm_interrupts.ptr;
 	}
 	return number;
@@ -175,8 +198,8 @@ uint8_t vm_interrupt_exec() {
 		uint8_t num = vm_interrupt_get() * 2;
 		uint16_t adr, ret;
 		ret  = vm_reg[REG_PC];
-		adr  = vm_mem[INTERRUPTS_OFF + num + 0] << 8;
-		adr |= vm_mem[INTERRUPTS_OFF + num + 1];
+		adr  = vm_mem[vm_interrupts.tbl + num + 0] << 8;
+		adr |= vm_mem[vm_interrupts.tbl + num + 1];
 
 		vm_set(SS, vm_reg[REG_SP]--, ret >> 8);
 		vm_set(SS, vm_reg[REG_SP]--, ret & 0xff);
@@ -187,7 +210,7 @@ uint8_t vm_interrupt_exec() {
 void print_inters() {
 	uint8_t i;
 	for(i = 0; i < vm_interrupts.ptr; i++)
-		printf("%d ", vm_interrupts.addr[i]);
+		printf("%d ", vm_interrupts.num[i]);
 	printf("\n");
 }
 
@@ -195,10 +218,28 @@ void print_inters() {
  * Команды ВМ
  */
 
+void vm_cmd_nop(uint8_t args[]) {
+	//No oPeration
+}
+
+void vm_cmd_hlt(uint8_t args[]) {
+	exit(0);
+}
+
+/*
+ * Прерывания
+ */
+
 void vm_cmd_int(uint8_t args[]) {
 	uint8_t num;
 	num = args[0] & 0xff; //Максимум - 256 прерываний
 	vm_interrupt_add(num);
+}
+
+void vm_cmd_lit(uint8_t args[]) {
+	uint16_t wrd;
+	wrd = (args[0] << 8) | args[1];
+	vm_interrupts.tbl = wrd;
 }
 
 void vm_cmd_cli(uint8_t args[]) {
@@ -209,9 +250,10 @@ void vm_cmd_sti(uint8_t args[]) {
 	BIT_RST(vm_reg[REG_FL], REG_FL_BIT_INT);
 }
 
-void vm_cmd_nop(uint8_t args[]) {
-	//No oPeration
-}
+
+/*
+ * Работа с памятью
+ */
 
 void vm_cmd_cpy(uint8_t args[]) {
 	uint8_t src, dst;
@@ -252,25 +294,19 @@ void vm_cmd_lhb(uint8_t args[]) {
 }
 
 void vm_cmd_ldmb(uint8_t args[]) {
-	uint8_t  reg, seg;
+	uint8_t  reg;
 	uint16_t wrd;
 	reg = args[0] & 0xf;
-	seg = args[1] & 0x3;
-	wrd = (args[2] << 8) | args[3];
-	vm_reg[reg] = vm_get(seg, wrd);
+	wrd = (args[1] << 8) | args[2];
+	vm_reg[reg] = vm_mem[wrd];
 }
 
 void vm_cmd_ldmw(uint8_t args[]) {
-	uint8_t  reg, seg;
+	uint8_t  reg;
 	uint16_t wrd;
 	reg = args[0] & 0xf;
-	seg = args[1] & 0x3;
-	wrd = (args[2] << 8) | args[3];
-	vm_reg[reg] = (vm_get(seg, wrd) << 8) | vm_get(seg, wrd + 1);
-}
-
-void vm_cmd_hlt(uint8_t args[]) {
-	exit(0);
+	wrd = (args[1] << 8) | args[2];
+	vm_reg[reg] = (vm_mem[wrd] << 8) | vm_mem[wrd] + 1;
 }
 
 /*
@@ -534,7 +570,7 @@ void vm_cmd_ret(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 37
+#define CMD_COUNT 38
 
 struct {
 	void (*func)();
@@ -581,9 +617,10 @@ struct {
 
 	{vm_cmd_in,   2}, //33
 	{vm_cmd_out,  2}, //34
-	
+
 	{vm_cmd_cli,  0}, //35
-	{vm_cmd_sti,  0}  //36
+	{vm_cmd_sti,  0},  //36
+	{vm_cmd_lit,  2}  //37
 };
 
 void vm_exec_comand(uint8_t seg) {
@@ -659,31 +696,36 @@ int main() {
 	vm_reg[3] = 444;
 
 	//Майн програм
-	//cli
-	vm_set(0, 0, 35);
-	
-	vm_set(0, 2, 34);
-	vm_set(0, 3, 0);
-	vm_set(0, 4, 0);
+	//lit 0x64
+	vm_set(0, 0, 37);
+	vm_set(0, 1, 0);
+	vm_set(0, 2, 100);
 
-	// int $0
-	vm_set(0, 5, 2);
+	//cli
+	vm_set(0, 3, 35);
+
+	vm_set(0, 4, 34);
+	vm_set(0, 5, 0);
 	vm_set(0, 6, 0);
 
-	// int $1
+	// int $0
 	vm_set(0, 7, 2);
-	vm_set(0, 8, 1);
+	vm_set(0, 8, 0);
+
+	// int $1
+	vm_set(0, 9, 2);
+	vm_set(0,10, 1);
 
 	// out %3, $0
-	vm_set(0, 9, 34);
-	vm_set(0,10, 3);
-	vm_set(0,11, 0);
+	vm_set(0,11, 34);
+	vm_set(0,12, 3);
+	vm_set(0,13, 0);
 
 
 	//sti
-	vm_set(0,12, 36);
+	vm_set(0,14, 36);
 	// hlt
-	vm_set(0,13, 1);
+	vm_set(0,15, 1);
 
 	// inter 1: out %1, $0
 	vm_set(0, 20, 34);
