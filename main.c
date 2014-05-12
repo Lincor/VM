@@ -3,11 +3,19 @@
 #include <unistd.h>
 #include <time.h>
 
-#ifdef __unix__
+/*#ifdef __unix__
 	#include "getch.c"
 #else
 	#include <conio.h>
-#endif
+#endif*/
+
+
+//////// Нужно вынести в отдельный заголовочный файл, полезная штука
+#define BIT_SET(v, n) (v = ((1 << n) | v))
+#define BIT_RST(v, n) (v = ((1 << n) ^ v) & v)
+#define BIT_GET(v, n) ((v >> n) & 0x1)
+/////////////////////////////////////////////////////////////////////
+
 
 /* TODO по проекту:
  * 1) Реализовать весь набор команд ВМ
@@ -67,7 +75,12 @@ struct {
 #define REG_PC	0xf
 #define REG_SP	0xe
 #define REG_BP	0xd
-#define REG_INT	0xc
+#define REG_FL	0xc
+
+// Биты регистра флагов
+#define REG_FL_BIT_INT 0x0	// Запрет прерываний
+#define REG_FL_BIT_OVR 0x1	// Переполнение чисел
+#define REG_FL_BIT_CRR 0x2	// Перенос в знаковый разряд
 
 uint16_t vm_reg[REG_COUNT];
 uint8_t  vm_mem[MEM_SIZE];
@@ -158,7 +171,7 @@ uint8_t vm_interrupt_get() {
 }
 
 uint8_t vm_interrupt_exec() {
-	if (vm_interrupts.ptr > 0) {
+	if (vm_interrupts.ptr > 0 && !BIT_GET(vm_reg[REG_FL], REG_FL_BIT_INT)) {
 		uint8_t num = vm_interrupt_get() * 2;
 		uint16_t adr, ret;
 		ret  = vm_reg[REG_PC];
@@ -186,6 +199,14 @@ void vm_cmd_int(uint8_t args[]) {
 	uint8_t num;
 	num = args[0] & 0xff; //Максимум - 256 прерываний
 	vm_interrupt_add(num);
+}
+
+void vm_cmd_cli(uint8_t args[]) {
+	BIT_SET(vm_reg[REG_FL], REG_FL_BIT_INT);
+}
+
+void vm_cmd_sti(uint8_t args[]) {
+	BIT_RST(vm_reg[REG_FL], REG_FL_BIT_INT);
 }
 
 void vm_cmd_nop(uint8_t args[]) {
@@ -453,7 +474,7 @@ void vm_cmd_in(uint8_t args[]) {
 		}
 		break;
 		case 1: {
-			vm_reg[reg] = getch();
+			//vm_reg[reg] = getch();
 		}
 	}
 }
@@ -513,7 +534,7 @@ void vm_cmd_ret(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 35
+#define CMD_COUNT 37
 
 struct {
 	void (*func)();
@@ -559,7 +580,10 @@ struct {
 	{vm_cmd_ret,  0}, //32
 
 	{vm_cmd_in,   2}, //33
-	{vm_cmd_out,  2}  //34
+	{vm_cmd_out,  2}, //34
+	
+	{vm_cmd_cli,  0}, //35
+	{vm_cmd_sti,  0}  //36
 };
 
 void vm_exec_comand(uint8_t seg) {
@@ -635,26 +659,31 @@ int main() {
 	vm_reg[3] = 444;
 
 	//Майн програм
-	// out %0, $0
-	vm_set(0, 0, 34);
-	vm_set(0, 1, 0);
-	vm_set(0, 2, 0);
-
-	// int $0
-	vm_set(0, 3, 2);
+	//cli
+	vm_set(0, 0, 35);
+	
+	vm_set(0, 2, 34);
+	vm_set(0, 3, 0);
 	vm_set(0, 4, 0);
 
+	// int $0
+	vm_set(0, 5, 2);
+	vm_set(0, 6, 0);
+
 	// int $1
-	//vm_set(0, 5, 2);
-	//vm_set(0, 6, 1);
+	vm_set(0, 7, 2);
+	vm_set(0, 8, 1);
 
 	// out %3, $0
-	vm_set(0, 7, 34);
-	vm_set(0, 8, 3);
-	vm_set(0, 9, 0);
+	vm_set(0, 9, 34);
+	vm_set(0,10, 3);
+	vm_set(0,11, 0);
 
+
+	//sti
+	vm_set(0,12, 36);
 	// hlt
-	vm_set(0,10, 1);
+	vm_set(0,13, 1);
 
 	// inter 1: out %1, $0
 	vm_set(0, 20, 34);
@@ -664,16 +693,16 @@ int main() {
 
 	// inter 2: out %2, $0
 	vm_set(0, 30, 34);
-	vm_set(0, 31, 1);
+	vm_set(0, 31, 2);
 	vm_set(0, 32, 0);
 	vm_set(0, 33, 32);
 
 	//Таблиаца прерываний. Обработчик прерывания 0 по адресу 10
 	vm_set(0, 100, 0);
-	vm_set(0, 101, 30);
+	vm_set(0, 101, 20);
 
-	vm_set(0, 100, 0);
-	vm_set(0, 101, 30);
+	vm_set(0, 102, 0);
+	vm_set(0, 103, 30);
 
 	vm_exec_loop();
 
