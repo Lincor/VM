@@ -3,11 +3,11 @@
 #include <unistd.h>
 #include <time.h>
 
-/*#ifdef __unix__
+#ifdef __unix__
 	#include "getch.c"
 #else
 	#include <conio.h>
-#endif*/
+#endif
 
 
 //////// Нужно вынести в отдельный заголовочный файл, полезная штука
@@ -474,7 +474,7 @@ void vm_cmd_in(uint8_t args[]) {
 		}
 		break;
 		case 1: {
-			//vm_reg[reg] = getch();
+			vm_reg[reg] = getch();
 		}
 	}
 }
