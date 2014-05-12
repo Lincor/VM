@@ -9,6 +9,10 @@
 	#include <conio.h>
 #endif
 
+#define BIT_SET(v, n) (v = ((1 << n) | v))
+#define BIT_RST(v, n) (v = ((1 << n) ^ v) & v)
+#define BIT_GET(v, n) ((v >> n) & 0x1)
+
 /* TODO по проекту:
  * 1) Реализовать весь набор команд ВМ
  * 2) Написать ассемблер, протестировать ВМ
@@ -30,11 +34,12 @@
 #define uint8_t unsigned char
 
 /*
- * Настройки ВМ
+ * Виртуальная машина
  */
-#define REG_COUNT   16
-#define MEM_SIZE    65536
-#define PORTS_CNT   64
+
+/*
+ * Сегменты
+ */
 
 #define CS 0
 #define DS 1
@@ -52,27 +57,60 @@ struct {
 		SEG_READ_WRITE,
 		SEG_READ_ONLY
 	} ro;
-	uint8_t access;	// Access level
+	uint8_t access;
 } vm_seg_regs[4];
 
-#define INTERRUPTS_MAX	128		// максимальное кол-во прерываний
-#define INTERRUPTS_OFF  100    // потом поменяем
+/*
+ * Прерывания
+ */
+
+#define INTERRUPTS_MAX	128
 
 struct {
-	uint16_t addr[INTERRUPTS_MAX];
+	uint16_t tbl;
+	uint16_t num[INTERRUPTS_MAX];
 	uint8_t  ptr;
 } vm_interrupts;
 
-// Имена спец. регистров
+/*
+ * Регистры
+ */
+
+#define REG_COUNT   16
+
 #define REG_PC	0xf
 #define REG_SP	0xe
 #define REG_BP	0xd
-#define REG_INT	0xc
+#define REG_FL	0xc
+
+// Биты регистра флагов
+#define REG_FL_BIT_INT 0x0	// Запрет прерываний
+#define REG_FL_BIT_OVR 0x1	// Переполнение чисел
+#define REG_FL_BIT_CRR 0x2	// Перенос в знаковый разряд
 
 uint16_t vm_reg[REG_COUNT];
+
+/*
+ * Память
+ */
+
+#define MEM_SIZE    65536
+
 uint8_t  vm_mem[MEM_SIZE];
-uint16_t vm_pio[PORTS_CNT];
 uint8_t  vm_access;
+
+/*
+ * Ввод/вывод
+ */
+
+#define PORTS_CNT   64
+
+uint16_t vm_pio[PORTS_CNT];
+
+/*
+ * Внутренние функции ВМ
+ */
+
 
 void segfault() {
 	printf("Surprise!\n");
@@ -80,9 +118,7 @@ void segfault() {
 	*ptr = 1;
 }
 
-/*
- * Внутренние функции ВМ
- */
+
 uint16_t vm_translate_addr(uint8_t reg, uint16_t vaddr) {
 	if (vm_access > vm_seg_regs[reg].access) {
 		segfault();
@@ -137,7 +173,7 @@ uint8_t vm_load(char* name) {
 
 uint8_t vm_interrupt_add(uint8_t number) {
 	if (vm_interrupts.ptr < INTERRUPTS_MAX) {
-		vm_interrupts.addr[vm_interrupts.ptr++] = number;
+		vm_interrupts.num[vm_interrupts.ptr++] = number;
 		return 1;
 	} else {
 		// Печаль беда
@@ -147,23 +183,23 @@ uint8_t vm_interrupt_add(uint8_t number) {
 }
 
 uint8_t vm_interrupt_get() {
-	uint8_t number = vm_interrupts.addr[0];
+	uint8_t number = vm_interrupts.num[0];
 	if (vm_interrupts.ptr > 0) {
 		uint8_t i;
 		for(i = 0; i < vm_interrupts.ptr; i++)
-			vm_interrupts.addr[i] = vm_interrupts.addr[i + 1];
+			vm_interrupts.num[i] = vm_interrupts.num[i + 1];
 		--vm_interrupts.ptr;
 	}
 	return number;
 }
 
 uint8_t vm_interrupt_exec() {
-	if (vm_interrupts.ptr > 0) {
+	if (vm_interrupts.ptr > 0 && !BIT_GET(vm_reg[REG_FL], REG_FL_BIT_INT)) {
 		uint8_t num = vm_interrupt_get() * 2;
 		uint16_t adr, ret;
 		ret  = vm_reg[REG_PC];
-		adr  = vm_mem[INTERRUPTS_OFF + num + 0] << 8;
-		adr |= vm_mem[INTERRUPTS_OFF + num + 1];
+		adr  = vm_mem[vm_interrupts.tbl + num + 0] << 8;
+		adr |= vm_mem[vm_interrupts.tbl + num + 1];
 
 		vm_set(SS, vm_reg[REG_SP]--, ret >> 8);
 		vm_set(SS, vm_reg[REG_SP]--, ret & 0xff);
@@ -174,12 +210,24 @@ uint8_t vm_interrupt_exec() {
 void print_inters() {
 	uint8_t i;
 	for(i = 0; i < vm_interrupts.ptr; i++)
-		printf("%d ", vm_interrupts.addr[i]);
+		printf("%d ", vm_interrupts.num[i]);
 	printf("\n");
 }
 
 /*
  * Команды ВМ
+ */
+
+void vm_cmd_nop(uint8_t args[]) {
+	//No oPeration
+}
+
+void vm_cmd_hlt(uint8_t args[]) {
+	exit(0);
+}
+
+/*
+ * Прерывания
  */
 
 void vm_cmd_int(uint8_t args[]) {
@@ -188,9 +236,24 @@ void vm_cmd_int(uint8_t args[]) {
 	vm_interrupt_add(num);
 }
 
-void vm_cmd_nop(uint8_t args[]) {
-	//No oPeration
+void vm_cmd_lit(uint8_t args[]) {
+	uint16_t wrd;
+	wrd = (args[0] << 8) | args[1];
+	vm_interrupts.tbl = wrd;
 }
+
+void vm_cmd_cli(uint8_t args[]) {
+	BIT_SET(vm_reg[REG_FL], REG_FL_BIT_INT);
+}
+
+void vm_cmd_sti(uint8_t args[]) {
+	BIT_RST(vm_reg[REG_FL], REG_FL_BIT_INT);
+}
+
+
+/*
+ * Работа с памятью
+ */
 
 void vm_cmd_cpy(uint8_t args[]) {
 	uint8_t src, dst;
@@ -349,10 +412,6 @@ void vm_cmd_lhi(uint8_t args[])
 	rgb = args[1] & 0xf;
 	vm_reg[rgb] &= 0x00ff;
 	vm_reg[rgb] |= byt << 8;
-}
-
-void vm_cmd_hlt(uint8_t args[]) {
-	exit(0);
 }
 
 /*
@@ -628,7 +687,7 @@ void vm_cmd_ret(uint8_t args[]) {
  * Все команды ВМ и кол-во байт-аргументов
  */
 
-#define CMD_COUNT 51
+#define CMD_COUNT 54
 
 struct {
 	void (*func)();
@@ -690,7 +749,11 @@ struct {
 	{vm_cmd_ret,  0}, //48
 
 	{vm_cmd_in,   2}, //49
-	{vm_cmd_out,  2}  //50
+	{vm_cmd_out,  2},  //50
+	
+	{vm_cmd_cli,  0}, //51
+	{vm_cmd_sti,  0},  //52
+	{vm_cmd_lit,  2}  //53
 };
 
 void vm_exec_comand(uint8_t seg) {
