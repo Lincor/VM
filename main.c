@@ -298,8 +298,8 @@ void vm_cmd_lhb(uint8_t args[]) {
 void vm_cmd_ldwi(uint8_t args[]) {
 	uint8_t rgb;
 	uint16_t wrd;
-	wrd = args[0] << 8 | args[1];
-	rgb = args[2] & 0xf;
+	rgb = args[0] & 0xf;
+	wrd = args[1] << 8 | args[2];
 	uint8_t wl, wh;
 	wl = vm_get(DS, wrd);
 	wh = vm_get(DS, wrd + 1);
@@ -309,16 +309,16 @@ void vm_cmd_ldwi(uint8_t args[]) {
 void vm_cmd_ldbi(uint8_t args[]) {
 	uint8_t rgb;
 	uint16_t wrd;
-	wrd = args[0] << 8 | args[1];
-	rgb = args[2] & 0xf;
+	rgb = args[0] & 0xf;
+	wrd = args[1] << 8 | args[2];
 	vm_reg[rgb] = vm_get(DS, wrd);
 }
 
 void vm_cmd_llbi(uint8_t args[]) {
 	uint8_t rgb;
 	uint16_t wrd;
-	wrd = args[0] << 8 | args[1];
-	rgb = args[2] & 0xf;
+	rgb = args[0] & 0xf;
+	wrd = args[1] << 8 | args[2];
 	vm_reg[rgb] &= 0xff00;
 	vm_reg[rgb] |= vm_get(DS, wrd);
 }
@@ -326,8 +326,8 @@ void vm_cmd_llbi(uint8_t args[]) {
 void vm_cmd_lhbi(uint8_t args[]) {
 	uint8_t rgb;
 	uint16_t wrd;
-	wrd = args[0] << 8 | args[1];
-	rgb = args[2] & 0xf;
+	rgb = args[0] & 0xf;
+	wrd = args[1] << 8 | args[2];
 	vm_reg[rgb] &= 0x00ff;
 	vm_reg[rgb] |= vm_get(DS, wrd) << 8;
 }
@@ -351,7 +351,7 @@ void vm_cmd_shb(uint8_t args[]) {
 	uint8_t rga, rgb;
 	rga = args[0] >> 4;
 	rgb = args[0] & 0xf;
-		vm_set(DS, vm_reg[rgb], vm_reg[rga] >> 8);
+	vm_set(DS, vm_reg[rgb], vm_reg[rga] >> 8);
 }
 
 void vm_cmd_stwi(uint8_t args[]) {
@@ -383,24 +383,24 @@ void vm_cmd_ldi(uint8_t args[])
 {
 	uint8_t rgb;
 	uint16_t wrd;
-	wrd = args[0] << 8 | args[1];
-	rgb = args[2] & 0xf;
+	rgb = args[0] & 0xf;
+	wrd = args[1] << 8 | args[2];
 	vm_reg[rgb] = wrd;
 }
 
 void vm_cmd_lbi(uint8_t args[])
 {
 	uint8_t byt, rgb;
-	byt = args[0];
-	rgb = args[1] & 0xf;
+	rgb = args[0] & 0xf;
+	byt = args[1];
 	vm_reg[rgb] = byt;
 }
 
 void vm_cmd_lli(uint8_t args[])
 {
 	uint8_t byt, rgb;
-	byt = args[0];
-	rgb = args[1] & 0xf;
+	rgb = args[0] & 0xf;
+	byt = args[1];
 	vm_reg[rgb] &= 0xff00;
 	vm_reg[rgb] |= byt;
 }
@@ -408,8 +408,8 @@ void vm_cmd_lli(uint8_t args[])
 void vm_cmd_lhi(uint8_t args[])
 {
 	uint8_t byt, rgb;
-	byt = args[0];
-	rgb = args[1] & 0xf;
+	rgb = args[0] & 0xf;
+	byt = args[1];
 	vm_reg[rgb] &= 0x00ff;
 	vm_reg[rgb] |= byt << 8;
 }

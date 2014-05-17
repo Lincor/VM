@@ -28,7 +28,50 @@ uint8_t code_generator(FILE *stream, line* lines)
 		fputc(c->cmd_i, stream);
 
 		int i;
-		for (i = 0; cmd_table[c->cmd_i].argt[i]; i++) {
+
+		for (i = 0; cmd_table[c->cmd_i].argt[i]; i++) { // first, writing register's bytes
+			uint8_t t = cmd_table[c->cmd_i].argt[i];
+			int l;
+
+			if (!a)
+				asm_error(ERR_FEW_ARGS, lines->code_line, 0);
+
+			switch (t) {
+				case AT_REG:
+					switch (a->type) {
+						case CA_REG:
+							fputc(a->v1, stream);
+							break;
+						default:
+							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
+							exit(1);
+							break;
+					}
+					break;
+				case AT_REG_REG:
+					switch (a->type) {
+						case CA_REG:
+							if (!a->next)
+								asm_error(ERR_FEW_ARGS, lines->code_line, a->code_column);
+							if (a->next->type != CA_REG) {
+								asm_error(ERR_EXP_REG, lines->code_line, a->next->code_column);
+								exit(1);
+							}
+							fputc((a->v1 << 4) | a->next->v1, stream);
+							a = a->next;
+							break;
+						default:
+							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
+							exit(1);
+							break;
+					}
+					break;
+			}
+			a = a->next;
+		}
+
+		a = c->args;
+		for (i = 0; cmd_table[c->cmd_i].argt[i]; i++) { // second, writing others
 			uint8_t t = cmd_table[c->cmd_i].argt[i];
 			int l;
 
@@ -71,35 +114,6 @@ uint8_t code_generator(FILE *stream, line* lines)
 							break;
 						default:
 							asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);
-							exit(1);
-							break;
-					}
-					break;
-				case AT_REG:
-					switch (a->type) {
-						case CA_REG:
-							fputc(a->v1, stream);
-							break;
-						default:
-							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
-							exit(1);
-							break;
-					}
-					break;
-				case AT_REG_REG:
-					switch (a->type) {
-						case CA_REG:
-							if (!a->next)
-								asm_error(ERR_FEW_ARGS, lines->code_line, a->code_column);
-							if (a->next->type != CA_REG) {
-								asm_error(ERR_EXP_REG, lines->code_line, a->next->code_column);
-								exit(1);
-							}
-							fputc((a->v1 << 4) | a->next->v1, stream);
-							a = a->next;
-							break;
-						default:
-							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
 							exit(1);
 							break;
 					}
