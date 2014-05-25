@@ -35,7 +35,7 @@ const cmd_info cmd_table[CMD_COUNT] = {
 	{"mod",   2, 1, {AT_REG_REG, 0}},
 	{"shl",   2, 1, {AT_REG_REG, 0}},
 	{"shr",   2, 1, {AT_REG_REG, 0}},
-	{"or",    2, 1, {AT_REG_REG, 0}}, 
+	{"or",    2, 1, {AT_REG_REG, 0}},
 	{"and",   2, 1, {AT_REG_REG, 0}},
 	{"xor",   2, 1, {AT_REG_REG, 0}},
 	{"not",   1, 1, {AT_REG, 0}},
@@ -56,6 +56,6 @@ const cmd_info cmd_table[CMD_COUNT] = {
 	{"pop",   1, 1, {AT_REG, 0}},
 	{"ret",   0, 0, {0}},
 
-	{"in",    2, 2, {AT_BYTE, AT_REG, 0}}, 
-	{"out",   2, 2, {AT_REG, AT_BYTE, 0}} 
+	{"in",    2, 2, {AT_BYTE, AT_REG, 0}},
+	{"out",   2, 2, {AT_REG, AT_BYTE, 0}}
 };

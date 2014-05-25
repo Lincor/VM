@@ -13,8 +13,7 @@ static void get_labels(pair **labels, line *lines);
 static bool add_label(pair **labels, const char *label, int adr);
 static int get_label(pair **labels, const char *label);
 
-uint8_t code_generator(FILE *stream, line* lines)
-{
+uint8_t code_generator(FILE *stream, line* lines) {
 	pair *labels = NULL;
 	get_labels(&labels, lines);
 
@@ -37,35 +36,35 @@ uint8_t code_generator(FILE *stream, line* lines)
 				asm_error(ERR_FEW_ARGS, lines->code_line, 0);
 
 			switch (t) {
-				case AT_REG:
-					switch (a->type) {
-						case CA_REG:
-							fputc(a->v1, stream);
-							break;
-						default:
-							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
-							exit(1);
-							break;
-					}
+			case AT_REG:
+				switch (a->type) {
+				case CA_REG:
+					fputc(a->v1, stream);
 					break;
-				case AT_REG_REG:
-					switch (a->type) {
-						case CA_REG:
-							if (!a->next)
-								asm_error(ERR_FEW_ARGS, lines->code_line, a->code_column);
-							if (a->next->type != CA_REG) {
-								asm_error(ERR_EXP_REG, lines->code_line, a->next->code_column);
-								exit(1);
-							}
-							fputc((a->v1 << 4) | a->next->v1, stream);
-							a = a->next;
-							break;
-						default:
-							asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
-							exit(1);
-							break;
-					}
+				default:
+					asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
+					exit(1);
 					break;
+				}
+				break;
+			case AT_REG_REG:
+				switch (a->type) {
+				case CA_REG:
+					if (!a->next)
+						asm_error(ERR_FEW_ARGS, lines->code_line, a->code_column);
+					if (a->next->type != CA_REG) {
+						asm_error(ERR_EXP_REG, lines->code_line, a->next->code_column);
+						exit(1);
+					}
+					fputc((a->v1 << 4) | a->next->v1, stream);
+					a = a->next;
+					break;
+				default:
+					asm_error(ERR_EXP_REG, lines->code_line, a->code_column);
+					exit(1);
+					break;
+				}
+				break;
 			}
 			a = a->next;
 		}
@@ -79,71 +78,71 @@ uint8_t code_generator(FILE *stream, line* lines)
 				asm_error(ERR_FEW_ARGS, lines->code_line, 0);
 
 			switch (t) {
-				case AT_BYTE:
-					switch (a->type) {
-						case CA_SYMBOL:
-							asm_error(ERR_VAR, lines->code_line, a->code_column);
-							break;
-						case CA_SYMBOL_ADR:
-							if ((l = get_label(&labels, a->value_s + 1)) == -1)
-								asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
-							fputc(l & 0xff, stream);
-							break;
-						case CA_IMM:
-							fputc(a->v2, stream);
-							break;
-						default:
-							asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);
-							break;
-					}
+			case AT_BYTE:
+				switch (a->type) {
+				case CA_SYMBOL:
+					asm_error(ERR_VAR, lines->code_line, a->code_column);
 					break;
-				case AT_WORD:
-					switch (a->type) {
-						case CA_SYMBOL:
-							asm_error(ERR_VAR, lines->code_line, a->code_column);
-							break;
-						case CA_SYMBOL_ADR:
-							if ((l = get_label(&labels, a->value_s + 1)) == -1)
-								asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
-							fputc((l & 0xff00) >> 8, stream);
-							fputc(l & 0xff, stream);
-							break;
-						case CA_IMM:
-							fputc(a->v1, stream);
-							fputc(a->v2, stream);
-							break;
-						default:
-							asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);
-							exit(1);
-							break;
-					}
+				case CA_SYMBOL_ADR:
+					if ((l = get_label(&labels, a->value_s + 1)) == -1)
+						asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
+					fputc(l & 0xff, stream);
 					break;
-				case AT_SEG_WORD:
+				case CA_IMM:
+					fputc(a->v2, stream);
+					break;
+				default:
+					asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);
+					break;
+				}
+				break;
+			case AT_WORD:
+				switch (a->type) {
+				case CA_SYMBOL:
+					asm_error(ERR_VAR, lines->code_line, a->code_column);
+					break;
+				case CA_SYMBOL_ADR:
+					if ((l = get_label(&labels, a->value_s + 1)) == -1)
+						asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
+					fputc((l & 0xff00) >> 8, stream);
+					fputc(l & 0xff, stream);
+					break;
+				case CA_IMM:
 					fputc(a->v1, stream);
-					switch (a->type) {
-						case CA_SEG:
-							switch (a->v4) {
-								case TK_SYMBOL:
-									asm_error(ERR_VAR, lines->code_line, a->code_column);
-									break;
-								case TK_SYMBOL_ADR:
-									if ((l = get_label(&labels, a->value_s + 1)) == -1)
-										asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
-									fputc((l & 0xff00) >> 8, stream);
-									fputc(l & 0xff, stream);
-									break;
-								case TK_IMM:
-									fputc(a->v2, stream);
-									fputc(a->v3, stream);
-									break;
-							}
-							break;
-						default:
-							asm_error(ERR_EXP_SEG, lines->code_line, a->code_column);
-							exit(1);
-							break;
+					fputc(a->v2, stream);
+					break;
+				default:
+					asm_error(ERR_EXP_SYM_ADR_IMM, lines->code_line, a->code_column);
+					exit(1);
+					break;
+				}
+				break;
+			case AT_SEG_WORD:
+				fputc(a->v1, stream);
+				switch (a->type) {
+				case CA_SEG:
+					switch (a->v4) {
+					case TK_SYMBOL:
+						asm_error(ERR_VAR, lines->code_line, a->code_column);
+						break;
+					case TK_SYMBOL_ADR:
+						if ((l = get_label(&labels, a->value_s + 1)) == -1)
+							asm_error(ERR_UNDEF_LBL, lines->code_line, a->code_column);
+						fputc((l & 0xff00) >> 8, stream);
+						fputc(l & 0xff, stream);
+						break;
+					case TK_IMM:
+						fputc(a->v2, stream);
+						fputc(a->v3, stream);
+						break;
 					}
 					break;
+				default:
+					asm_error(ERR_EXP_SEG, lines->code_line, a->code_column);
+					exit(1);
+					break;
+				}
+				break;
 			}
 			a = a->next;
 		}
@@ -155,8 +154,7 @@ next_line:
 	return ERR_NO_ERROR;
 }
 
-static void get_labels(pair **labels, line *lines)
-{
+static void get_labels(pair **labels, line *lines) {
 	int byte = 0;
 
 	while (lines) {
@@ -170,8 +168,7 @@ static void get_labels(pair **labels, line *lines)
 	}
 }
 
-static bool add_label(pair **labels, const char *label, int adr)
-{
+static bool add_label(pair **labels, const char *label, int adr) {
 	pair *t;
 
 	if (!*labels) {
@@ -193,8 +190,7 @@ static bool add_label(pair **labels, const char *label, int adr)
 	return true;
 }
 
-static int get_label(pair **labels, const char *label)
-{
+static int get_label(pair **labels, const char *label) {
 	if (!*labels)
 		return -1;
 	else if (!strcmp((*labels)->str, label))

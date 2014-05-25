@@ -17,8 +17,7 @@ static uint8_t str_to_chr(const char *str, uint16_t *num);
 
 extern cmd_info cmd_table[];
 
-string_list *string_tokenizer(char *str, const char *delim, const char *opr)
-{
+string_list *string_tokenizer(char *str, const char *delim, const char *opr) {
 	string_list *list = NULL;
 	string_list *cur_list, *next_list;
 
@@ -26,7 +25,7 @@ string_list *string_tokenizer(char *str, const char *delim, const char *opr)
 
 	tok = strtok(str, delim);
 
-	while (tok)  {
+	while (tok) {
 		if (!list) {
 			list = malloc(sizeof(string_list));
 			cur_list = list;
@@ -42,14 +41,13 @@ string_list *string_tokenizer(char *str, const char *delim, const char *opr)
 
 		tok = strtok(NULL, delim);
 	}
-	
+
 	string_tokenizer_opr(list, opr);
 
 	return list;
 }
 
-static void string_tokenizer_opr(string_list *list, const char *opr)
-{
+static void string_tokenizer_opr(string_list *list, const char *opr) {
 	if (!list)
 		return;
 	string_list *temp1, *temp2;
@@ -66,7 +64,7 @@ static void string_tokenizer_opr(string_list *list, const char *opr)
 
 				temp1->next = list->next;
 				list->next = temp1;
-				
+
 				next = temp1;
 			} else if (list->string[i + 1] == '\0') { // the operator at in the end of the line
 				temp1 = malloc(sizeof(string_list));
@@ -90,7 +88,7 @@ static void string_tokenizer_opr(string_list *list, const char *opr)
 
 				temp1->next = list->next;
 				list->next = temp1;
-				
+
 				temp2 = malloc(sizeof(string_list));
 				temp2->string = strdup(list->string + i + 1);
 				temp2->code_column = temp1->code_column + 1;
@@ -104,19 +102,17 @@ static void string_tokenizer_opr(string_list *list, const char *opr)
 			}
 			break;
 		}
-		string_tokenizer_opr(next, opr);
+	string_tokenizer_opr(next, opr);
 }
 
-void print_string_list(string_list *list)
-{
+void print_string_list(string_list *list) {
 	while (list) {
 		printf("%s %d\n", list->string, list->code_column);
 		list = list->next;
 	}
 }
 
-bool str_to_reg(const char *str, uint8_t *reg)
-{
+bool str_to_reg(const char *str, uint8_t *reg) {
 	if (str[1] == '\0') {
 		if (str[0] >= '0' && str[0] <= '9')
 			*reg = str[0] - '0';
@@ -141,8 +137,7 @@ bool str_to_reg(const char *str, uint8_t *reg)
 	return true;
 }
 
-uint8_t str_to_uint16_t(const char *str, uint16_t *num)
-{
+uint8_t str_to_uint16_t(const char *str, uint16_t *num) {
 	uint8_t radix = 10;
 	bool (*exam)(char) = isdecdigit;
 	if (strlen(str) > 2) {
@@ -177,8 +172,7 @@ uint8_t str_to_uint16_t(const char *str, uint16_t *num)
 	return ERR_NO_ERROR;
 }
 
-static uint8_t str_to_chr(const char *str, uint16_t *num)
-{
+static uint8_t str_to_chr(const char *str, uint16_t *num) {
 	if (str[1] == '\0') // length == 1
 		*num = str[0];
 	else if (!strcmp(str, "\\c"))
@@ -209,8 +203,7 @@ static uint8_t str_to_chr(const char *str, uint16_t *num)
 	return ERR_NO_ERROR;
 }
 
-bool str_to_cmd(const char *str, uint8_t *cmd)
-{
+bool str_to_cmd(const char *str, uint8_t *cmd) {
 	int i;
 	for (i = 0; i < CMD_COUNT; i++)
 		if (!strcmp(cmd_table[i].mnemonics, str)) {
@@ -220,29 +213,24 @@ bool str_to_cmd(const char *str, uint8_t *cmd)
 	return false;
 }
 
-static bool isbindigit(char c)
-{
+static bool isbindigit(char c) {
 	return (c == '0') || (c == '1');
 }
 
-static bool isoctdigit(char c)
-{
+static bool isoctdigit(char c) {
 	return (c >= '0') && (c <= '7');
 }
 
-static bool isdecdigit(char c)
-{
+static bool isdecdigit(char c) {
 	return (c >= '0') && (c <= '9');
 }
 
-static bool ishexdigit(char c)
-{
+static bool ishexdigit(char c) {
 	return (c >= '0' && c <= '9')
-		|| (c >= 'a' && c <= 'f');
+	       || (c >= 'a' && c <= 'f');
 }
 
-static uint8_t char_to_digit(char c)
-{
+static uint8_t char_to_digit(char c) {
 	if (c >= '0' && c <= '9')
 		return c - '0';
 	else if (c >= 'a' && c <= 'f')

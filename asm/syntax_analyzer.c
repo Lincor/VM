@@ -6,8 +6,7 @@
 
 extern cmd_info cmd_table[];
 
-uint8_t syntax_analyzer(token_list *list)
-{
+uint8_t syntax_analyzer(token_list *list) {
 	token_list *tl = list;
 	token *t = NULL, *pt;
 
@@ -23,17 +22,17 @@ uint8_t syntax_analyzer(token_list *list)
 				asm_error(ERR_UNEXP_TK_AFT_LBL, tl->code_line, t->code_column);
 			else
 				goto next;
-		
+
 		if (t->type == TK_CMD) {
 			uint8_t argc = cmd_table[t->value].argc;
 			uint8_t count = 0;
-			
+
 			t = t->next;
 			while (t) {
 				if ((t->type != TK_COMMA && t->next && t->next->type == TK_COMMA) ||
-					(t->type != TK_COMMA && !t->next))
+				        (t->type != TK_COMMA && !t->next))
 					count++;
-				if (t->next && t->type == TK_COMMA && t->next->type == TK_COMMA) 
+				if (t->next && t->type == TK_COMMA && t->next->type == TK_COMMA)
 					asm_error(ERR_MANY_COM, tl->code_line, t->code_column);
 				if (t->type == TK_COMMA && !t->next)
 					asm_error(ERR_EXP_TK_AFT_COM, tl->code_line, t->code_column);

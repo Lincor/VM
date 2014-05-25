@@ -6,8 +6,7 @@
 
 static void print_help();
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	char *input = NULL, *output = NULL;
 	int c;
 
@@ -15,22 +14,22 @@ int main(int argc, char **argv)
 
 	while ((c = getopt(argc, argv, "ho:")) != -1)
 		switch (c) {
-			case 'h':
-				print_help();
-				return EXIT_SUCCESS;
-			case 'o':
-				output = optarg;
-				break;
-			case '?':
-				if (optopt == 'c')
-					fprintf(stderr, "Option '-%c' requires an argument.\n", optopt);
-				else if (isprint (optopt))
-					fprintf(stderr, "Unknown option '-%c'.\n", optopt);
-				else
-					fprintf(stderr, "Unknown option character '\\x%x'.\n", optopt);
-				return EXIT_FAILURE;
-			default:
-				abort();
+		case 'h':
+			print_help();
+			return EXIT_SUCCESS;
+		case 'o':
+			output = optarg;
+			break;
+		case '?':
+			if (optopt == 'c')
+				fprintf(stderr, "Option '-%c' requires an argument.\n", optopt);
+			else if (isprint (optopt))
+				fprintf(stderr, "Unknown option '-%c'.\n", optopt);
+			else
+				fprintf(stderr, "Unknown option character '\\x%x'.\n", optopt);
+			return EXIT_FAILURE;
+		default:
+			abort();
 		}
 
 	if (optind < argc)
@@ -49,7 +48,7 @@ int main(int argc, char **argv)
 		}
 	} else
 		inp = stdin;
-	
+
 	if (output) {
 		if (!(out = fopen(output, "wb"))) {
 			fprintf(stderr, "Can't open for writing: %s\n", output);
@@ -60,10 +59,10 @@ int main(int argc, char **argv)
 
 	token_list *tl;
 	lexical_analyzer(inp, &tl);
-	
+
 	if (inp != stdin)
 		fclose(inp);
-	
+
 	syntax_analyzer(tl);
 
 	line *lines;
@@ -77,8 +76,7 @@ int main(int argc, char **argv)
 	return EXIT_SUCCESS;
 }
 
-static void print_help()
-{
+static void print_help() {
 	printf("Usage: asm [-h] [-o OUTPUT] [INPUT]\n");
 	printf("Translate INPUT to OUTPUT.\n");
 	printf("INPUT is stdin if it is not specified.\n");

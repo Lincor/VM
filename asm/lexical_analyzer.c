@@ -15,8 +15,7 @@ static uint8_t classify_token(char *tok, token *token_item, int code_line);
 const char *delim = " \n\t\v";
 const char *opr = ",:#";
 
-uint8_t lexical_analyzer(FILE *file, token_list **list)
-{
+uint8_t lexical_analyzer(FILE *file, token_list **list) {
 	uint32_t code_line;
 	char line[MAX_LINE_LEN + 1];
 	string_list *line_tokens, *prev_tokens;
@@ -102,12 +101,11 @@ uint8_t lexical_analyzer(FILE *file, token_list **list)
 		*list = first_token_list;
 	} else
 		list = NULL;
-	
+
 	return ERR_NO_ERROR;
 }
 
-static uint8_t classify_token(char *tok, token *token_item, int code_line)
-{
+static uint8_t classify_token(char *tok, token *token_item, int code_line) {
 	/* IMMEDIATE OR SYMBOL_ADR */
 	if (tok[0] == '$') {
 		uint16_t imm;
@@ -123,7 +121,7 @@ static uint8_t classify_token(char *tok, token *token_item, int code_line)
 		}
 	}
 
-	/* COMMA */	
+	/* COMMA */
 	else if (tok[0] == ',')
 		token_item->type = TK_COMMA;
 
@@ -146,7 +144,7 @@ static uint8_t classify_token(char *tok, token *token_item, int code_line)
 			token_item->value = cmd;
 			token_item->value_s = strdup(tok);
 		}
-		
+
 		/* SYMBOL */
 		else {
 			if (strlen(tok) <= MAX_SYMBOL_SIZE) {

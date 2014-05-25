@@ -7,9 +7,9 @@
 #include <sys/queue.h>
 
 #ifdef __unix__
-	#include "getch.c"
+#include "getch.c"
 #else
-	#include <conio.h>
+#include <conio.h>
 #endif
 
 #define BIT_SET(v, n) (v = ((1 << n) | v))
@@ -618,7 +618,7 @@ void vm_cmd_jpr(uint8_t args[]) {
 /*
  * Работа с портами ввода/вывода
  */
- 
+
 void dev_hdd_read(uint8_t dev,uint16_t num,uint16_t addr) {
 	for (np = dev_hdd_fifo_head.tqh_first; np!=NULL; np = np->entries.tqe_next) {
 		fseek(dev_hdd[np->dev],(np->sec)*BLOCK_SIZE,SEEK_SET);
@@ -649,31 +649,31 @@ void vm_cmd_out(uint8_t args[]) {
 	reg = args[0] & 0xf;
 	prt = args[1];
 	switch (prt) {
-		case 0: {
-			printf("%d", vm_reg[reg]);
-		}
-		break;
-		case 1: {
-			putchar(vm_reg[reg]);
-		}
-		break;
-		case 2: {
-			cur_dev = vm_reg[reg];
-		}
-		break;
-		case 3: {
-			cur_sec = vm_reg[reg];
-		}
-		break;
-		case 4: {
-			printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
-			dev_hdd_write(cur_dev, cur_sec, vm_reg[reg]);
-		}
-		case 5: {
-			printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
-			dev_hdd_real_write(cur_dev, cur_sec, vm_reg[reg]);
-		}
-		break;
+	case 0: {
+		printf("%d", vm_reg[reg]);
+	}
+	break;
+	case 1: {
+		putchar(vm_reg[reg]);
+	}
+	break;
+	case 2: {
+		cur_dev = vm_reg[reg];
+	}
+	break;
+	case 3: {
+		cur_sec = vm_reg[reg];
+	}
+	break;
+	case 4: {
+		printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
+		dev_hdd_write(cur_dev, cur_sec, vm_reg[reg]);
+	}
+	case 5: {
+		printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
+		dev_hdd_real_write(cur_dev, cur_sec, vm_reg[reg]);
+	}
+	break;
 	}
 }
 
@@ -682,21 +682,21 @@ void vm_cmd_in(uint8_t args[]) {
 	prt = args[0] & 0xf;
 	reg = args[1];
 	switch (prt) {
-		case 0: {
-			scanf("%hu", &vm_reg[reg]);
-		}
-		break;
-		case 1: {
-			vm_reg[reg] = getchar();
-		}
-		case 2: {
-			vm_reg[reg] = errno;
-		}
-		break;
-		case 3: {
-			dev_hdd_read(cur_dev,cur_sec,vm_reg[reg]);
-		}
-		break;
+	case 0: {
+		scanf("%hu", &vm_reg[reg]);
+	}
+	break;
+	case 1: {
+		vm_reg[reg] = getchar();
+	}
+	case 2: {
+		vm_reg[reg] = errno;
+	}
+	break;
+	case 3: {
+		dev_hdd_read(cur_dev,cur_sec,vm_reg[reg]);
+	}
+	break;
 	}
 }
 
@@ -818,7 +818,7 @@ struct {
 
 	{vm_cmd_in,   2}, //49
 	{vm_cmd_out,  2},  //50
-	
+
 	{vm_cmd_cli,  0}, //51
 	{vm_cmd_sti,  0},  //52
 	{vm_cmd_lit,  2}  //53
@@ -888,11 +888,11 @@ int main() {
 	vm_seg_regs[2].ro=SEG_READ_WRITE;
 	vm_seg_regs[2].type=SEG_STACK;
 	vm_reg[REG_SP]=65535;
-	
+
 	TAILQ_INIT(&dev_hdd_fifo_head);
-	
+
 	dev_hdd[0]=fopen("hdd","rb+");
-	
+
 	//memcpy(vm_mem,dev_hdd_read(0,0),BLOCK_SIZE);
 
 	vm_load("test");

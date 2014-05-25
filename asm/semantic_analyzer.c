@@ -7,8 +7,7 @@
 
 extern cmd_info cmd_table[];
 
-uint8_t semantic_analyzer(token_list *list, line** lines)
-{
+uint8_t semantic_analyzer(token_list *list, line** lines) {
 	line *first_line = NULL, *cur_line = NULL, *next_line;
 	arg *first_arg = NULL, *cur_arg = NULL, *next_arg;
 	token *t;
@@ -47,7 +46,7 @@ uint8_t semantic_analyzer(token_list *list, line** lines)
 		bool new_arg = true;
 		t = t->next;
 		while (t) { // CL_CMD
-			
+
 			if (!first_arg) {
 				cur_arg = malloc(sizeof(arg));
 				first_arg = cur_arg;
@@ -60,7 +59,7 @@ uint8_t semantic_analyzer(token_list *list, line** lines)
 					new_arg = true;
 			}
 
-	
+
 			if (t->type == TK_COMMA) {
 				new_arg = false;
 				goto next_token;
@@ -83,7 +82,7 @@ uint8_t semantic_analyzer(token_list *list, line** lines)
 				cur_arg->code_column = t->code_column;
 			} else if (t->type == TK_SEG) {
 				if (!t->next || (t->next->type != TK_SYMBOL && t->next->type != TK_SYMBOL_ADR
-					&& t->next->type != TK_IMM))
+				                 && t->next->type != TK_IMM))
 					asm_error(ERR_EXP_OFF_AFT_SEG, cur_line->code_line, t->code_column);
 				else {
 					cur_arg->type = CA_SEG;
@@ -91,14 +90,14 @@ uint8_t semantic_analyzer(token_list *list, line** lines)
 					t = t->next;
 					cur_arg->v4 = t->type;
 					switch (t->type) {
-						case TK_SYMBOL:
-						case TK_SYMBOL_ADR:
-							cur_arg->value_s = strdup(t->value_s);
-							break;
-						case TK_IMM:
-							cur_arg->v2 = (t->value & 0xff00) >> 8;
-							cur_arg->v3 = t->value & 0xff;
-							break;
+					case TK_SYMBOL:
+					case TK_SYMBOL_ADR:
+						cur_arg->value_s = strdup(t->value_s);
+						break;
+					case TK_IMM:
+						cur_arg->v2 = (t->value & 0xff00) >> 8;
+						cur_arg->v3 = t->value & 0xff;
+						break;
 					}
 					cur_arg->code_column = t->code_column;
 				}
@@ -114,7 +113,7 @@ next_token:
 
 		if (cur_arg)
 			cur_arg->next = NULL;
-		
+
 next:
 		list = list->next;
 	}

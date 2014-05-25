@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
- 
+
 int getch() {
 	struct termios oldt,newt;
 	int ch;
