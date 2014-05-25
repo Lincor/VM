@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/queue.h>
 
 #ifdef __unix__
 	#include "getch.c"
@@ -104,8 +107,26 @@ uint8_t  vm_access;
  */
 
 #define PORTS_CNT   64
+#define BLOCK_SIZE	512
+
+TAILQ_HEAD(fifo,fifo_entry) dev_hdd_fifo_head;
+
+struct fifo_entry {
+	TAILQ_ENTRY(fifo_entry) entries;
+	uint16_t sec;
+	uint8_t dev;
+	uint8_t data[BLOCK_SIZE];
+} *n1, *np;
+
+enum {
+	BUSY,
+	AVAILABLE
+} dev_hdd_state;
 
 uint16_t vm_pio[PORTS_CNT];
+FILE *dev_hdd[4];
+uint8_t cur_dev;
+uint8_t cur_sec;
 
 /*
  * Внутренние функции ВМ
@@ -205,6 +226,7 @@ uint8_t vm_interrupt_exec() {
 		vm_set(SS, vm_reg[REG_SP]--, ret & 0xff);
 		vm_reg[REG_PC] = adr;
 	}
+	return 0;
 }
 
 void print_inters() {
@@ -379,8 +401,7 @@ void vm_cmd_shbi(uint8_t args[]) {
 	vm_set(DS, wrd, vm_reg[rga] >> 8);
 }
 
-void vm_cmd_ldi(uint8_t args[])
-{
+void vm_cmd_ldi(uint8_t args[]) {
 	uint8_t rgb;
 	uint16_t wrd;
 	rgb = args[0] & 0xf;
@@ -388,16 +409,14 @@ void vm_cmd_ldi(uint8_t args[])
 	vm_reg[rgb] = wrd;
 }
 
-void vm_cmd_lbi(uint8_t args[])
-{
+void vm_cmd_lbi(uint8_t args[]) {
 	uint8_t byt, rgb;
 	rgb = args[0] & 0xf;
 	byt = args[1];
 	vm_reg[rgb] = byt;
 }
 
-void vm_cmd_lli(uint8_t args[])
-{
+void vm_cmd_lli(uint8_t args[]) {
 	uint8_t byt, rgb;
 	rgb = args[0] & 0xf;
 	byt = args[1];
@@ -405,8 +424,7 @@ void vm_cmd_lli(uint8_t args[])
 	vm_reg[rgb] |= byt;
 }
 
-void vm_cmd_lhi(uint8_t args[])
-{
+void vm_cmd_lhi(uint8_t args[]) {
 	uint8_t byt, rgb;
 	rgb = args[0] & 0xf;
 	byt = args[1];
@@ -600,6 +618,31 @@ void vm_cmd_jpr(uint8_t args[]) {
 /*
  * Работа с портами ввода/вывода
  */
+ 
+void dev_hdd_read(uint8_t dev,uint16_t num,uint16_t addr) {
+	for (np = dev_hdd_fifo_head.tqh_first; np!=NULL; np = np->entries.tqe_next) {
+		fseek(dev_hdd[np->dev],(np->sec)*BLOCK_SIZE,SEEK_SET);
+		fwrite(np->data,BLOCK_SIZE,1,dev_hdd[dev]);
+	}
+	while (dev_hdd_fifo_head.tqh_first!=NULL)
+		TAILQ_REMOVE(&dev_hdd_fifo_head,dev_hdd_fifo_head.tqh_first,entries);
+	fseek(dev_hdd[dev],num*BLOCK_SIZE,SEEK_SET);
+	fread(&vm_mem[addr],BLOCK_SIZE,1,dev_hdd[dev]);
+}
+
+void dev_hdd_write(uint8_t dev,uint16_t num,uint16_t addr) {
+	n1 = malloc(sizeof(struct fifo_entry));
+	TAILQ_INSERT_TAIL(&dev_hdd_fifo_head, n1, entries);
+	n1->dev=dev;
+	n1->sec=num;
+	memcpy(n1->data,&vm_mem[addr],BLOCK_SIZE);
+}
+
+void dev_hdd_real_write(uint8_t dev,uint16_t num,uint16_t addr) {
+	fseek(dev_hdd[dev],num*BLOCK_SIZE,SEEK_SET);
+	fwrite(&vm_mem[addr],BLOCK_SIZE,1,dev_hdd[dev]);
+	//if (ferror(dev_hdd[dev]))  perror("Error");
+}
 
 void vm_cmd_out(uint8_t args[]) {
 	uint8_t reg, prt;
@@ -611,7 +654,24 @@ void vm_cmd_out(uint8_t args[]) {
 		}
 		break;
 		case 1: {
-			printf("%c", vm_reg[reg]);
+			putchar(vm_reg[reg]);
+		}
+		break;
+		case 2: {
+			cur_dev = vm_reg[reg];
+		}
+		break;
+		case 3: {
+			cur_sec = vm_reg[reg];
+		}
+		break;
+		case 4: {
+			printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
+			dev_hdd_write(cur_dev, cur_sec, vm_reg[reg]);
+		}
+		case 5: {
+			printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
+			dev_hdd_real_write(cur_dev, cur_sec, vm_reg[reg]);
 		}
 		break;
 	}
@@ -627,8 +687,16 @@ void vm_cmd_in(uint8_t args[]) {
 		}
 		break;
 		case 1: {
-			vm_reg[reg] = getch();
+			vm_reg[reg] = getchar();
 		}
+		case 2: {
+			vm_reg[reg] = errno;
+		}
+		break;
+		case 3: {
+			dev_hdd_read(cur_dev,cur_sec,vm_reg[reg]);
+		}
+		break;
 	}
 }
 
@@ -803,12 +871,12 @@ int main() {
 	vm_access=0;
 
 	vm_seg_regs[0].base=0;
-	vm_seg_regs[0].limit=200;
+	vm_seg_regs[0].limit=2000;
 	vm_seg_regs[0].access=0;
 	vm_seg_regs[0].ro=SEG_READ_WRITE;
 	vm_seg_regs[0].type=SEG_CODE;
 
-	vm_seg_regs[1].base=200;
+	vm_seg_regs[1].base=2000;
 	vm_seg_regs[1].limit=64535;
 	vm_seg_regs[1].access=0;
 	vm_seg_regs[1].ro=SEG_READ_WRITE;
@@ -820,6 +888,12 @@ int main() {
 	vm_seg_regs[2].ro=SEG_READ_WRITE;
 	vm_seg_regs[2].type=SEG_STACK;
 	vm_reg[REG_SP]=65535;
+	
+	TAILQ_INIT(&dev_hdd_fifo_head);
+	
+	dev_hdd[0]=fopen("hdd","rb+");
+	
+	//memcpy(vm_mem,dev_hdd_read(0,0),BLOCK_SIZE);
 
 	vm_load("test");
 
@@ -870,6 +944,7 @@ int main() {
 	/*vm_set(0, 101, 30);*/
 
 	vm_exec_loop();
+	fclose(dev_hdd[0]);
 
 	return 0;
 }
