@@ -5,12 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/queue.h>
-
-#ifdef __unix__
-#include "getch.c"
-#else
 #include <conio.h>
-#endif
 
 #define BIT_SET(v, n) (v = ((1 << n) | v))
 #define BIT_RST(v, n) (v = ((1 << n) ^ v) & v)
