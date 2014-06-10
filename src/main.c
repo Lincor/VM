@@ -104,7 +104,7 @@ uint8_t  vm_access;
 #define PORTS_CNT   64
 #define BLOCK_SIZE	512
 
-TAILQ_HEAD(fifo,fifo_entry) dev_hdd_fifo_head;
+TAILQ_HEAD(fifo, fifo_entry) dev_hdd_fifo_head;
 
 struct fifo_entry {
 	TAILQ_ENTRY(fifo_entry) entries;
@@ -176,16 +176,6 @@ uint8_t vm_load(char* name) {
  * Прерывания
  */
 
-/* Таблица прерываний имеет такой формат:
- *    0000: сегмент (1 байт) слово (2 байта)
- *    0003: сегмент (1 байт) слово (2 байта)
- *    0006: сегмент (1 байт) слово (2 байта)
- *    ...
- *
- * Начинается с адреса INTERRUPTS_OFF
- *
- * Таблица прерываний указывает на обработчики прерываний
- */
 
 uint8_t vm_interrupt_add(uint8_t number) {
 	if (vm_interrupts.ptr < INTERRUPTS_MAX) {
@@ -614,28 +604,28 @@ void vm_cmd_jpr(uint8_t args[]) {
  * Работа с портами ввода/вывода
  */
 
-void dev_hdd_read(uint8_t dev,uint16_t num,uint16_t addr) {
-	for (np = dev_hdd_fifo_head.tqh_first; np!=NULL; np = np->entries.tqe_next) {
-		fseek(dev_hdd[np->dev],(np->sec)*BLOCK_SIZE,SEEK_SET);
-		fwrite(np->data,BLOCK_SIZE,1,dev_hdd[dev]);
+void dev_hdd_read(uint8_t dev, uint16_t num, uint16_t addr) {
+	for (np = dev_hdd_fifo_head.tqh_first; np != NULL; np = np->entries.tqe_next) {
+		fseek(dev_hdd[np->dev], (np->sec) * BLOCK_SIZE, SEEK_SET);
+		fwrite(np->data, BLOCK_SIZE, 1, dev_hdd[dev]);
 	}
 	while (dev_hdd_fifo_head.tqh_first!=NULL)
-		TAILQ_REMOVE(&dev_hdd_fifo_head,dev_hdd_fifo_head.tqh_first,entries);
-	fseek(dev_hdd[dev],num*BLOCK_SIZE,SEEK_SET);
-	fread(&vm_mem[addr],BLOCK_SIZE,1,dev_hdd[dev]);
+		TAILQ_REMOVE(&dev_hdd_fifo_head, dev_hdd_fifo_head.tqh_first, entries);
+	fseek(dev_hdd[dev], num * BLOCK_SIZE, SEEK_SET);
+	fread(&vm_mem[addr], BLOCK_SIZE, 1, dev_hdd[dev]);
 }
 
-void dev_hdd_write(uint8_t dev,uint16_t num,uint16_t addr) {
+void dev_hdd_write(uint8_t dev, uint16_t num, uint16_t addr) {
 	n1 = malloc(sizeof(struct fifo_entry));
 	TAILQ_INSERT_TAIL(&dev_hdd_fifo_head, n1, entries);
-	n1->dev=dev;
-	n1->sec=num;
-	memcpy(n1->data,&vm_mem[addr],BLOCK_SIZE);
+	n1->dev = dev;
+	n1->sec = num;
+	memcpy(n1->data, &vm_mem[addr], BLOCK_SIZE);
 }
 
-void dev_hdd_real_write(uint8_t dev,uint16_t num,uint16_t addr) {
-	fseek(dev_hdd[dev],num*BLOCK_SIZE,SEEK_SET);
-	fwrite(&vm_mem[addr],BLOCK_SIZE,1,dev_hdd[dev]);
+void dev_hdd_real_write(uint8_t dev, uint16_t num, uint16_t addr) {
+	fseek(dev_hdd[dev], num * BLOCK_SIZE, SEEK_SET);
+	fwrite(&vm_mem[addr], BLOCK_SIZE, 1, dev_hdd[dev]);
 	//if (ferror(dev_hdd[dev]))  perror("Error");
 }
 
@@ -644,31 +634,26 @@ void vm_cmd_out(uint8_t args[]) {
 	reg = args[0] & 0xf;
 	prt = args[1];
 	switch (prt) {
-	case 0: {
-		printf("%d", vm_reg[reg]);
-	}
-	break;
-	case 1: {
-		putchar(vm_reg[reg]);
-	}
-	break;
-	case 2: {
-		cur_dev = vm_reg[reg];
-	}
-	break;
-	case 3: {
-		cur_sec = vm_reg[reg];
-	}
-	break;
-	case 4: {
-		printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
-		dev_hdd_write(cur_dev, cur_sec, vm_reg[reg]);
-	}
-	case 5: {
-		printf("\n%d %d %d\n",cur_dev,cur_sec,vm_mem[vm_reg[reg]]);
-		dev_hdd_real_write(cur_dev, cur_sec, vm_reg[reg]);
-	}
-	break;
+		case 0: {
+			printf("%d", vm_reg[reg]);
+		} break;
+		case 1: {
+			putchar(vm_reg[reg]);
+		} break;
+		case 2: {
+			cur_dev = vm_reg[reg];
+		} break;
+		case 3: {
+			cur_sec = vm_reg[reg];
+		} break;
+		case 4: {
+			printf("\n%d %d %d\n", cur_dev, cur_sec, vm_mem[vm_reg[reg]]);
+			dev_hdd_write(cur_dev, cur_sec, vm_reg[reg]);
+		}
+		case 5: {
+			printf("\n%d %d %d\n", cur_dev, cur_sec, vm_mem[vm_reg[reg]]);
+			dev_hdd_real_write(cur_dev, cur_sec, vm_reg[reg]);
+		} break;
 	}
 }
 
@@ -677,21 +662,18 @@ void vm_cmd_in(uint8_t args[]) {
 	prt = args[0] & 0xf;
 	reg = args[1];
 	switch (prt) {
-	case 0: {
-		scanf("%hu", &vm_reg[reg]);
-	}
-	break;
-	case 1: {
-		vm_reg[reg] = getchar();
-	}
-	case 2: {
-		vm_reg[reg] = errno;
-	}
-	break;
-	case 3: {
-		dev_hdd_read(cur_dev,cur_sec,vm_reg[reg]);
-	}
-	break;
+		case 0: {
+			scanf("%hu", &vm_reg[reg]);
+		} break;
+		case 1: {
+			vm_reg[reg] = getchar();
+		}
+		case 2: {
+			vm_reg[reg] = errno;
+		} break;
+		case 3: {
+			dev_hdd_read(cur_dev, cur_sec, vm_reg[reg]);
+		} break;
 	}
 }
 
