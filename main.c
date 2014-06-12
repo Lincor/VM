@@ -606,7 +606,7 @@ void vm_cmd_jpr(uint8_t args[]) {
 }
 
 /*
- * Работа с портами ввода/вывода
+ * Работа с жестким диском
  */
 
 void dev_hdd_read(uint8_t dev, uint16_t num, uint16_t addr) {
@@ -633,6 +633,10 @@ void dev_hdd_real_write(uint8_t dev, uint16_t num, uint16_t addr) {
 	fwrite(&vm_mem[addr], BLOCK_SIZE, 1, dev_hdd[dev]);
 	//if (ferror(dev_hdd[dev]))  perror("Error");
 }
+
+/*
+ * Работа с портами ввода/вывода
+ */
 
 void vm_cmd_out(uint8_t args[]) {
 	uint8_t reg, prt;
@@ -745,65 +749,67 @@ struct {
 } vm_cmd[CMD_COUNT] = {
 	{vm_cmd_nop,  0}, //0
 	{vm_cmd_hlt,  0}, //1
-
+	// Interrupts
 	{vm_cmd_int,  1}, //2
-
-	{vm_cmd_cpy,  1}, //3
-	{vm_cmd_ldw,  1}, //4
-	{vm_cmd_ldb,  1}, //5
-	{vm_cmd_llb,  1}, //6
-	{vm_cmd_lhb,  1}, //7
-	{vm_cmd_ldwi, 3}, //8
-	{vm_cmd_ldbi, 3}, //9
-	{vm_cmd_llbi, 3}, //10
-	{vm_cmd_lhbi, 3}, //11
-	{vm_cmd_stw,  1}, //12
-	{vm_cmd_slb,  1}, //13
-	{vm_cmd_shb,  1}, //14
-	{vm_cmd_stwi, 3}, //15
-	{vm_cmd_slbi, 3}, //16
-	{vm_cmd_shbi, 3}, //17
-	{vm_cmd_ldi,  3}, //18
-	{vm_cmd_lbi,  2}, //19
-	{vm_cmd_lli,  2}, //20
-	{vm_cmd_lhi,  2}, //21
-
-	{vm_cmd_inc,  1}, //22
-	{vm_cmd_dec,  1}, //23
-	{vm_cmd_add,  1}, //24
-	{vm_cmd_sub,  1}, //25
-	{vm_cmd_mul,  1}, //26
-	{vm_cmd_div,  1}, //27
-	{vm_cmd_mod,  1}, //28
-	{vm_cmd_shl,  1}, //29
-	{vm_cmd_shr,  1}, //30
-	{vm_cmd_or,   1}, //31
-	{vm_cmd_and,  1}, //32
-	{vm_cmd_xor,  1}, //33
-	{vm_cmd_not,  1}, //34
-
-	{vm_cmd_jeq,  3}, //35
-	{vm_cmd_jne,  3}, //36
-	{vm_cmd_jlt,  3}, //37
-	{vm_cmd_jgt,  3}, //38
-	{vm_cmd_jle,  3}, //39
-	{vm_cmd_jge,  3}, //40
-	{vm_cmd_jmp,  2}, //41
-	{vm_cmd_jpr,  1}, //42
-
-	{vm_cmd_callr,1}, //43
-	{vm_cmd_callv,2}, //44
-	{vm_cmd_pushr,1}, //45
-	{vm_cmd_pushv,2}, //46
-	{vm_cmd_pop,  1}, //47
-	{vm_cmd_ret,  0}, //48
-
-	{vm_cmd_in,   2}, //49
-	{vm_cmd_out,  2},  //50
-
-	{vm_cmd_cli,  0}, //51
-	{vm_cmd_sti,  0},  //52
-	{vm_cmd_lit,  2}  //53
+	{vm_cmd_cli,  0}, //3
+	{vm_cmd_sti,  0}, //4
+	{vm_cmd_lit,  2}, //5
+	// Copying and moving data
+	{vm_cmd_cpy,  1}, //6
+	{vm_cmd_ldw,  1}, //7
+	{vm_cmd_ldb,  1}, //8
+	{vm_cmd_llb,  1}, //9
+	{vm_cmd_lhb,  1}, //10
+	{vm_cmd_ldwi, 3}, //11
+	{vm_cmd_ldbi, 3}, //12
+	{vm_cmd_llbi, 3}, //13
+	{vm_cmd_lhbi, 3}, //14
+	{vm_cmd_stw,  1}, //15
+	{vm_cmd_slb,  1}, //16
+	{vm_cmd_shb,  1}, //17
+	{vm_cmd_stwi, 3}, //18
+	{vm_cmd_slbi, 3}, //19
+	{vm_cmd_shbi, 3}, //20
+	{vm_cmd_ldi,  3}, //21
+	{vm_cmd_lbi,  2}, //22
+	{vm_cmd_lli,  2}, //23
+	{vm_cmd_lhi,  2}, //24
+	// Arithmetic operations
+	{vm_cmd_inc,  1}, //25
+	{vm_cmd_dec,  1}, //26
+	{vm_cmd_add,  1}, //27
+	{vm_cmd_sub,  1}, //28
+	{vm_cmd_mul,  1}, //29
+	{vm_cmd_div,  1}, //30
+	{vm_cmd_mod,  1}, //31
+	{vm_cmd_shl,  1}, //32
+	{vm_cmd_shr,  1}, //33
+	// Logic operations
+	{vm_cmd_or,   1}, //34
+	{vm_cmd_and,  1}, //35
+	{vm_cmd_xor,  1}, //36
+	{vm_cmd_not,  1}, //37
+	// branch instructions
+	// Conditional
+	{vm_cmd_jeq,  3}, //38
+	{vm_cmd_jne,  3}, //39
+	{vm_cmd_jlt,  3}, //40
+	{vm_cmd_jgt,  3}, //41
+	{vm_cmd_jle,  3}, //42
+	{vm_cmd_jge,  3}, //43
+	// Uncoditional
+	{vm_cmd_jmp,  2}, //44
+	{vm_cmd_jpr,  1}, //45
+	// Subroutines
+	{vm_cmd_callr,1}, //46
+	{vm_cmd_callv,2}, //47
+	{vm_cmd_pushr,1}, //48
+	{vm_cmd_pushv,2}, //49
+	{vm_cmd_pop,  1}, //50
+	{vm_cmd_ret,  0}, //51
+	// Ports
+	{vm_cmd_in,   2}, //52
+	{vm_cmd_out,  2}  //53
 };
 
 void vm_exec_comand(uint8_t seg) {
