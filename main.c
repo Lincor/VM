@@ -369,7 +369,7 @@ void vm_cmd_shb(uint8_t args[]) {
 void vm_cmd_stwi(uint8_t args[]) {
 	uint8_t rga;
 	uint16_t wrd;
-	rga = args[0] >> 4;
+	rga = args[0] & 0xf;
 	wrd = args[1] << 8 | args[2];
 	vm_set(DS, wrd, vm_reg[rga] >> 8);
 	vm_set(DS, wrd + 1, vm_reg[rga] & 0xff);
@@ -378,7 +378,7 @@ void vm_cmd_stwi(uint8_t args[]) {
 void vm_cmd_slbi(uint8_t args[]) {
 	uint8_t rga;
 	uint16_t wrd;
-	rga = args[0] >> 4;
+	rga = args[0] & 0xf;
 	wrd = args[1] << 8 | args[2];
 	vm_set(DS, wrd, vm_reg[rga] & 0xff);
 }
@@ -386,7 +386,7 @@ void vm_cmd_slbi(uint8_t args[]) {
 void vm_cmd_shbi(uint8_t args[]) {
 	uint8_t rga;
 	uint16_t wrd;
-	rga = args[0] >> 4;
+	rga = args[0] & 0xf;
 	wrd = args[1] << 8 | args[2];
 	vm_set(DS, wrd, vm_reg[rga] >> 8);
 }
