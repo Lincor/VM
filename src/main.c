@@ -6,6 +6,23 @@
 #include <errno.h>
 #include <sys/queue.h>
 #include <conio.h>
+#include <config.h>
+
+#define XCB 1
+#define XLIB 2
+
+#ifdef GUI
+
+#if GUI_LIB == XCB
+#include <ui_xcb.h>
+#elif GUI_LIB == XLIB
+#include <ui_xlib.h>
+#else
+#error Unknown graphic library.
+#endif
+#else
+#include <ui_cli.h>
+#endif
 
 #define BIT_SET(v, n) (v = ((1 << n) | v))
 #define BIT_RST(v, n) (v = ((1 << n) ^ v) & v)
@@ -102,7 +119,6 @@ uint8_t  vm_access;
  */
 
 #define PORTS_CNT   64
-#define BLOCK_SIZE	512
 
 TAILQ_HEAD(fifo, fifo_entry) dev_hdd_fifo_head;
 
@@ -129,7 +145,7 @@ uint8_t cur_sec;
 
 
 void segfault() {
-	printf("Surprise!\n");
+	ui_printf("Surprise!\n");
 	int* ptr = (int*)0;
 	*ptr = 1;
 }
@@ -162,13 +178,13 @@ uint8_t vm_get(uint8_t seg, uint16_t addr) {
 	return vm_mem[vm_translate_addr(seg, addr)];
 }
 
-uint8_t vm_load(char* name) {
+uint8_t vm_load(char* name, uint8_t seg) {
 	FILE* f = fopen(name, "rb");
 	if (f == NULL) return 1;
 	fseek(f, 0, SEEK_END);
 	int size = ftell(f);
 	fseek(f, 0, SEEK_SET);
-	fread(vm_mem, 1, size, f);
+	fread(vm_mem+vm_seg_regs[seg].base, 1, size, f);
 	return 0;
 }
 
@@ -217,8 +233,8 @@ uint8_t vm_interrupt_exec() {
 void print_inters() {
 	uint8_t i;
 	for(i = 0; i < vm_interrupts.ptr; i++)
-		printf("%d ", vm_interrupts.num[i]);
-	printf("\n");
+		ui_printf("%d ", vm_interrupts.num[i]);
+	ui_printf("\n");
 }
 
 /*
@@ -230,7 +246,11 @@ void vm_cmd_nop(uint8_t args[]) {
 }
 
 void vm_cmd_hlt(uint8_t args[]) {
-	exit(0);
+	while (1) {
+		ui_update();
+		//exit(0);
+		vm_interrupt_exec();
+	}
 }
 
 /*
@@ -601,7 +621,7 @@ void vm_cmd_jpr(uint8_t args[]) {
 }
 
 /*
- * Работа с портами ввода/вывода
+ * Работа с жестким диском
  */
 
 void dev_hdd_read(uint8_t dev, uint16_t num, uint16_t addr) {
@@ -629,16 +649,20 @@ void dev_hdd_real_write(uint8_t dev, uint16_t num, uint16_t addr) {
 	//if (ferror(dev_hdd[dev]))  perror("Error");
 }
 
+/*
+ * Работа с портами ввода/вывода
+ */
+
 void vm_cmd_out(uint8_t args[]) {
 	uint8_t reg, prt;
 	reg = args[0] & 0xf;
 	prt = args[1];
 	switch (prt) {
 		case 0: {
-			printf("%d", vm_reg[reg]);
+			ui_printf("%d", vm_reg[reg]);
 		} break;
 		case 1: {
-			putchar(vm_reg[reg]);
+			ui_putchar(vm_reg[reg]);
 		} break;
 		case 2: {
 			cur_dev = vm_reg[reg];
@@ -647,11 +671,9 @@ void vm_cmd_out(uint8_t args[]) {
 			cur_sec = vm_reg[reg];
 		} break;
 		case 4: {
-			printf("\n%d %d %d\n", cur_dev, cur_sec, vm_mem[vm_reg[reg]]);
 			dev_hdd_write(cur_dev, cur_sec, vm_reg[reg]);
-		}
+		} break;
 		case 5: {
-			printf("\n%d %d %d\n", cur_dev, cur_sec, vm_mem[vm_reg[reg]]);
 			dev_hdd_real_write(cur_dev, cur_sec, vm_reg[reg]);
 		} break;
 	}
@@ -740,65 +762,67 @@ struct {
 } vm_cmd[CMD_COUNT] = {
 	{vm_cmd_nop,  0}, //0
 	{vm_cmd_hlt,  0}, //1
-
+	// Interrupts
 	{vm_cmd_int,  1}, //2
-
-	{vm_cmd_cpy,  1}, //3
-	{vm_cmd_ldw,  1}, //4
-	{vm_cmd_ldb,  1}, //5
-	{vm_cmd_llb,  1}, //6
-	{vm_cmd_lhb,  1}, //7
-	{vm_cmd_ldwi, 3}, //8
-	{vm_cmd_ldbi, 3}, //9
-	{vm_cmd_llbi, 3}, //10
-	{vm_cmd_lhbi, 3}, //11
-	{vm_cmd_stw,  1}, //12
-	{vm_cmd_slb,  1}, //13
-	{vm_cmd_shb,  1}, //14
-	{vm_cmd_stwi, 3}, //15
-	{vm_cmd_slbi, 3}, //16
-	{vm_cmd_shbi, 3}, //17
-	{vm_cmd_ldi,  3}, //18
-	{vm_cmd_lbi,  2}, //19
-	{vm_cmd_lli,  2}, //20
-	{vm_cmd_lhi,  2}, //21
-
-	{vm_cmd_inc,  1}, //22
-	{vm_cmd_dec,  1}, //23
-	{vm_cmd_add,  1}, //24
-	{vm_cmd_sub,  1}, //25
-	{vm_cmd_mul,  1}, //26
-	{vm_cmd_div,  1}, //27
-	{vm_cmd_mod,  1}, //28
-	{vm_cmd_shl,  1}, //29
-	{vm_cmd_shr,  1}, //30
-	{vm_cmd_or,   1}, //31
-	{vm_cmd_and,  1}, //32
-	{vm_cmd_xor,  1}, //33
-	{vm_cmd_not,  1}, //34
-
-	{vm_cmd_jeq,  3}, //35
-	{vm_cmd_jne,  3}, //36
-	{vm_cmd_jlt,  3}, //37
-	{vm_cmd_jgt,  3}, //38
-	{vm_cmd_jle,  3}, //39
-	{vm_cmd_jge,  3}, //40
-	{vm_cmd_jmp,  2}, //41
-	{vm_cmd_jpr,  1}, //42
-
-	{vm_cmd_callr,1}, //43
-	{vm_cmd_callv,2}, //44
-	{vm_cmd_pushr,1}, //45
-	{vm_cmd_pushv,2}, //46
-	{vm_cmd_pop,  1}, //47
-	{vm_cmd_ret,  0}, //48
-
-	{vm_cmd_in,   2}, //49
-	{vm_cmd_out,  2},  //50
-
-	{vm_cmd_cli,  0}, //51
-	{vm_cmd_sti,  0},  //52
-	{vm_cmd_lit,  2}  //53
+	{vm_cmd_cli,  0}, //3
+	{vm_cmd_sti,  0}, //4
+	{vm_cmd_lit,  2}, //5
+	// Copying and moving data
+	{vm_cmd_cpy,  1}, //6
+	{vm_cmd_ldw,  1}, //7
+	{vm_cmd_ldb,  1}, //8
+	{vm_cmd_llb,  1}, //9
+	{vm_cmd_lhb,  1}, //10
+	{vm_cmd_ldwi, 3}, //11
+	{vm_cmd_ldbi, 3}, //12
+	{vm_cmd_llbi, 3}, //13
+	{vm_cmd_lhbi, 3}, //14
+	{vm_cmd_stw,  1}, //15
+	{vm_cmd_slb,  1}, //16
+	{vm_cmd_shb,  1}, //17
+	{vm_cmd_stwi, 3}, //18
+	{vm_cmd_slbi, 3}, //19
+	{vm_cmd_shbi, 3}, //20
+	{vm_cmd_ldi,  3}, //21
+	{vm_cmd_lbi,  2}, //22
+	{vm_cmd_lli,  2}, //23
+	{vm_cmd_lhi,  2}, //24
+	// Arithmetic operations
+	{vm_cmd_inc,  1}, //25
+	{vm_cmd_dec,  1}, //26
+	{vm_cmd_add,  1}, //27
+	{vm_cmd_sub,  1}, //28
+	{vm_cmd_mul,  1}, //29
+	{vm_cmd_div,  1}, //30
+	{vm_cmd_mod,  1}, //31
+	{vm_cmd_shl,  1}, //32
+	{vm_cmd_shr,  1}, //33
+	// Logic operations
+	{vm_cmd_or,   1}, //34
+	{vm_cmd_and,  1}, //35
+	{vm_cmd_xor,  1}, //36
+	{vm_cmd_not,  1}, //37
+	// branch instructions
+	// Conditional
+	{vm_cmd_jeq,  3}, //38
+	{vm_cmd_jne,  3}, //39
+	{vm_cmd_jlt,  3}, //40
+	{vm_cmd_jgt,  3}, //41
+	{vm_cmd_jle,  3}, //42
+	{vm_cmd_jge,  3}, //43
+	// Uncoditional
+	{vm_cmd_jmp,  2}, //44
+	{vm_cmd_jpr,  1}, //45
+	// Subroutines
+	{vm_cmd_callr,1}, //46
+	{vm_cmd_callv,2}, //47
+	{vm_cmd_pushr,1}, //48
+	{vm_cmd_pushv,2}, //49
+	{vm_cmd_pop,  1}, //50
+	{vm_cmd_ret,  0}, //51
+	// Ports
+	{vm_cmd_in,   2}, //52
+	{vm_cmd_out,  2}  //53
 };
 
 void vm_exec_comand(uint8_t seg) {
@@ -810,7 +834,7 @@ void vm_exec_comand(uint8_t seg) {
 	cmd = vm_get(seg, vm_reg[REG_PC]++);
 	//Тут надо кидать прерывание!
 	if (cmd > CMD_COUNT) {
-		printf("Invalid comand: %d\n", cmd);
+		ui_printf("Invalid comand: %d\n", cmd);
 		return;
 	}
 	uint8_t i, bytes[4];
@@ -832,7 +856,7 @@ void vm_exec_loop() {
 			vm_exec_comand(0);
 			vm_interrupt_exec();
 		} else {
-			//printf("Instructions: %d @ time: %f ms\n", ips, (time(0) - old_time));
+			//ui_printf("Instructions: %d @ time: %f ms\n", ips, (time(0) - old_time));
 			sleep_time = (1000 - (time(0) - old_time)); //отнимаем от секунды время затраченное на выполнение инструкций
 			if (sleep_time > 0) {
 				usleep(sleep_time);
@@ -840,11 +864,13 @@ void vm_exec_loop() {
 				ips = 0;
 			}
 		}
+		ui_update();
 	}
 }
 
 int main() {
-	printf("TINY RISC MACHINE 1975.\n");
+	ui_init();
+	ui_printf("TINY RISC MACHINE 1975.\n");
 	vm_access=0;
 
 	vm_seg_regs[0].base=0;
@@ -872,7 +898,8 @@ int main() {
 
 	//memcpy(vm_mem,dev_hdd_read(0,0),BLOCK_SIZE);
 
-	vm_load("test");
+	vm_load("seccode",0);
+	vm_load("secdata",1);
 
 	/*vm_reg[0] = 111;*/
 	/*vm_reg[1] = 222;*/

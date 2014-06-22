@@ -1,0 +1,60 @@
+#!/bin/bash
+
+isnum() { [ "$(echo $*|grep -v "[^0-9]")" ]; }
+
+enter_int() {
+	read var
+	if [ ! $var ]; then
+		var=$2
+	fi
+	if ( ! isnum $var ) || [ $var -eq 0 ]; then
+		echo "Incorrect value."
+		exit 1
+	fi
+	echo "#define $1 $var" >> include/config.h
+}
+
+enter_string() {
+	read var
+	if [ ! $var ]; then
+		var=$2
+	fi
+	var=`tr '[:lower:]' '[:upper:]' <<<"$var"`
+	for val in $*; do
+		if [[ $var = "$val" ]]; then
+			echo "#define $1 $var" >> include/config.h
+			return
+		fi
+	done
+	echo "Incorrect value."
+}
+
+enter_bool() {
+	read -n 1 var
+	echo -e "\n"
+	if [ ! $var ]; then
+		var=$2
+	fi
+	var=`tr '[:lower:]' '[:upper:]' <<<"$var"`
+	if [[ $var = "y" ]] || [[ $var = "yes" ]]; then
+		echo "#define $1" >> include/config.h
+		return 1
+	elif [[ $var = "n" ]] || [[ $var = "no" ]]; then
+		return 0
+	fi
+	echo "Incorrect value."
+}
+
+rm -f include/config.h
+shopt -s nocasematch
+echo "Hard disk sector size (in bytes) [512]: "
+enter_int BLOCK_SIZE 512
+echo "Do you want to use graphic mode? [y]"
+enter_bool GUI y
+if [ $? -eq 1 ]; then
+	echo "If you want to use graphic mode, you should select a graphical library."
+	echo "It is recommended to use XCB always, when it possible. Variant with Xlib"
+	echo "added for compatibility."
+	echo "Possible values are: [XCB], Xlib"
+	enter_string GUI_LIB XCB Xlib
+fi

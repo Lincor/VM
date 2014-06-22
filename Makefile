@@ -1,4 +1,4 @@
 all:
 	make -C src
 clean:
-	rm `find -name *.o` vm
+	rm -f `find -name *.o` vm

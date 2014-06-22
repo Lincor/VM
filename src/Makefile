@@ -1,2 +1,2 @@
 all:
-	cc *.c -o ../vm -idirafter../include
+	cc *.c -g -o../vm -idirafter../include -lxcb
