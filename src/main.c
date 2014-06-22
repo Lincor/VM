@@ -8,20 +8,19 @@
 #include <conio.h>
 #include <config.h>
 
-#define XCB 1
-#define XLIB 2
+#define XCB	1
+#define XLIB	2
 
 #ifdef GUI
-
-#if GUI_LIB == XCB
-#include <ui_xcb.h>
-#elif GUI_LIB == XLIB
-#include <ui_xlib.h>
+	#if GUI_LIB == XCB
+		#include <ui_xcb.h>
+	#elif GUI_LIB == XLIB
+		#include <ui_xlib.h>
+	#else
+		#error Unknown graphic library.
+	#endif
 #else
-#error Unknown graphic library.
-#endif
-#else
-#include <ui_cli.h>
+	#include <ui_cli.h>
 #endif
 
 #define BIT_SET(v, n) (v = ((1 << n) | v))
@@ -894,12 +893,12 @@ int main() {
 
 	TAILQ_INIT(&dev_hdd_fifo_head);
 
-	dev_hdd[0]=fopen("hdd","rb+");
+	dev_hdd[0] = fopen("hdd", "rb+");
 
 	//memcpy(vm_mem,dev_hdd_read(0,0),BLOCK_SIZE);
 
-	vm_load("seccode",0);
-	vm_load("secdata",1);
+	vm_load("seccode", 0);
+	vm_load("secdata", 1);
 
 	/*vm_reg[0] = 111;*/
 	/*vm_reg[1] = 222;*/
