@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CFLAGS="-g"
+
 isnum() { [ "$(echo $*|grep -v "[^0-9]")" ]; }
 
 enter_int() {
@@ -21,9 +23,16 @@ enter_string() {
 	fi
 	var=`tr '[:lower:]' '[:upper:]' <<<"$var"`
 	for val in $*; do
-		if [[ $var = "$val" ]]; then
-			echo "#define $1 $var" >> include/config.h
-			return
+		if [[ $val != $1 ]]; then
+			val=`tr '[:lower:]' '[:upper:]' <<<"$val"`
+			if [[ $var = "$val" ]]; then
+				echo "#define $val 1" >> include/config.h
+				echo "#define $1 $val" >> include/config.h
+				echo $val
+				return
+			#else
+			#	echo "#define $val 0" >> include/config.h
+			fi
 		fi
 	done
 	echo "Incorrect value."
@@ -36,25 +45,28 @@ enter_bool() {
 		var=$2
 	fi
 	var=`tr '[:lower:]' '[:upper:]' <<<"$var"`
-	if [[ $var = "y" ]] || [[ $var = "yes" ]]; then
+	if [[ $var = "Y" ]] || [[ $var = "YES" ]]; then
 		echo "#define $1" >> include/config.h
 		return 1
-	elif [[ $var = "n" ]] || [[ $var = "no" ]]; then
+	elif [[ $var = "N" ]] || [[ $var = "NO" ]]; then
 		return 0
 	fi
 	echo "Incorrect value."
 }
 
 rm -f include/config.h
-shopt -s nocasematch
 echo "Hard disk sector size (in bytes) [512]: "
 enter_int BLOCK_SIZE 512
-echo "Do you want to use graphic mode? [y]"
+echo "Do you want to use graphic mode? [Y/n]"
 enter_bool GUI y
 if [ $? -eq 1 ]; then
 	echo "If you want to use graphic mode, you should select a graphical library."
 	echo "It is recommended to use XCB always, when it possible. Variant with Xlib"
 	echo "added for compatibility."
-	echo "Possible values are: [XCB], Xlib"
-	enter_string GUI_LIB XCB Xlib
+	echo "[XCB/xlib]"
+	gui_lib=$(enter_string GUI_LIB XCB Xlib)
+	if [ $gui_lib = "XCB" ]; then
+		CFLAGS="$CFLAGS -lxcb"
+	fi
 fi
+sed -e "s/^CFLAGS=.*/CFLAGS=$CFLAGS/" -i src/Makefile

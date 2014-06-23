@@ -8,9 +8,6 @@
 #include <conio.h>
 #include <config.h>
 
-#define XCB	1
-#define XLIB	2
-
 #ifdef GUI
 	#if GUI_LIB == XCB
 		#include <ui_xcb.h>
