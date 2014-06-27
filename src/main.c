@@ -122,7 +122,7 @@ struct fifo_entry {
 	TAILQ_ENTRY(fifo_entry) entries;
 	uint16_t sec;
 	uint8_t dev;
-	uint8_t data[BLOCK_SIZE];
+	uint8_t data[SECTOR_SIZE];
 } *n1, *np;
 
 enum {
@@ -622,13 +622,13 @@ void vm_cmd_jpr(uint8_t args[]) {
 
 void dev_hdd_read(uint8_t dev, uint16_t num, uint16_t addr) {
 	for (np = dev_hdd_fifo_head.tqh_first; np != NULL; np = np->entries.tqe_next) {
-		fseek(dev_hdd[np->dev], (np->sec) * BLOCK_SIZE, SEEK_SET);
-		fwrite(np->data, BLOCK_SIZE, 1, dev_hdd[dev]);
+		fseek(dev_hdd[np->dev], (np->sec) * SECTOR_SIZE, SEEK_SET);
+		fwrite(np->data, SECTOR_SIZE, 1, dev_hdd[dev]);
 	}
 	while (dev_hdd_fifo_head.tqh_first!=NULL)
 		TAILQ_REMOVE(&dev_hdd_fifo_head, dev_hdd_fifo_head.tqh_first, entries);
-	fseek(dev_hdd[dev], num * BLOCK_SIZE, SEEK_SET);
-	fread(&vm_mem[addr], BLOCK_SIZE, 1, dev_hdd[dev]);
+	fseek(dev_hdd[dev], num * SECTOR_SIZE, SEEK_SET);
+	fread(&vm_mem[addr], SECTOR_SIZE, 1, dev_hdd[dev]);
 }
 
 void dev_hdd_write(uint8_t dev, uint16_t num, uint16_t addr) {
@@ -636,12 +636,12 @@ void dev_hdd_write(uint8_t dev, uint16_t num, uint16_t addr) {
 	TAILQ_INSERT_TAIL(&dev_hdd_fifo_head, n1, entries);
 	n1->dev = dev;
 	n1->sec = num;
-	memcpy(n1->data, &vm_mem[addr], BLOCK_SIZE);
+	memcpy(n1->data, &vm_mem[addr], SECTOR_SIZE);
 }
 
 void dev_hdd_real_write(uint8_t dev, uint16_t num, uint16_t addr) {
-	fseek(dev_hdd[dev], num * BLOCK_SIZE, SEEK_SET);
-	fwrite(&vm_mem[addr], BLOCK_SIZE, 1, dev_hdd[dev]);
+	fseek(dev_hdd[dev], num * SECTOR_SIZE, SEEK_SET);
+	fwrite(&vm_mem[addr], SECTOR_SIZE, 1, dev_hdd[dev]);
 	//if (ferror(dev_hdd[dev]))  perror("Error");
 }
 
@@ -684,8 +684,8 @@ void vm_cmd_in(uint8_t args[]) {
 			scanf("%hu", &vm_reg[reg]);
 		} break;
 		case 1: {
-			vm_reg[reg] = getchar();
-		}
+			vm_reg[reg] = ui_getch();
+		} break;
 		case 2: {
 			vm_reg[reg] = errno;
 		} break;
@@ -892,7 +892,7 @@ int main() {
 
 	dev_hdd[0] = fopen("hdd", "rb+");
 
-	//memcpy(vm_mem,dev_hdd_read(0,0),BLOCK_SIZE);
+	//memcpy(vm_mem,dev_hdd_read(0,0),SECTOR_SIZE);
 
 	vm_load("seccode", 0);
 	vm_load("secdata", 1);

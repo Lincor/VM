@@ -1,3 +1,8 @@
+#include <config.h>
+
+#ifdef GUI
+#if GUI_LIB == XCB
+
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb.h>
@@ -81,6 +86,17 @@ void xcb_putchar(char c) {
 	}
 }
 
+int xcb_getch() {
+	xcb_generic_event_t *e;
+	while (e = xcb_wait_for_event(connection)) {
+		switch (e->response_type & ~0x80) {
+			case XCB_KEY_RELEASE:
+			return ((xcb_key_release_event_t*)e)->detail;
+		}
+		free(e);
+	}
+}
+
 void xcb_printf(char *f,...) {
 	va_list args;
 	va_start(args,f);
@@ -117,3 +133,6 @@ void xcb_init() {
 	reply2 = xcb_intern_atom_reply(connection, cookie2, 0);
 	xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window, (*reply).atom, 4, 32, 1, &(*reply2).atom);
 }
+
+#endif
+#endif

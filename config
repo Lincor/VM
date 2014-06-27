@@ -56,7 +56,7 @@ enter_bool() {
 
 rm -f include/config.h
 echo "Hard disk sector size (in bytes) [512]: "
-enter_int BLOCK_SIZE 512
+enter_int SECTOR_SIZE 512
 echo "Do you want to use graphic mode? [Y/n]"
 enter_bool GUI y
 if [ $? -eq 1 ]; then

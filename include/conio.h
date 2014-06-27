@@ -1,1 +1,1 @@
-int getch();
+#define getch builtin_getch
