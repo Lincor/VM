@@ -8,3 +8,7 @@ test
 .*.swp
 core
 asm
+*.exe
+*.so
+*.dll
+include/config.h
