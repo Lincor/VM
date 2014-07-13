@@ -13,6 +13,8 @@
 		#include <ui_xcb.h>
 	#elif GUI_LIB == XLIB
 		#include <ui_xlib.h>
+	#elif GUI_LIB == WINAPI
+		#include <ui_winapi.h>
 	#else
 		#error Unknown graphic library.
 	#endif
@@ -870,12 +872,12 @@ int main() {
 	vm_access=0;
 
 	vm_seg_regs[0].base=0;
-	vm_seg_regs[0].limit=2000;
+	vm_seg_regs[0].limit=64535;
 	vm_seg_regs[0].access=0;
 	vm_seg_regs[0].ro=SEG_READ_WRITE;
 	vm_seg_regs[0].type=SEG_CODE;
 
-	vm_seg_regs[1].base=2000;
+	vm_seg_regs[1].base=0;
 	vm_seg_regs[1].limit=64535;
 	vm_seg_regs[1].access=0;
 	vm_seg_regs[1].ro=SEG_READ_WRITE;
@@ -894,8 +896,8 @@ int main() {
 
 	//memcpy(vm_mem,dev_hdd_read(0,0),SECTOR_SIZE);
 
-	vm_load("seccode", 0);
-	vm_load("secdata", 1);
+	vm_load("test", 0);
+	//vm_load("secdata", 1);
 
 	/*vm_reg[0] = 111;*/
 	/*vm_reg[1] = 222;*/
