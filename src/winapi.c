@@ -20,8 +20,8 @@ static void winapi_repaint() {
 	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, 0x00FFFFFF);
 	int i;
-	for (i=0;i<HEIGHT;i++) {
-		TextOut(hdc,0,i*15,buf[i],strlen(buf[i]));
+	for (i=0; i<HEIGHT; i++) {
+		TextOut(hdc, 0, i*15, buf[i], strlen(buf[i]));
 	}
 	EndPaint(hWnd, &ps);
 }
@@ -44,19 +44,19 @@ void winapi_putchar(char c) {
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
-		case WM_KEYDOWN:
-			key = wParam;
-			break;
-		case WM_KEYUP:
-			key = wParam;
-			break;
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			exit(0);
-		case WM_PAINT:
-			winapi_repaint();
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+	case WM_KEYDOWN:
+		key = wParam;
+		break;
+	case WM_KEYUP:
+		key = wParam;
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		exit(0);
+	case WM_PAINT:
+		winapi_repaint();
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
@@ -67,7 +67,7 @@ void winapi_printf(char *f,...) {
 	char *s = malloc(strlen(f)+sizeof(args));
 	vsprintf(s,f,args);
 	int i;
-	for (i=0;i<strlen(s);i++) winapi_putchar(s[i]);
+	for (i=0; i<strlen(s); i++) winapi_putchar(s[i]);
 	va_end(args);
 }
 
