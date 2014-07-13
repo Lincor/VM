@@ -1,4 +1,4 @@
 CC=cc
 CFLAGS=-g -lxcb
 all:
-	$(CC) $(CFLAGS) *.c -o../vm -idirafter../include
+	$(CC) *.c -o../vm -idirafter../include $(CFLAGS)
