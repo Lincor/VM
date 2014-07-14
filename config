@@ -58,14 +58,14 @@ rm -f include/config.h
 echo "Hard disk sector size (in bytes) [512]: "
 enter_int SECTOR_SIZE 512
 echo "Do you want to use graphic mode? [Y/n]"
+echo "WARNING: console backend currently NOT work as planned."
 enter_bool GUI y
 if [ $? -eq 1 ]; then
 	echo "If you want to use graphic mode, you should select a graphical library."
 	echo "We provide two X11 backends: XCB and Xlib. It is recommended to use XCB always,"
 	echo "when it possible. Xlib variant added for compatibility."
 	echo "For using on Windows, you should select WinAPI backend."
-	echo "WARNING: Xlib backend currently NOT implemented. At this moment, only WinAPI backend"
-	echo "works as planned."
+	echo "WARNING: Xlib backend currently NOT implemented."
 	echo "[XCB/xlib/winapi]"
 	gui_lib=$(enter_string GUI_LIB XCB Xlib WinAPI)
 	if [ $gui_lib = "XCB" ]; then
