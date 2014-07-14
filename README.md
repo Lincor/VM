@@ -9,3 +9,9 @@ Build requiments:
 * GNU Libc
 
 Working with other compiler, linker or standard C library is not guaranteed.
+
+Building
+========
+
+	./config
+	make
