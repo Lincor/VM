@@ -4,7 +4,7 @@
 #include <time.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/queue.h>
+#include <queue.h>
 #include <stdint.h>
 
 #include <config.h>
@@ -123,10 +123,10 @@ uint8_t  vm_access;
 
 #define PORTS_CNT   64
 
-TAILQ_HEAD(fifo, fifo_entry) dev_hdd_fifo_head;
+TAILQ_HEAD(fifo, struct fifo_entry) dev_hdd_fifo_head;
 
 struct fifo_entry {
-	TAILQ_ENTRY(fifo_entry) entries;
+	TAILQ_ENTRY(struct fifo_entry) entries;
 	uint16_t sec;
 	uint8_t dev;
 	uint8_t data[SECTOR_SIZE];
