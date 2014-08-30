@@ -12,3 +12,6 @@ asm
 *.so
 *.dll
 include/config.h
+Makefile
+src/Makefile
+include/stamp-h1
