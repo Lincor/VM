@@ -7,6 +7,7 @@
 #include <string.h>
 #include <xcb/xcb.h>
 #include <stdarg.h>
+#include <stddef.h>
 
 #define WIDTH 80
 #define HEIGHT 25
@@ -56,30 +57,33 @@ static uint8_t scancodes[256] = {
 	0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static void test_cookie(xcb_void_cookie_t cookie, xcb_connection_t *connection, char *errMessage) {
-	xcb_generic_error_t *error = xcb_request_check(connection, cookie);
-	if(error) {
-		xcb_disconnect(connection);
-		exit(-1);
-	}
-}
-
 static xcb_gc_t getfontgc(xcb_connection_t *connection, xcb_screen_t *screen, xcb_window_t window, const char *font_name) {
-	xcb_font_t font = xcb_generate_id(connection);
+	uint32_t mask, value_list[3];
+	xcb_font_t font;
+	xcb_gcontext_t gc;
+	font = xcb_generate_id(connection);
 	xcb_open_font(connection, font, strlen(font_name), font_name);
-	xcb_gcontext_t  gc = xcb_generate_id(connection);
-	uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT;
-	uint32_t value_list[3] = { screen->white_pixel, screen->black_pixel, font };
+	value_list[0] = screen->white_pixel;
+	value_list[1] = screen->black_pixel;
+	value_list[2] = font;
+	gc = xcb_generate_id(connection);
+	mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_FONT;
 	xcb_create_gc(connection, gc, window, mask, value_list);
 	xcb_close_font(connection, font);
 	return gc;
 }
 
 static void xcb_draw_text(xcb_connection_t *connection, xcb_screen_t *screen, xcb_window_t window, int16_t x1, int16_t y1, const char *label) {
+	xcb_generic_error_t *error;
+	xcb_void_cookie_t cookie;
 	xcb_gcontext_t gc = getfontgc(connection, screen, window, "fixed");
 	xcb_image_text_8(connection, strlen(label), window, gc, x1, y1, label);
-	xcb_void_cookie_t cookie = xcb_free_gc(connection, gc);
-	test_cookie(cookie, connection, "can't free gc");
+	cookie = xcb_free_gc(connection, gc);
+	error = xcb_request_check(connection, cookie);
+	if(error) {
+		xcb_disconnect(connection);
+		exit(-1);
+	}
 }
 
 static void xcb_repaint() {
@@ -137,21 +141,23 @@ int xcb_getch() {
 
 void xcb_printf(char *f,...) {
 	va_list args;
+	char *s;
+	size_t i;
 	va_start(args,f);
-	char *s = malloc(strlen(f)+sizeof(args));
+	s = malloc(strlen(f)+sizeof(args));
 	vsprintf(s,f,args);
-	int i;
 	for (i=0;i<strlen(s);i++) xcb_putchar(s[i]);
 	va_end(args);
 }
 
 void xcb_init() {
+	uint32_t mask, values[2];
+	xcb_screen_iterator_t iter;
 	connection = xcb_connect(NULL, NULL);
-	xcb_screen_iterator_t iter = xcb_setup_roots_iterator(xcb_get_setup(connection));
+	iter = xcb_setup_roots_iterator(xcb_get_setup(connection));
 	screen = iter.data;
 	window = xcb_generate_id(connection);
-	uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-	uint32_t values[2];
+	mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
 	values[0] = screen->black_pixel;
 	values[1] = XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_EXPOSURE;
 	xcb_create_window(connection,

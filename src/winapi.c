@@ -3,6 +3,11 @@
 #ifdef ENABLE_WINAPI
 
 #include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stddef.h>
+#include <stdarg.h>
 
 #define WIDTH 80
 #define HEIGHT 25
@@ -13,12 +18,12 @@ static char buf[HEIGHT][WIDTH];
 static int key;
 
 static void winapi_repaint() {
+	int i;
 	HWND hWnd = GetActiveWindow();
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hWnd, &ps);
 	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, 0x00FFFFFF);
-	int i;
 	for (i=0; i<HEIGHT; i++) {
 		TextOut(hdc, 0, i*15, buf[i], strlen(buf[i]));
 	}
@@ -62,10 +67,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 void winapi_printf(char *f,...) {
 	va_list args;
+	char *s;
+	size_t i;
 	va_start(args,f);
-	char *s = malloc(strlen(f)+sizeof(args));
+	s = malloc(strlen(f)+sizeof(args));
 	vsprintf(s,f,args);
-	int i;
 	for (i=0; i<strlen(s); i++) winapi_putchar(s[i]);
 	va_end(args);
 }
@@ -84,18 +90,18 @@ int winapi_getch() {
 }
 
 void winapi_init() {
-	HINSTANCE hInstance = GetModuleHandle(NULL);
 	WNDCLASS windowclass = {0};
+	HWND window;
+	HINSTANCE hInstance = GetModuleHandle(NULL);
 	windowclass.lpfnWndProc = (WNDPROC)WndProc;
-	windowclass.style = CS_HREDRAW|CS_VREDRAW;
+	windowclass.style = CS_HREDRAW | CS_VREDRAW;
 	windowclass.hInstance = hInstance;
 	windowclass.lpszClassName = TEXT("Main window");
 	windowclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	windowclass.hbrBackground = GetStockObject(BLACK_BRUSH);
 	RegisterClass(&windowclass);
-	HWND window = CreateWindow(TEXT("Main window"), TEXT(""), WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 640, 480, NULL, NULL, hInstance, NULL);
+	window = CreateWindow(TEXT("Main window"), TEXT(""), WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 640, 480, NULL, NULL, hInstance, NULL);
 	if (!window) exit(2);
-	//while (1) winapi_update();
 }
 
 #endif

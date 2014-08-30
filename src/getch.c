@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 int builtin_getch() {
-	struct termios oldt,newt;
+	struct termios oldt, newt;
 	int ch;
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
