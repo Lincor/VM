@@ -237,7 +237,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-vm_SOURCES = main.c getch.c xcb.c winapi.c ../include/*
+vm_SOURCES = main.c getch.c xcb.c winapi.c
 AM_CFLAGS = -I../include -DSECTOR_SIZE=@SECTOR_SIZE@
 all: all-am
 
