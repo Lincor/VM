@@ -11,7 +11,7 @@ int builtin_getch() {
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 	ch = getchar();
 	if (ch == 27)
-		if (ch = getchar() == '[')
+		if ((ch = getchar()) == '[')
 			if (!(ch = getchar()))
 				ch = getchar();
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);

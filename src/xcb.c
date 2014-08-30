@@ -2,6 +2,7 @@
 
 #ifdef ENABLE_XCB
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb.h>
@@ -122,15 +123,16 @@ void xcb_putchar(char c) {
 
 int xcb_getch() {
 	xcb_generic_event_t *e;
-	while (e = xcb_wait_for_event(connection)) {
+	while ((e = xcb_wait_for_event(connection))) {
 		switch (e->response_type & ~0x80) {
 			case XCB_KEY_PRESS:
-			return scancodes[((xcb_key_press_event_t*)e)->detail];
+				return scancodes[((xcb_key_press_event_t*)e)->detail];
 			case XCB_KEY_RELEASE:
-			return scancodes[((xcb_key_release_event_t*)e)->detail];
+				return scancodes[((xcb_key_release_event_t*)e)->detail];
 		}
 		free(e);
 	}
+	return 0;
 }
 
 void xcb_printf(char *f,...) {
