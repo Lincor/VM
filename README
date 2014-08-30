@@ -12,6 +12,9 @@ Working with other compiler, linker or standard C library is not guaranteed.
 
 Building
 ========
-
-	./config
+Linux:
+	./configure --enable-xcb
+	make
+Windows:
+	./configure --enable-winapi
 	make

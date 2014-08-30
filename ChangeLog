@@ -1,0 +1,442 @@
+2014-07-14  Lincor <mikegurin@yandex.ru>
+
+	* : commit 251da327163d8878c68079f05368eabfc0a6d6e1 Author: Lincor
+	<mikegurin@yandex.ru> Date:   Mon Jul 14 20:47:48 2014 +0400
+
+2014-07-13  Mike Gurin <mikegurin@yandex.ru>
+
+	* README.md: Added build instructions
+
+2014-07-13  Lincor <mikegurin@yandex.ru>
+
+	* src/winapi.c: Style fix
+
+2014-07-13  Lincor <mikegurin@yandex.ru>
+
+	* : Fixed conflict
+
+2014-07-10  Penguinum <penguinum@gmail.com>
+
+	* src/Makefile: move CFLAGS
+
+2014-07-05  Lincor <mikegurin@yandex.ru>
+
+	* .gitignore: Updated .gitignore.
+
+2014-06-27  Lincor <mikegurin@yandex.ru>
+
+	* config, include/config.h, include/conio.h, include/ui_cli.h,
+	include/ui_xcb.h, src/getch.c, src/main.c, src/xcb.c: Implemented
+	ui_getch() for XCB
+
+2014-06-23  Lincor <mikegurin@yandex.ru>
+
+	* config, include/config.h, src/Makefile, src/main.c: Fixed config
+
+2014-06-22  Bizunow <bizunow13@gmail.com>
+
+	* src/main.c: Update main.c
+
+2014-06-22  Lincor <mikegurin@yandex.ru>
+
+	* : commit 60657c4d456b8752aca9dcf1f77e0e150b459fd7 Author: Lincor
+	<mikegurin@yandex.ru> Date:   Sun Jun 22 14:52:06 2014 +0400
+
+2014-06-14  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Fixed vm_cmd_stwi, vm_cmd_slbi, vm_cmd_shbi cmds
+
+2014-06-12  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Change order of commands
+
+2014-06-10  Lincor <mikegurin@yandex.ru>
+
+	* : commit cb025221ac66550a9a7115f8a3dfcfda11352d86 Author: Lincor
+	<mikegurin@yandex.ru> Date:   Tue Jun 10 23:08:21 2014 +0400
+
+2014-05-29  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Small style fixes
+
+2014-05-25  Lincor <mikegurin@yandex.ru>
+
+	* asm/asm_error.c, asm/assembler.c, asm/code_generator.c,
+	asm/commands_table.c, asm/lexical_analyzer.c,
+	asm/semantic_analyzer.c, asm/str_utils.c, asm/syntax_analyzer.c,
+	asm/test.c, getch.c, main.c: Java-style formatting
+
+2014-05-25  Lincor <mikegurin@yandex.ru>
+
+	* hdd, main.c: Hard disk support
+
+2014-05-17  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/code_generator.c, main.c: Fix bytes order in instructions
+
+2014-05-12  Lincor <mikegurin@yandex.ru>
+
+	* : commit be3344293d49aef0f0f246935cfef88c5d3f67b2 Author:
+	Kotolegokot <gkotolegokot@gmail.com> Date:   Mon May 12 20:12:39
+	2014 +0600
+
+2014-05-12  Bizunow <bizunow13@gmail.com>
+
+	* main.c: interrupts 1.0
+
+2014-05-12  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Update main.c
+
+2014-05-12  Bizunow <bizunow13@gmail.com>
+
+	* main.c: cli & sti commands
+
+2014-05-11  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Fix interrupts
+
+2014-05-11  Oleg Matveev <gkotolegokot@gmail.com>
+
+	* main.c: Fix pushr
+
+2014-05-10  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Implement interrupts
+
+2014-05-09  Kotolegokot <gkotolegokot@gmail.com>
+
+	* : commit 30dd0f77a8dc8b947157b5286028bf23d8c96535 Author: Oleg
+	Matveev <gkotolegokot@gmail.com> Date:   Fri May 9 22:43:10 2014
+	+0600
+
+2014-05-09  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/str_utils.c, asm/test2.asm: Add "Hello, world!" example
+
+2014-05-09  Oleg Matveev <gkotolegokot@gmail.com>
+
+	* : Merge pull request #6 from Kotolegokot/asm Asm
+
+2014-05-09  Kotolegokot <gkotolegokot@gmail.com>
+
+	* : commit 359974483b0d072192d5d8c6c2309e4367acb8de Author:
+	Kotolegokot <gkotolegokot@gmail.com> Date:   Fri May 9 16:59:06 2014
+	+0600
+
+2014-05-09  Bizunow <bizunow13@gmail.com>
+
+	* main.c: segment and stack instructions fix
+
+2014-05-08  Kotolegokot <gkotolegokot@gmail.com>
+
+	* .gitignore, asm/Makefile, asm/assembler.c: Add asm front-end
+
+2014-05-08  Kotolegokot <gkotolegokot@gmail.com>
+
+	* : commit a8b4805279cd18b2e4189988b5e061874bb1e81f Merge: 9127897
+	2722ea9 Author: Mike Gurin <mikegurin@yandex.ru> Date:   Thu May 8
+	17:57:07 2014 +0400
+
+2014-05-08  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/asm_error.c, asm/assembler.h, asm/lexical_analyzer.c,
+	asm/str_utils.c, asm/str_utils.h, asm/test.asm, main.c: Add char
+	constants
+
+2014-05-08  Oleg Matveev <gkotolegokot@gmail.com>
+
+	* main.c: Update main.c
+
+2014-05-08  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/commands_table.c, asm/commands_table.h, asm/test.asm: Add
+	'cpy' instruction
+
+2014-05-08  Mike Gurin <mikegurin@yandex.ru>
+
+	* : Merge pull request #4 from Kotolegokot/asm_new Added assembler.
+
+2014-05-08  Kotolegokot <gkotolegokot@gmail.com>
+
+	* : commit e91ee1bae711f1c0eef0bd75e422e47b77161db8 Author: Bizunow
+	<bizunow13@gmail.com> Date:   Wed May 7 22:17:58 2014 +0500
+
+2014-05-07  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/assembler.h, asm/code_generator.c, asm/lexical_analyzer.c,
+	asm/test.asm: Fix some bugs
+
+2014-05-07  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/asm_error.c, asm/assembler.h, asm/code_generator.c,
+	asm/test.asm: Add lefover error type's description
+
+2014-05-07  Kotolegokot <gkotolegokot@gmail.com>
+
+	* : commit ccf91242b784b38fb59f83e40eda1b0406ac09b8 Author:
+	Kotolegokot <gkotolegokot@gmail.com> Date:   Wed May 7 20:29:08 2014
+	+0600
+
+2014-05-07  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/asm_error.c, asm/assembler.h, asm/commands_table.c,
+	asm/commands_table.h, asm/lexical_analyzer.c,
+	asm/semantic_analyzer.c, asm/test.asm, asm/test.c: Analyze of
+	SEGMENT:OFFSEt
+
+2014-05-07  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/asm_error.c, asm/assembler.h, asm/lexical_analyzer.c,
+	asm/semantic_analyzer.c, asm/syntax_analyzer.c, asm/test.asm,
+	asm/test.c: Remove construction of the form a(b,c,d)
+
+2014-05-06  Bizunow <bizunow13@gmail.com>
+
+	* main.c: ldmb & ldmw
+
+2014-05-06  Bizunow <bizunow13@gmail.com>
+
+	* main.c: order of regs, interrupts fixes, 0xf 2 0x3
+
+2014-05-06  Bizunow <bizunow13@gmail.com>
+
+	* main.c: change order of bytes in j* instructions
+
+2014-05-05  Bizunow <bizunow13@gmail.com>
+
+	* 0xc: Delete 0xc
+
+2014-05-05  Bizunow <bizunow13@gmail.com>
+
+	* main.c: callr & callv small fix
+
+2014-05-05  Bizunow <bizunow13@gmail.com>
+
+	* 0xc, main.c: callr & callv instructions
+
+2014-05-05  Lincor <mikegurin@yandex.ru>
+
+	* .gitignore: Update .gitignore
+
+2014-05-05  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/test.c: Replace naked numbers with constants in test.c
+
+2014-05-05  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/asm_error.c, asm/lexical_analyzer.c: Fix the Hell of arrows
+
+2014-05-05  Bizunow <bizunow13@gmail.com>
+
+	* main.c: iterruptrs to interrupts rename, REG_INT
+
+2014-05-05  Bizunow <bizunow13@gmail.com>
+
+	* main.c: iterrupts to interrupts
+
+2014-05-04  Bizunow <bizunow13@gmail.com>
+
+	* main.c: iterrupts: add & get functions
+
+2014-05-04  Bizunow <bizunow13@gmail.com>
+
+	* : commit 60e9a6fb9c4999f71bc77c4cee1e449e9ca48273 Author: Bizunow
+	<bizunow13@gmail.com> Date:   Sun May 4 21:52:02 2014 +0000
+
+2014-05-04  Bizunow <bizunow13@gmail.com>
+
+	* main.c: start of implementing iterrupts
+
+2014-05-04  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/Makefile, asm/asm_error.c, asm/asm_error.h,
+	asm/lexical_analyzer.c, asm/lexical_analyzer.h,
+	asm/semantic_analyzer.c, asm/semantic_analyzer.h, asm/str_utils.h,
+	asm/syntax_analyzer.c, asm/syntax_analyzer.h: Translate code errors
+	into text
+
+2014-05-04  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/assembler.h, asm/lexical_analyzer.c, asm/lexical_analyzer.h,
+	asm/semantic_analyzer.c, asm/semantic_analyzer.h,
+	asm/syntax_analyzer.c, asm/syntax_analyzer.h, asm/test.c: Add error
+	codes
+
+2014-05-04  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/assembler.h, asm/lexical_analyzer.c, asm/semantic_analyzer.c,
+	asm/str_utils.c, asm/test.asm, asm/test.c: Fix some problems * Now $smth is a address of a label or a var named "smth" or a
+	immutable number.  * Fixed finding out of a token's column number.
+
+2014-05-03  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Added HLT command
+
+2014-05-03  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Limited frequency
+
+2014-05-03  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/Makefile, asm/assembler.h, asm/lexical_analyzer.c,
+	asm/semantic_analyzer.c, asm/semantic_analyzer.h, asm/str_utils.c,
+	asm/test.asm, asm/test.c: Add the blank of the semantic analyzer
+
+2014-05-02  Bizunow <bizunow13@gmail.com>
+
+	* main.c: small style fix
+
+2014-04-29  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Update main.c
+
+2014-04-27  Lincor <mikegurin@yandex.ru>
+
+	* getch.c, main.c: Added getch() emulation for Unix-like OS
+
+2014-04-27  Bizunow <bizunow13@gmail.com>
+
+	* main.c: scanf2getch
+
+2014-04-27  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Small style fix
+
+2014-04-27  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Small style fix
+
+2014-04-27  Lincor <mikegurin@yandex.ru>
+
+	* : commit 2c5a0439e15e2f4a6ae8faaed2438f2d2ebf4e91 Author: Lincor
+	<mikegurin@yandex.ru> Date:   Sun Apr 27 15:32:08 2014 +0400
+
+2014-04-27  Lincor <mikegurin@yandex.ru>
+
+	* README.md: Update README.md
+
+2014-04-27  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Fixed binary operations and I/O ports
+
+2014-04-27  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Binary loading
+
+2014-04-27  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Fixed SP increase/decrease in pushr/pushv
+
+2014-04-26  Lincor <mikegurin@yandex.ru>
+
+	* main.c: push replaced by pushr/pushv
+
+2014-04-25  Lincor <mikegurin@yandex.ru>
+
+	* : Fixed conflict
+
+2014-04-25  Lincor <mikegurin@yandex.ru>
+
+	* : Merge pull request #3 from Kotolegokot/patch-1 Update .gitignore
+
+2014-04-24  Kotolegokot <gkotolegokot@gmail.com>
+
+	* .gitignore, asm/Makefile, asm/assembler.h,
+	asm/lexical_analyzer.c, asm/lexical_analyzer.h, asm/str_utils.c,
+	asm/str_utils.h, asm/syntax_analyzer.c, asm/syntax_analyzer.h,
+	asm/test.asm, asm/test.c: Fix some problems
+
+2014-04-24  Oleg Matveev <gkotolegokot@gmail.com>
+
+	* .gitignore: Update .gitignore
+
+2014-04-24  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Add more tasks in TODO list
+
+2014-04-23  Bizunow <bizunow13@gmail.com>
+
+	* main.c: vm_set arg "src" to "val"
+
+2014-04-23  Bizunow <bizunow13@gmail.com>
+
+	* main.c: all spaces convert to tabs
+
+2014-04-23  Bizunow <bizunow13@gmail.com>
+
+	* main.c: tabs
+
+2014-04-23  Lincor <mikegurin@yandex.ru>
+
+	* : Fixed conflict
+
+2014-04-23  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/assembler.h, asm/commands_table.c, asm/commands_table.h,
+	asm/lexical_analyzer.c, asm/str_utils.c, asm/syntax_analyzer.c,
+	asm/syntax_analyzer.h, asm/test.asm: Syntax analyzer
+
+2014-04-23  Bizunow <bizunow13@gmail.com>
+
+	* main.c: space2tab
+
+2014-04-23  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Style fixes, remove old comments
+
+2014-04-23  Bizunow <bizunow13@gmail.com>
+
+	* main.c: Add JuMP & JumpToRegister comands
+
+2014-04-23  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/assembler.h, asm/commands_table.h, asm/lexical_analyzer.c,
+	asm/lexical_analyzer.h, asm/str_utils.c, asm/str_utils.h,
+	asm/test.asm: Lexical analyzer
+
+2014-04-23  Kotolegokot <gkotolegokot@gmail.com>
+
+	* asm/str_utils.c, asm/str_utils.h: str_utils
+
+2014-04-22  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Removed "copy"
+
+2014-04-22  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Added protected memory access, binary operations and
+	"copy" command
+
+2014-04-21  Lincor <mikegurin@yandex.ru>
+
+	* : Fixed conflict
+
+2014-04-20  Lincor <mikegurin@yandex.ru>
+
+	* : Merge pull request #1 from Kotolegokot/master SHL, SHR, .gitignore
+
+2014-04-20  Kotolegokot <gkotolegokot@gmail.com>
+
+	* main.c: Add SHL and SHR
+
+2014-04-20  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Commit
+
+2014-04-20  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Added memory segmentation
+
+2014-04-20  Lincor <mikegurin@yandex.ru>
+
+	* main.c: Commit
+
+2014-04-19  Lincor <mikegurin@yandex.ru>
+
+	* main.c: First commit
+
+2014-04-19  Lincor <mikegurin@yandex.ru>
+
+	* Initial commit
+

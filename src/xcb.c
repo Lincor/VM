@@ -1,7 +1,6 @@
 #include <config.h>
 
-#ifdef GUI
-#if GUI_LIB == XCB
+#ifdef ENABLE_XCB
 
 #include <stdlib.h>
 #include <string.h>
@@ -170,5 +169,4 @@ void xcb_init() {
 	xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window, (*reply).atom, 4, 32, 1, &(*reply2).atom);
 }
 
-#endif
 #endif

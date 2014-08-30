@@ -1,7 +1,6 @@
 #include <config.h>
 
-#ifdef GUI
-#if GUI_LIB == WINAPI
+#ifdef ENABLE_WINAPI
 
 #include <windows.h>
 
@@ -99,5 +98,4 @@ void winapi_init() {
 	//while (1) winapi_update();
 }
 
-#endif
 #endif

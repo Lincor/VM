@@ -5,21 +5,26 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/queue.h>
-#include <conio.h>
+
 #include <config.h>
 
-#ifdef GUI
-	#if GUI_LIB == XCB
-		#include <ui_xcb.h>
-	#elif GUI_LIB == XLIB
-		#include <ui_xlib.h>
-	#elif GUI_LIB == WINAPI
-		#include <ui_winapi.h>
-	#else
-		#error Unknown graphic library.
-	#endif
+#ifdef ENABLE_XCB
+	#include <ui_xcb.h>
 #else
-	#include <ui_cli.h>
+#ifdef ENABLE_WINAPI
+	#include <ui_winapi.h>
+#else
+#ifdef HAVE_CONIO_H
+#include <conio.h>
+#else
+#ifdef __unix__
+#include <unix-conio.h>
+#else
+#error "Required getch()"
+#endif
+#endif
+#include <ui_cli.h>
+#endif
 #endif
 
 #define BIT_SET(v, n) (v = ((1 << n) | v))
