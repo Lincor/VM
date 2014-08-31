@@ -238,7 +238,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 vm_SOURCES = main.c getch.c xcb.c winapi.c
-AM_CFLAGS = -Wall -Wextra -pedantic -I../include -DSECTOR_SIZE=@SECTOR_SIZE@
+AM_CFLAGS = -g -Wall -Wextra -pedantic -I../include -DSECTOR_SIZE=@SECTOR_SIZE@
 all: all-am
 
 .SUFFIXES:

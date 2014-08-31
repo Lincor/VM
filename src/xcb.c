@@ -113,7 +113,7 @@ void xcb_putchar(char c) {
 	if (c == '\n') {
 		y++;
 		x=0;
-	} else if (c == '\r') x=0;
+	} else if (c == '\r') x = 0;
 	else {
 		buf[y][x]=c;
 		x++;

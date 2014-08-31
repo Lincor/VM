@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <time.h>
 #include <string.h>
 #include <errno.h>
@@ -846,27 +845,18 @@ void vm_exec_comand(uint8_t seg) {
 	vm_cmd[cmd].func(&bytes);
 }
 
-#define IPS 100000
+#define FREQ 5000000
+#define STEP 1000000000 / FREQ
 
 void vm_exec_loop() {
-	uint32_t ips;
-	double old_time, sleep_time;
-	ips = 0;
-	old_time = time(0);
-
 	while (1) {
-		if (ips++ < IPS) {
-			vm_exec_comand(0);
-			vm_interrupt_exec();
-		} else {
-			sleep_time = (1000 - (time(0) - old_time)); /* отнимаем от секунды время затраченное на выполнение инструкций */
-			if (sleep_time > 0) {
-				usleep(sleep_time);
-				old_time = time(0);
-				ips = 0;
-			}
-		}
+		struct timespec t;
+		t.tv_sec = STEP / 1000000000;
+		t.tv_nsec = STEP % 1000000000;
+		vm_exec_comand(0);
+		vm_interrupt_exec();
 		ui_update();
+		nanosleep(&t, NULL);
 	}
 }
 
