@@ -76,7 +76,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = vm$(EXEEXT)
+bin_PROGRAMS = $(top_builddir)/vm$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -90,10 +90,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_vm_OBJECTS = main.$(OBJEXT) getch.$(OBJEXT) xcb.$(OBJEXT) \
-	winapi.$(OBJEXT)
-vm_OBJECTS = $(am_vm_OBJECTS)
-vm_LDADD = $(LDADD)
+am___top_builddir__vm_OBJECTS = main.$(OBJEXT) getch.$(OBJEXT) \
+	xcb.$(OBJEXT) winapi.$(OBJEXT)
+__top_builddir__vm_OBJECTS = $(am___top_builddir__vm_OBJECTS)
+__top_builddir__vm_LDADD = $(LDADD)
+am__dirstamp = $(am__leading_dot)dirstamp
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -122,8 +123,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(vm_SOURCES)
-DIST_SOURCES = $(vm_SOURCES)
+SOURCES = $(__top_builddir__vm_SOURCES)
+DIST_SOURCES = $(__top_builddir__vm_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -237,8 +238,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-vm_SOURCES = main.c getch.c xcb.c winapi.c
-AM_CFLAGS = -g -Wall -Wextra -pedantic -I../include -DSECTOR_SIZE=@SECTOR_SIZE@
+__top_builddir__vm_SOURCES = main.c getch.c xcb.c winapi.c
+__top_builddir__AM_CFLAGS = -g -Wall -Wextra -pedantic -I../include -DSECTOR_SIZE=@SECTOR_SIZE@
 all: all-am
 
 .SUFFIXES:
@@ -315,10 +316,13 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+$(top_builddir)/$(am__dirstamp):
+	@$(MKDIR_P) $(top_builddir)
+	@: > $(top_builddir)/$(am__dirstamp)
 
-vm$(EXEEXT): $(vm_OBJECTS) $(vm_DEPENDENCIES) $(EXTRA_vm_DEPENDENCIES) 
-	@rm -f vm$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(vm_OBJECTS) $(vm_LDADD) $(LIBS)
+$(top_builddir)/vm$(EXEEXT): $(__top_builddir__vm_OBJECTS) $(__top_builddir__vm_DEPENDENCIES) $(EXTRA___top_builddir__vm_DEPENDENCIES) $(top_builddir)/$(am__dirstamp)
+	@rm -f $(top_builddir)/vm$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(__top_builddir__vm_OBJECTS) $(__top_builddir__vm_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -460,6 +464,7 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(top_builddir)/$(am__dirstamp)" || rm -f $(top_builddir)/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
