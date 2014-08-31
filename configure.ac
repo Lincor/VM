@@ -8,7 +8,9 @@ AC_CONFIG_HEADERS(include/config.h)
 AC_CHECK_HEADERS(conio.h)
 
 AC_ARG_VAR(SECTOR_SIZE, [ HDD sector size (in bytes) \[512\] ])
-AS_IF([test -z $SECTOR_SIZE], AC_SUBST(SECTOR_SIZE, 512))
+AS_IF([test -z $SECTOR_SIZE], AC_DEFINE_UNQUOTED([SECTOR_SIZE], 512, 
+[ Hard disk sector size ]), 
+AC_DEFINE_UNQUOTED([SECTOR_SIZE], [$SECTOR_SIZE]))
 
 AC_ARG_ENABLE([winapi],
 [  --enable-winapi         Enable WinAPI UI backend],

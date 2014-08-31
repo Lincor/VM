@@ -4137,7 +4137,15 @@ done
 
 
 if test -z $SECTOR_SIZE; then :
-  SECTOR_SIZE=512
+
+cat >>confdefs.h <<_ACEOF
+#define SECTOR_SIZE 512
+_ACEOF
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define SECTOR_SIZE $SECTOR_SIZE
+_ACEOF
 
 fi
 
