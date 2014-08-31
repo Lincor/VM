@@ -15,4 +15,8 @@ include/config.h
 Makefile
 src/Makefile
 include/stamp-h1
-autom4te.cache/*
+autom4te.cache
+a.out.so
+config.log
+config.status
+
